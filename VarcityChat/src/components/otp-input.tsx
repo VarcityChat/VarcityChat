@@ -68,14 +68,14 @@ export default function OtpInput({
       {Array.from({ length: numOfInputs }).map((_, index) => {
         return (
           <View
-            className="flex flex-1 h-[70px] rounded-md bg-grey-50"
+            className="flex flex-1 h-[70px] rounded-md bg-grey-50 dark:bg-grey-800"
             key={`field-${index}`}
           >
             <TextInput
               ref={(element) => (inputRefs.current[index] = element)}
               maxLength={1}
               keyboardType="number-pad"
-              className="w-full h-full flex text-center text-2xl"
+              className="w-full h-full flex text-center text-2xl dark:text-white"
               onChangeText={handleChange}
             />
           </View>
