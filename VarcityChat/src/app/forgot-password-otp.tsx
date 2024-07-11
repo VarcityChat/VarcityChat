@@ -1,3 +1,4 @@
+import OtpInput from "@/components/otp-input";
 import { View, Text, Image, ControlledInput, Button } from "@/ui";
 import { Link, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
@@ -5,7 +6,7 @@ import { SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 const logo = require("../../assets/icon.png");
 
-export default function ForgotPassword() {
+export default function ForgotPasswordOtp() {
   const router = useRouter();
   const { control } = useForm();
 
@@ -15,24 +16,26 @@ export default function ForgotPassword() {
         <Image source={logo} className="w-[50px] h-[50px] rounded-md mt-10" />
         <View className="flex flex-1 w-full items-center justify-center -mt-16">
           <Text className="font-bold text-2xl">Forgot password</Text>
-          <Text className="text-grey-500 text-sm mt-2 text-center">
-            We would help you get your account back! An otp would be sent to the
-            phone number
-          </Text>
+          <View className="flex max-w-[90%]">
+            <Text className="text-grey-500 text-sm mt-2 text-center text-wrap">
+              We have sent a 4-digit code to{" "}
+            </Text>
+            <Text className="text-black font-bold text-sm text-center text-wrap">
+              promisesheggs@gmail.com
+            </Text>
+          </View>
+          <View className="mt-3 flex flex-row items-center">
+            <Text className="text-grey-500">Resend code in </Text>
+            <Text className="text-primary-500 font-bold">00:59</Text>
+          </View>
 
           <View className="flex w-full mt-10">
-            <ControlledInput
-              control={control}
-              label="Email"
-              keyboardType="email-address"
-              name="email"
-              placeholder="Enter your email"
-            />
+            <OtpInput numOfInputs={4} onChange={(e) => console.log(e)} />
 
             <View className="mt-10">
               <Button
                 label="Continue"
-                onPress={() => router.navigate("forgot-password-otp")}
+                onPress={() => router.navigate("reset-password")}
               />
               <Link
                 href="login"
