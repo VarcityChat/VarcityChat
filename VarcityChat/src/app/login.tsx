@@ -36,13 +36,13 @@ export default function Login() {
             />
 
             <View className="flex items-end mt-2">
-              <Link href="forgot-password" className=" text-primary-500">
+              <Link href="forgot-password" className="text-primary-500">
                 Forgot password?
               </Link>
             </View>
 
             <View className="mt-10">
-              <Button label="Login" />
+              <Button label="Login" onPress={() => router.replace("/app")} />
               <Pressable
                 onPress={() => {
                   router.push("/register");

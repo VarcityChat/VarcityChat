@@ -28,11 +28,17 @@ function RootLayoutNav() {
 
   return (
     <Providers>
-      <Stack initialRouteName="onboarding">
+      <Stack>
+        <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="forgot-password"
+          options={{
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         <Stack.Screen
           name="forgot-password-otp"
