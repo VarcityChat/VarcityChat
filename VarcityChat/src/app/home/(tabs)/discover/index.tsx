@@ -66,7 +66,7 @@ export default function DiscoverScreen() {
             left: 0,
             right: 0,
             height: HEADER_HEIGHT,
-            backgroundColor: isDark ? colors.charcoal[500] : colors.white,
+            backgroundColor: isDark ? colors.charcoal[950] : colors.white,
             zIndex: 1000,
             elevation: 1000,
           },
@@ -77,7 +77,7 @@ export default function DiscoverScreen() {
           className="flex flex-1 flex-row justify-between items-end px-6 pb-3"
           style={{ marginTop: insets.top }}
         >
-          <Text className="font-semibold text-xl text-red-500">
+          <Text className="font-semibold text-xl text-primary-600 dark:text-primary-600">
             Varcity Chat
           </Text>
           <TouchableOpacity

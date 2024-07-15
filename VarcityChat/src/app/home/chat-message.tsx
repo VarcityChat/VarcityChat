@@ -3,7 +3,7 @@ import React from "react";
 
 export default function ChatMessage() {
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex flex-1">
       <Text className="text-xl text-primary-500">Chat Message</Text>
     </SafeAreaView>
   );
