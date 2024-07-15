@@ -24,7 +24,6 @@ const TabNavigation = () => {
       screenOptions={{
         headerShown: false,
         tabBarLabelStyle: { fontSize: 13, marginTop: -10 },
-        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           height: 90,
           backgroundColor: isDark ? colors.black : colors.white,

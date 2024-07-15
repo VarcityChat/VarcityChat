@@ -1,31 +1,47 @@
-import { View, Text, Button, TouchableOpacity } from "@/ui";
+import { View, Text, Button, TouchableOpacity, Image } from "@/ui";
 import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { Link, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import { universities } from "../../../../../constants/unis";
+import LocationSvg from "@/ui/icons/location";
+import SearchBar from "@/components/search-bar";
 
 export default function DiscoverScreen() {
   const router = useRouter();
 
   return (
     <SafeAreaView className="flex flex-1">
-      <ScrollView className="flex flex-1 flex-grow px-4">
+      <ScrollView className="flex flex-1 flex-grow px-6">
+        <SearchBar placeholder="Discover more people here" />
         <FlashList
-          data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]}
+          data={[...universities]}
           keyExtractor={(_, index) => `university-${index}`}
-          renderItem={() => {
+          renderItem={({ item, index }) => {
             return (
               <TouchableOpacity
                 activeOpacity={0.7}
-                className="flex flex-1 h-[130px] mb-8 mx-2"
+                className={`flex flex-1 h-[130px] mb-8 
+                  ${(index + 1) % 3 === 0 ? "ml-2" : ""}
+                  ${(index + 1) % 3 === 1 ? "mr-2" : ""}
+                  ${(index + 1) % 3 === 2 ? "mx-1" : ""}
+                `}
               >
-                <View className="w-full h-[90] bg-grey-50 rounded-md dark:bg-grey-800"></View>
+                <View className="w-full h-[90] bg-grey-50 rounded-md dark:bg-grey-800 items-center justify-center">
+                  {item.image ? (
+                    <Image
+                      source={item.image}
+                      className="w-[60] h-[60] object-contain"
+                    />
+                  ) : null}
+                </View>
                 <View className="mt-2">
-                  <Text className="font-semibold">Lead City</Text>
+                  <Text className="font-semibold">{item.name}</Text>
                   <View className="flex flex-row items-center">
+                    <LocationSvg className="mr-1" />
                     <Text className="text-sm text-grey-500 dark:text-grey-200">
-                      Ibadan, Oyo
+                      {item.location}
                     </Text>
                   </View>
                 </View>
@@ -37,13 +53,6 @@ export default function DiscoverScreen() {
           estimatedItemSize={50}
         />
       </ScrollView>
-      {/* <Text>Discover Screen</Text>
-      <Button
-        label="Lead City Unviersity"
-        onPress={() => {
-          router.navigate("/(tabs)/discover/leadcity");
-        }}
-      /> */}
     </SafeAreaView>
   );
 }

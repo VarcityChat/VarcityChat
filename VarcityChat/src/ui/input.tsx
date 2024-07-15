@@ -11,7 +11,6 @@ import { useController } from "react-hook-form";
 import { tv } from "tailwind-variants";
 import { Ionicons } from "@expo/vector-icons";
 
-import colors from "./colors";
 import { Text } from "./text";
 
 const inputTv = tv({
