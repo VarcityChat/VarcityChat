@@ -43,6 +43,10 @@ const button = tv({
         label: "text-black",
         indicator: "text-black",
       },
+      tertiary: {
+        container: "bg-grey-50 dark:bg-grey-800",
+        label: "text-black dark:text-white",
+      },
     },
     size: {
       default: {
