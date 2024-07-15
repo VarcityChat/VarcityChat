@@ -18,8 +18,18 @@ export default function DiscoverScreen() {
             return (
               <TouchableOpacity
                 activeOpacity={0.7}
-                className="flex flex-1 h-[130px] bg-red-500 mb-8 mx-1"
-              ></TouchableOpacity>
+                className="flex flex-1 h-[130px] mb-8 mx-2"
+              >
+                <View className="w-full h-[90] bg-grey-50 rounded-md dark:bg-grey-800"></View>
+                <View className="mt-2">
+                  <Text className="font-semibold">Lead City</Text>
+                  <View className="flex flex-row items-center">
+                    <Text className="text-sm text-grey-500 dark:text-grey-200">
+                      Ibadan, Oyo
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
             );
           }}
           numColumns={3}
