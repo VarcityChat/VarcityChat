@@ -23,9 +23,10 @@ const TabNavigation = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarLabelStyle: { fontSize: 13, marginTop: -10 },
+        tabBarLabelStyle: { fontSize: 13 },
         tabBarStyle: {
-          height: 90,
+          paddingTop: 4,
+          // height: ,
           backgroundColor: isDark ? colors.black : colors.white,
         },
       }}
@@ -52,7 +53,7 @@ const TabNavigation = () => {
             alignItems: "center",
             justifyContent: "center",
             position: "absolute",
-            top: 10,
+            top: 2,
           },
         }}
       />

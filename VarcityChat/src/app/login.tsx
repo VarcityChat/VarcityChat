@@ -42,7 +42,7 @@ export default function Login() {
             </View>
 
             <View className="mt-10">
-              <Button label="Login" onPress={() => router.replace("/app")} />
+              <Button label="Login" onPress={() => router.replace("home")} />
               <Pressable
                 onPress={() => {
                   router.push("/register");

@@ -20,6 +20,7 @@ import GenderSelect from "@/components/register/gender-select";
 import Paginator from "@/components/register/paginator";
 import PersonalInformationForm from "@/components/register/personal-information";
 import Personality from "@/components/register/personality";
+import BackButton from "@/components/back-button";
 
 export default function Index() {
   const router = useRouter();
@@ -51,8 +52,7 @@ export default function Index() {
           scrollEnabled={currentIndex > 0}
         >
           <View className="flex flex-row items-center justify-between px-8">
-            <TouchableOpacity
-              className="flex w-[35px] h-[35px] justify-center items-center bg-grey-50 rounded-md"
+            <BackButton
               onPress={() => {
                 if (currentIndex === 0) {
                   router.back();
@@ -64,9 +64,7 @@ export default function Index() {
                 }
                 slideRef.current?.scrollToIndex({ index: 1, animated: true });
               }}
-            >
-              <CaretBack />
-            </TouchableOpacity>
+            />
             <Paginator data={[1, 2, 3]} currentIndex={currentIndex} />
             <View className="w-[35px]" />
           </View>
