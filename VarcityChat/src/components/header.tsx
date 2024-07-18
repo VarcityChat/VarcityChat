@@ -17,7 +17,7 @@ interface HeaderProps {
   children: ReactNode;
 }
 
-const HEADER_HEIGHT = 60;
+export const HEADER_HEIGHT = 60;
 
 export default function Header({ title, headerRight, children }: HeaderProps) {
   const router = useRouter();
@@ -56,7 +56,7 @@ export default function Header({ title, headerRight, children }: HeaderProps) {
               }}
             />
           </View>
-          <View className="flex-1 items-center">
+          <View className="items-center">
             <Text className="font-semibold text-lg">{title}</Text>
           </View>
           <View className="flex-1 items-end">{headerRight}</View>
