@@ -1,5 +1,4 @@
 import Animated, {
-  Extrapolation,
   clamp,
   interpolate,
   useAnimatedScrollHandler,
@@ -15,7 +14,6 @@ import {
   colors,
   List,
 } from "@/ui";
-import { useRoute } from "@react-navigation/native";
 import { Link, useRouter } from "expo-router";
 import { Platform, SafeAreaView, StatusBar } from "react-native";
 import { universities } from "../../../../../constants/unis";
@@ -94,7 +92,7 @@ export default function DiscoverScreen() {
         className="flex flex-1 flex-grow px-6"
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        style={{ paddingTop: HEADER_HEIGHT - insets.top }}
+        style={{ paddingTop: HEADER_HEIGHT + insets.top }}
       >
         <SearchBar placeholder="Discover more people here" />
         <List
