@@ -1,18 +1,15 @@
-import { Text, View } from "@/ui";
+import { View } from "@/ui";
 import {
   FlatList,
   ViewToken,
   SafeAreaView,
-  TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
-  Platform,
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import { CaretBack } from "@/ui/icons/caret-back";
 import { useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import RegisterItem from "@/components/register/register-item";

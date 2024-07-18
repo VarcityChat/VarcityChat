@@ -3,17 +3,17 @@ PODS:
   - DoubleConversion (1.1.6)
   - EXConstants (16.0.2):
     - ExpoModulesCore
-  - Expo (51.0.17):
+  - Expo (51.0.21):
     - ExpoModulesCore
   - ExpoAsset (10.0.10):
     - ExpoModulesCore
   - ExpoFileSystem (17.0.1):
     - ExpoModulesCore
-  - ExpoFont (12.0.7):
+  - ExpoFont (12.0.9):
     - ExpoModulesCore
-  - ExpoHead (3.5.17):
+  - ExpoHead (3.5.18):
     - ExpoModulesCore
-  - ExpoImage (1.12.12):
+  - ExpoImage (1.12.13):
     - ExpoModulesCore
     - libavif/libdav1d
     - SDWebImage (~> 5.19.1)
@@ -22,7 +22,7 @@ PODS:
     - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.12.18):
+  - ExpoModulesCore (1.12.19):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -45,7 +45,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoSystemUI (3.0.6):
+  - ExpoSystemUI (3.0.7):
     - ExpoModulesCore
   - ExpoWebBrowser (13.0.3):
     - ExpoModulesCore
@@ -1253,8 +1253,48 @@ PODS:
     - React-logger (= 0.74.2)
     - React-perflogger (= 0.74.2)
     - React-utils (= 0.74.2)
-  - RNFlashList (1.6.4):
+  - ReactNativeAvoidSoftinput (5.0.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNFlashList (1.7.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNGestureHandler (2.16.2):
     - DoubleConversion
     - glog
@@ -1404,6 +1444,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - ReactNativeAvoidSoftinput (from `../node_modules/react-native-avoid-softinput`)
   - "RNFlashList (from `../node_modules/@shopify/flash-list`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -1556,6 +1597,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  ReactNativeAvoidSoftinput:
+    :path: "../node_modules/react-native-avoid-softinput"
   RNFlashList:
     :path: "../node_modules/@shopify/flash-list"
   RNGestureHandler:
@@ -1573,15 +1616,15 @@ SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
-  Expo: 675a5642b5860771507237259da50b921c03a9f3
+  Expo: 6ff8c293719c5e5d23204e3f5fc9f472b5d0fd32
   ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
-  ExpoFont: 43b69559cef3d773db57c7ae7edd3cb0aa0dc610
-  ExpoHead: 439510c5bec19592d5a0d78860e0cb6c59e28a34
-  ExpoImage: 2ccccff1219ebc765e344f3338f2430af2df4824
+  ExpoFont: e7f2275c10ca8573c991e007329ad6bf98086485
+  ExpoHead: 7880300d9c1519420530cf591d333d3f96ff9f6e
+  ExpoImage: cbe7617b4e0e7ba064cc4caa51bfc96262e51ef3
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
-  ExpoModulesCore: 30e1ed4659356cb9a84e0e5ddf1d090d735973c1
-  ExpoSystemUI: 65007dd0537cb38649ee55b4670a6ed222769b3a
+  ExpoModulesCore: 734c1802786b23c9598f4d15273753a779969368
+  ExpoSystemUI: d4f065a016cae6721b324eb659cdee4d4cf0cb26
   ExpoWebBrowser: 7595ccac6938eb65b076385fd23d035db9ecdc8e
   EXSplashScreen: fbf0ec78e9cee911df188bf17b4fe51d15a84b87
   FBLazyVector: 4bc164e5b5e6cfc288d2b5ff28643ea15fa1a589
@@ -1639,7 +1682,8 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 56b642bf605ba5afa500d35790928fc1d51565ad
   React-utils: 4476b7fcbbd95cfd002f3e778616155241d86e31
   ReactCommon: ecad995f26e0d1e24061f60f4e5d74782f003f12
-  RNFlashList: b521ebdd7f9352673817f1d98e8bdc0c8cf8545b
+  ReactNativeAvoidSoftinput: 681c06aa418705e95fa1d29913401f14dbdb9fad
+  RNFlashList: e9b57a5553639f9b528cc50ab53f25831722ed62
   RNGestureHandler: 2282cfbcf86c360d29f44ace393203afd5c6cff7
   RNReanimated: 35f9ac9c3ac42d0497ebd1cce5c39d7687a8493e
   RNScreens: b32a9ff15bea7fcdbe5dff6477bc503f792b1208
