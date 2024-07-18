@@ -42,6 +42,7 @@ import { Text } from "./text";
 
 type ModalProps = BottomSheetModalProps & {
   title?: string;
+  showCancelButton?: boolean;
 };
 
 type ModalRef = React.ForwardedRef<BottomSheetModal>;
@@ -49,6 +50,7 @@ type ModalRef = React.ForwardedRef<BottomSheetModal>;
 type ModalHeaderProps = {
   title?: string;
   dismiss: () => void;
+  showCancelButton?: boolean;
 };
 
 export const useModal = () => {
@@ -68,6 +70,7 @@ export const Modal = React.forwardRef(
       snapPoints: _snapPoints = ["60%"],
       title,
       detached = false,
+      showCancelButton = true,
       ...props
     }: ModalProps,
     ref: ModalRef
@@ -88,7 +91,11 @@ export const Modal = React.forwardRef(
       () => (
         <>
           <View className="mb-8 mt-2 h-1 w-12 self-center rounded-lg bg-gray-400 dark:bg-gray-700" />
-          <ModalHeader title={title} dismiss={modal.dismiss} />
+          <ModalHeader
+            title={title}
+            dismiss={modal.dismiss}
+            showCancelButton={showCancelButton}
+          />
         </>
       ),
       [title, modal.dismiss]
@@ -155,23 +162,25 @@ const getDetachedProps = (detached: boolean) => {
  * ModalHeader
  */
 
-const ModalHeader = React.memo(({ title, dismiss }: ModalHeaderProps) => {
-  return (
-    <>
-      {title && (
-        <View className="flex-row px-2 py-4">
-          <View className="h-[24px] w-[24px]" />
-          <View className="flex-1">
-            <Text className="text-center text-[16px] font-bold text-[#26313D] dark:text-white">
-              {title}
-            </Text>
+const ModalHeader = React.memo(
+  ({ title, dismiss, showCancelButton = true }: ModalHeaderProps) => {
+    return (
+      <>
+        {title && (
+          <View className="flex-row px-2 py-4">
+            <View className="h-[24px] w-[24px]" />
+            <View className="flex-1">
+              <Text className="text-center text-[16px] font-bold text-[#26313D] dark:text-white">
+                {title}
+              </Text>
+            </View>
           </View>
-        </View>
-      )}
-      <CloseButton close={dismiss} />
-    </>
-  );
-});
+        )}
+        {showCancelButton && <CloseButton close={dismiss} />}
+      </>
+    );
+  }
+);
 
 const CloseButton = ({ close }: { close: () => void }) => {
   return (

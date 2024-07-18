@@ -17,6 +17,7 @@ const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
       ref={ref}
       index={0}
       snapPoints={snapPoints}
+      showCancelButton={false}
       backgroundStyle={{
         backgroundColor: isDark ? colors.neutral[800] : colors.white,
       }}
