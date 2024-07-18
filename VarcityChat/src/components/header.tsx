@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 
 interface HeaderProps {
   title: string;
+  showHeaderLeft?: boolean;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
   children: ReactNode;
@@ -19,7 +20,12 @@ interface HeaderProps {
 
 export const HEADER_HEIGHT = 60;
 
-export default function Header({ title, headerRight, children }: HeaderProps) {
+export default function Header({
+  title,
+  headerRight,
+  children,
+  showHeaderLeft = true,
+}: HeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
@@ -50,11 +56,13 @@ export default function Header({ title, headerRight, children }: HeaderProps) {
       >
         <View className="flex flex-row items-center justify-between py-4 px-6">
           <View className="flex-1">
-            <BackButton
-              onPress={() => {
-                router.canGoBack() && router.back();
-              }}
-            />
+            {showHeaderLeft && (
+              <BackButton
+                onPress={() => {
+                  router.canGoBack() && router.back();
+                }}
+              />
+            )}
           </View>
           <View className="items-center">
             <Text className="font-semibold text-lg">{title}</Text>
