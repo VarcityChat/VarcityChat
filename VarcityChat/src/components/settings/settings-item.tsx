@@ -1,5 +1,6 @@
-import { Text, TouchableOpacity, View } from "@/ui";
+import { Text, TouchableOpacity } from "@/ui";
 import ActiveSvg from "@/ui/icons/settings/active-icon";
+import DeleteIcon from "@/ui/icons/settings/delete-icon";
 import NotificationsSvg from "@/ui/icons/settings/notifications-icon";
 import ProfileSvg from "@/ui/icons/settings/profile-icon";
 import SupportIcon from "@/ui/icons/settings/support-icon";
@@ -16,7 +17,8 @@ type iconNames =
   | "support"
   | "notifications"
   | "theme"
-  | "tellafriend";
+  | "tellafriend"
+  | "delete";
 
 const svgMap: Record<iconNames, any> = {
   profile: <ProfileSvg />,
@@ -26,21 +28,25 @@ const svgMap: Record<iconNames, any> = {
   notifications: <NotificationsSvg />,
   theme: <ThemeIcon />,
   tellafriend: <TellAFriendIcon />,
+  delete: <DeleteIcon />,
 };
 
 export default function SettingsItem({
   name,
   label,
   hasSwitch = false,
+  onPress,
 }: {
   name: iconNames;
   label: string;
   hasSwitch?: boolean;
+  onPress?: () => void;
 }) {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       className="flex flex-row flex-1 items-center gap-4 mb-2 py-2"
+      onPress={onPress}
     >
       {svgMap[name]}
       <Text className="flex-1">{label}</Text>

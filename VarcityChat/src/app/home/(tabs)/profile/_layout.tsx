@@ -1,4 +1,4 @@
-import { View, Text } from "@/ui";
+import { View } from "@/ui";
 import { Stack } from "expo-router";
 
 export default function ProfileScreenLayout() {

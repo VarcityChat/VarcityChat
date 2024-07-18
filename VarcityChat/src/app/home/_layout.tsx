@@ -6,6 +6,7 @@ export default function HomeLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="chat-message" />
       <Stack.Screen name="notifications" />
+      <Stack.Screen name="profile-detail" />
     </Stack>
   );
 }

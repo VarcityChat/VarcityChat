@@ -2,6 +2,7 @@ import SettingsItem from "@/components/settings/settings-item";
 import { View, Text, Image, Modal, colors, useModal, Button } from "@/ui";
 import LogoutIcon from "@/ui/icons/settings/logout-icon";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { forwardRef, useMemo } from "react";
 import { SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
@@ -38,6 +39,7 @@ const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
 });
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const logoutModal = useModal();
 
   return (
@@ -53,19 +55,38 @@ export default function ProfileScreen() {
             />
           </View>
           <Text className="font-semibold text-lg">Ebuka Varcity</Text>
-          <Text className="text-sm text-grey-500">Lead City University</Text>
+          <Text className="text-sm text-grey-500 dark:text-grey-200">
+            Lead City University
+          </Text>
         </View>
 
         <View className="flex flex-1 px-6 mt-10">
-          <Text className="text-grey-500 mb-4">Settings</Text>
-          <SettingsItem name="profile" label="Profile" />
+          {/* Header */}
+          <Text className="text-grey-500 mb-4 dark:text-grey-200">
+            Settings
+          </Text>
+
+          <SettingsItem
+            name="profile"
+            label="Profile"
+            onPress={() => {
+              router.push("home/profile-detail");
+            }}
+          />
+
           <SettingsItem name="activeStatus" label="Active Status" hasSwitch />
+
           <SettingsItem name="notifications" label="Notifications" hasSwitch />
+
           <SettingsItem name="theme" label="Theme" />
+
           <SettingsItem name="tellafriend" label="Tell a friend" />
 
-          <Text className="text-grey-500 mt-8">Safety</Text>
+          {/* Header */}
+          <Text className="text-grey-500 mt-8 dark:text-grey-200">Safety</Text>
+
           <SettingsItem name="tndc" label="Terms and conditions" />
+
           <SettingsItem name="support" label="Support" />
         </View>
 
