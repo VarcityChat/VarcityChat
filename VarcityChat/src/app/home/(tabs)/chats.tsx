@@ -102,15 +102,15 @@ function ChatFilter() {
       <TouchableOpacity
         onPress={() => setFilter("all")}
         activeOpacity={0.7}
-        className={`px-3 py-2 bg-primary-50 ${
-          filter === "all" ? "bg-primary-50" : "bg-grey-800"
+        className={`px-3 py-2 ${
+          filter === "all" ? "bg-primary-50" : "bg-grey-50 dark:bg-grey-800"
         } rounded-full`}
       >
         <Text
           className={`text-sm  ${
             filter === "all"
               ? " text-primary-500 dark:text-primary-500"
-              : "text-grey-200 dark:text-grey-200"
+              : "text-grey-500 dark:text-grey-200"
           }`}
         >
           All Chats
@@ -120,15 +120,15 @@ function ChatFilter() {
       <TouchableOpacity
         onPress={() => setFilter("unread")}
         activeOpacity={0.7}
-        className={`px-3 py-2 bg-primary-50 ${
-          filter === "unread" ? "bg-primary-50" : "bg-grey-800"
+        className={`px-3 py-2 ${
+          filter === "unread" ? "bg-primary-50" : "bg-grey-50 dark:bg-grey-800"
         } rounded-full`}
       >
         <Text
           className={`text-sm  ${
             filter === "unread"
               ? " text-primary-500 dark:text-primary-500"
-              : "text-grey-200 dark:text-grey-200"
+              : "text-grey-500 dark:text-grey-200"
           }`}
         >
           Unread
