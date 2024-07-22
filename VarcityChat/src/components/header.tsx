@@ -48,7 +48,7 @@ export default function Header({
   return (
     <View className="flex-1">
       <Animated.View
-        className="absolute top-0 left-0 right-0 bg-white z-10 border-b-grey-100"
+        className="absolute top-0 left-0 right-0 bg-white z-10 border-b-grey-100 dark:bg-charcoal-950 dark:border-b-charcoal-800"
         style={[
           headerStyle,
           { paddingTop: insets.top, height: HEADER_HEIGHT + insets.top },
