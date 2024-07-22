@@ -28,6 +28,7 @@ const TabNavigation = () => {
           paddingTop: 4,
           backgroundColor: isDark ? colors.black : colors.white,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
