@@ -26,7 +26,6 @@ const TabNavigation = () => {
         tabBarLabelStyle: { fontSize: 13 },
         tabBarStyle: {
           paddingTop: 4,
-          // height: ,
           backgroundColor: isDark ? colors.black : colors.white,
         },
       }}
