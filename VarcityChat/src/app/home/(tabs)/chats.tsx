@@ -1,7 +1,7 @@
 import SearchBar from "@/components/search-bar";
 import { Image, View, Text, TouchableOpacity } from "@/ui";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native";
+import { SafeAreaView, Touchable } from "react-native";
 import { chats } from "../../../../constants/chats";
 import Animated, {
   useSharedValue,
@@ -9,6 +9,7 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
 } from "react-native-reanimated";
+import { useState } from "react";
 
 export default function Chats() {
   const router = useRouter();
@@ -43,7 +44,12 @@ export default function Chats() {
       <Animated.FlatList
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
-        ListHeaderComponent={<SearchBar placeholder="Search" />}
+        ListHeaderComponent={
+          <>
+            <SearchBar placeholder="Search" />
+            <ChatFilter />
+          </>
+        }
         contentContainerClassName="px-6"
         style={{ flex: 1 }}
         keyExtractor={(_, index) => `item-${index}`}
@@ -85,5 +91,49 @@ export default function Chats() {
         ListFooterComponent={<View className="h-16" />}
       />
     </SafeAreaView>
+  );
+}
+
+function ChatFilter() {
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+
+  return (
+    <View className="flex flex-row mb-6 gap-4">
+      <TouchableOpacity
+        onPress={() => setFilter("all")}
+        activeOpacity={0.7}
+        className={`px-3 py-2 bg-primary-50 ${
+          filter === "all" ? "bg-primary-50" : "bg-grey-800"
+        } rounded-full`}
+      >
+        <Text
+          className={`text-sm  ${
+            filter === "all"
+              ? " text-primary-500 dark:text-primary-500"
+              : "text-grey-200 dark:text-grey-200"
+          }`}
+        >
+          All Chats
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => setFilter("unread")}
+        activeOpacity={0.7}
+        className={`px-3 py-2 bg-primary-50 ${
+          filter === "unread" ? "bg-primary-50" : "bg-grey-800"
+        } rounded-full`}
+      >
+        <Text
+          className={`text-sm  ${
+            filter === "unread"
+              ? " text-primary-500 dark:text-primary-500"
+              : "text-grey-200 dark:text-grey-200"
+          }`}
+        >
+          Unread
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
