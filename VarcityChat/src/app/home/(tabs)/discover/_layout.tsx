@@ -6,7 +6,6 @@ export default function DiscoverScreenLayout() {
     <View className="flex flex-1">
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="[university]" options={{ headerShown: false }} />
       </Stack>
     </View>
   );

@@ -1,3 +1,17 @@
+import SearchBar from "@/components/search-bar";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  IS_IOS,
+  colors,
+  List,
+  HEIGHT,
+} from "@/ui";
+import { useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { SafeAreaView, StatusBar } from "react-native";
 import Animated, {
   clamp,
   interpolate,
@@ -5,30 +19,15 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import {
-  View,
-  Text,
-  Button,
-  TouchableOpacity,
-  Image,
-  colors,
-  List,
-  IS_IOS,
-} from "@/ui";
-import { useRouter } from "expo-router";
-import { Platform, SafeAreaView, StatusBar } from "react-native";
-import { universities } from "../../../../../constants/unis";
-import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { universities } from "../../../../constants/unis";
 import LocationSvg from "@/ui/icons/location";
-import SearchBar from "@/components/search-bar";
-import NotificationSvg from "@/ui/icons/notification";
+import BackButton from "@/components/back-button";
 import { useEffect } from "react";
 
-const HEADER_HEIGHT =
-  Platform.OS === "ios" ? 100 : 70 + (StatusBar?.currentHeight ?? 0);
+const HEADER_HEIGHT = IS_IOS ? 100 : 70 + (StatusBar?.currentHeight ?? 0);
 
-export default function DiscoverScreen() {
+export default function University() {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
@@ -81,15 +80,14 @@ export default function DiscoverScreen() {
           className="flex flex-1 flex-row justify-between items-end px-6 pb-3"
           style={{ marginTop: insets.top }}
         >
-          <Text className="font-semibold text-xl text-primary-600 dark:text-primary-600">
-            Varcity Chat
-          </Text>
+          <BackButton onPress={() => router.canGoBack() && router.back()} />
+          <Text className="font-semibold text-lg">Lead City University</Text>
           <TouchableOpacity
             activeOpacity={0.7}
-            className="flex items-center justify-center w-[30px] h-[30px] rounded-md bg-grey-50"
+            className="flex items-center justify-center h-[30px] rounded-md bg-grey-50"
             onPress={() => router.push("/home/notifications")}
           >
-            <NotificationSvg />
+            <Text>filter</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -100,25 +98,20 @@ export default function DiscoverScreen() {
         scrollEventThrottle={16}
         style={{ paddingTop: IS_IOS ? insets.top : HEADER_HEIGHT }}
       >
-        <SearchBar placeholder="Discover more people here" />
+        <SearchBar placeholder="Search for people here" />
+
         <List
-          ListHeaderComponent={
-            <Text className="mb-4 font-bold text-lg">List of Universities</Text>
-          }
           data={[...universities]}
           keyExtractor={(_, index) => `university-${index}`}
           renderItem={({ item, index }) => {
             return (
               <TouchableOpacity
-                onPress={() => router.push("/home/university/lead-city")}
+                onPress={() => router.push("/home/discover/lead-city")}
                 activeOpacity={0.7}
-                className={`flex flex-1 h-[130px] mb-8 
-                  ${(index + 1) % 3 === 0 ? "ml-2" : ""}
-                  ${(index + 1) % 3 === 1 ? "mr-2" : ""}
-                  ${(index + 1) % 3 === 2 ? "mx-1" : ""}
-                `}
+                className={`flex flex-1 mb-8 bg-grey-50 rounded-md dark:bg-grey-800`}
+                style={{ height: HEIGHT / 3.3 }}
               >
-                <View className="w-full h-[90] bg-grey-50 rounded-md dark:bg-grey-800 items-center justify-center">
+                <View className="w-full h-[90] items-center justify-center">
                   {item.image ? (
                     <Image
                       source={item.image}
@@ -138,7 +131,6 @@ export default function DiscoverScreen() {
               </TouchableOpacity>
             );
           }}
-          numColumns={3}
           contentContainerClassName="flex flex-1 flex-grow"
           estimatedItemSize={50}
           ListFooterComponent={<View style={{ height: 150 }} />}
