@@ -13,8 +13,9 @@ import {
   Image,
   colors,
   List,
+  IS_IOS,
 } from "@/ui";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Platform, SafeAreaView, StatusBar } from "react-native";
 import { universities } from "../../../../../constants/unis";
 import { useColorScheme } from "nativewind";
@@ -92,7 +93,7 @@ export default function DiscoverScreen() {
         className="flex flex-1 flex-grow px-6"
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        style={{ paddingTop: HEADER_HEIGHT + insets.top }}
+        style={{ paddingTop: IS_IOS ? insets.top : HEADER_HEIGHT }}
       >
         <SearchBar placeholder="Discover more people here" />
         <List
