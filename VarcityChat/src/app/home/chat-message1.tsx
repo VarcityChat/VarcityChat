@@ -1,4 +1,3 @@
-import { View, Text, SafeAreaView } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import { messages as messagesData } from "../../../constants/message";
