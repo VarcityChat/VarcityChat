@@ -10,7 +10,9 @@ export default function NotificationsScreen() {
         title="Notification"
         headerRight={
           <TouchableOpacity activeOpacity={0.7}>
-            <Text className="text-primary-500">mark all as read</Text>
+            <Text className="text-primary-500 dark:text-primary-500">
+              mark all as read
+            </Text>
           </TouchableOpacity>
         }
       >
