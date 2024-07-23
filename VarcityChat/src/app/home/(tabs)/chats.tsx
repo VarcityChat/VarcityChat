@@ -31,7 +31,7 @@ export default function Chats() {
   return (
     <SafeAreaView className="flex flex-1">
       <Animated.View className="items-center mt-4">
-        <Animated.Text className="font-inter font-bold text-lg dark:text-white">
+        <Animated.Text className="font-inter font-semibold text-lg dark:text-white">
           Chats
         </Animated.Text>
 
