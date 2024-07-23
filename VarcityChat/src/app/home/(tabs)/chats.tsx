@@ -1,7 +1,7 @@
 import SearchBar from "@/components/search-bar";
 import { Image, View, Text, TouchableOpacity } from "@/ui";
 import { useRouter } from "expo-router";
-import { SafeAreaView, Touchable } from "react-native";
+import { SafeAreaView } from "react-native";
 import { chats } from "../../../../constants/chats";
 import Animated, {
   useSharedValue,
@@ -62,7 +62,7 @@ export default function Chats() {
           <TouchableOpacity
             activeOpacity={0.7}
             className="w-full flex-row items-center bg-red"
-            onPress={() => router.push("/home/chat-message")}
+            onPress={() => router.push("/home/chat-message/1")}
           >
             <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
               <Image
