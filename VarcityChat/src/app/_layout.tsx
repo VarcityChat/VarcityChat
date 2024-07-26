@@ -1,10 +1,11 @@
+import { ReactNode, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { SplashScreen, Stack, useNavigationContainerRef } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useThemeConfig } from "@/core/use-theme-config";
 import { ThemeProvider } from "@react-navigation/native";
-import { ReactNode, useEffect } from "react";
+import { MenuProvider } from "react-native-popup-menu";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -58,7 +59,9 @@ function Providers({ children }: { children: ReactNode }) {
       className={theme.dark ? "dark" : undefined}
     >
       <ThemeProvider value={theme}>
-        <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+        <MenuProvider>
+          <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+        </MenuProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

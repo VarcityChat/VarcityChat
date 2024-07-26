@@ -1,14 +1,5 @@
 import SearchBar from "@/components/search-bar";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  IS_IOS,
-  colors,
-  List,
-  HEIGHT,
-} from "@/ui";
+import { View, Text, TouchableOpacity, IS_IOS, colors, List } from "@/ui";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { SafeAreaView, StatusBar } from "react-native";
@@ -19,11 +10,20 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { useEffect, useState } from "react";
+import { users } from "../../../../constants/users";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { universities } from "../../../../constants/unis";
-import LocationSvg from "@/ui/icons/location";
+import { trimText } from "@/core/utils";
 import BackButton from "@/components/back-button";
-import { useEffect } from "react";
+import UserCard from "@/components/university/user-card";
+import FilterSvg from "@/ui/icons/university/filter-svg";
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import { Checkbox } from "@/ui/checkbox";
 
 const HEADER_HEIGHT = IS_IOS ? 100 : 70 + (StatusBar?.currentHeight ?? 0);
 
@@ -33,6 +33,8 @@ export default function University() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const scrollY = useSharedValue(0);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [filter, setFilter] = useState<"all" | "male" | "female">("all");
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event, ctx: { prevY: number }) => {
@@ -77,18 +79,76 @@ export default function University() {
         ]}
       >
         <View
-          className="flex flex-1 flex-row justify-between items-end px-6 pb-3"
+          className="flex flex-1 flex-row items-center justify-between px-6 pb-3"
           style={{ marginTop: insets.top }}
         >
-          <BackButton onPress={() => router.canGoBack() && router.back()} />
-          <Text className="font-semibold text-lg">Lead City University</Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            className="flex items-center justify-center h-[30px] rounded-md bg-grey-50"
-            onPress={() => router.push("/home/notifications")}
-          >
-            <Text>filter</Text>
-          </TouchableOpacity>
+          <View className="w-[65px]">
+            <BackButton onPress={() => router.canGoBack() && router.back()} />
+          </View>
+
+          <Text className="font-semibold text-lg">
+            {trimText("Lead City University")}
+          </Text>
+
+          <Menu opened={popupOpen} onBackdropPress={() => setPopupOpen(false)}>
+            <MenuTrigger customStyles={{ triggerOuterWrapper: { zIndex: 10 } }}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                className="flex-row items-center justify-center h-[40px] w-[65px] rounded-md bg-white dark:bg-charcoal-950 border border-grey-100"
+                onPress={() => setPopupOpen(true)}
+              >
+                <Text className="text-grey-500 mr-1">filter</Text>
+                <FilterSvg color={isDark ? "#fff" : "#6B7280"} />
+              </TouchableOpacity>
+            </MenuTrigger>
+
+            <MenuOptions
+              customStyles={{
+                optionsContainer: {
+                  width: 140,
+                  borderRadius: 10,
+                  backgroundColor: isDark ? colors.charcoal[950] : colors.white,
+                },
+                optionsWrapper: {
+                  padding: 4,
+                },
+                optionWrapper: {
+                  marginTop: 10,
+                },
+              }}
+            >
+              <MenuOption>
+                <Checkbox.Root
+                  accessibilityLabel="filter male"
+                  onChange={() => {
+                    setFilter("all");
+                  }}
+                >
+                  <Checkbox.Icon checked={filter === "all"} />
+                  <Checkbox.Label text="All"></Checkbox.Label>
+                </Checkbox.Root>
+              </MenuOption>
+              <MenuOption>
+                <Checkbox.Root
+                  accessibilityLabel="filter male"
+                  onChange={() => setFilter("male")}
+                >
+                  <Checkbox.Icon checked={filter === "male"} />
+                  <Checkbox.Label text="Male" />
+                </Checkbox.Root>
+              </MenuOption>
+              <MenuOption>
+                <Checkbox.Root
+                  accessibilityLabel="filter female"
+                  onChange={() => setFilter("female")}
+                  className="mb-2"
+                >
+                  <Checkbox.Icon checked={filter === "female"} />
+                  <Checkbox.Label text="Female" />
+                </Checkbox.Root>
+              </MenuOption>
+            </MenuOptions>
+          </Menu>
         </View>
       </Animated.View>
 
@@ -101,38 +161,13 @@ export default function University() {
         <SearchBar placeholder="Search for people here" />
 
         <List
-          data={[...universities]}
+          data={[...users]}
           keyExtractor={(_, index) => `university-${index}`}
-          renderItem={({ item, index }) => {
-            return (
-              <TouchableOpacity
-                onPress={() => router.push("/home/discover/lead-city")}
-                activeOpacity={0.7}
-                className={`flex flex-1 mb-8 bg-grey-50 rounded-md dark:bg-grey-800`}
-                style={{ height: HEIGHT / 3.3 }}
-              >
-                <View className="w-full h-[90] items-center justify-center">
-                  {item.image ? (
-                    <Image
-                      source={item.image}
-                      className="w-[60] h-[60] object-contain"
-                    />
-                  ) : null}
-                </View>
-                <View className="mt-2">
-                  <Text className="font-semibold">{item.name}</Text>
-                  <View className="flex flex-row items-center">
-                    <LocationSvg className="mr-1" />
-                    <Text className="text-sm text-grey-500 dark:text-grey-200">
-                      {item.location}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
+          renderItem={({ item }) => {
+            return <UserCard user={item} />;
           }}
           contentContainerClassName="flex flex-1 flex-grow"
-          estimatedItemSize={50}
+          estimatedItemSize={150}
           ListFooterComponent={<View style={{ height: 150 }} />}
         />
       </Animated.ScrollView>
