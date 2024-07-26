@@ -18,7 +18,7 @@ export default function NewsScreen() {
           <Text className="mt-8 text-lg text-grey-500">
             This page is coming soon
           </Text>
-          <Text className="text-lg text-grey-500">Aniticpate</Text>
+          <Text className="text-lg text-grey-500">Aniticpate...</Text>
         </View>
       </Header>
     </View>
