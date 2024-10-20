@@ -16,7 +16,7 @@ export default function UserCard({ user }: IUserCardProps) {
   return (
     <TouchableOpacity
       className={`relative flex flex-1 mb-8 bg-grey-50 rounded-lg dark:bg-grey-800 overflow-hidden`}
-      onPress={() => router.push("/home/user/user1")}
+      onPress={() => router.push("/home/users/user1")}
       activeOpacity={0.7}
       style={{ height: CARD_HEIGHT }}
     >

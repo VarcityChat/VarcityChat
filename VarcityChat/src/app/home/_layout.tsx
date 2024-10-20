@@ -8,6 +8,7 @@ export default function HomeLayout() {
       <Stack.Screen name="university" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="profile-detail" />
+      <Stack.Screen name="users" />
     </Stack>
   );
 }
