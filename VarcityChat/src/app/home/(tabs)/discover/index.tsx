@@ -8,7 +8,6 @@ import Animated, {
 import {
   View,
   Text,
-  Button,
   TouchableOpacity,
   Image,
   colors,
@@ -52,7 +51,7 @@ export default function DiscoverScreen() {
       [0, -HEADER_HEIGHT]
     );
     return {
-      transform: [{ translateY: headerY }],
+      transform: [{ translateY: headerY ?? 0 }],
     };
   });
 

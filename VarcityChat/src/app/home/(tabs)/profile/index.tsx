@@ -1,11 +1,12 @@
 import SettingsItem from "@/components/settings/settings-item";
+import ThemeSelect from "@/components/settings/theme-select";
 import { View, Text, Image, Modal, colors, useModal, Button } from "@/ui";
-import LogoutIcon from "@/ui/icons/settings/logout-icon";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { forwardRef, useMemo } from "react";
 import { SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import LogoutIcon from "@/ui/icons/settings/logout-icon";
 const avatar1 = require("../../../../../assets/images/avatars/avatar1.png");
 
 const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
@@ -78,7 +79,7 @@ export default function ProfileScreen() {
 
           <SettingsItem name="notifications" label="Notifications" hasSwitch />
 
-          <SettingsItem name="theme" label="Theme" />
+          <ThemeSelect />
 
           <SettingsItem name="tellafriend" label="Tell a friend" />
 
