@@ -158,7 +158,10 @@ export default function University() {
         scrollEventThrottle={16}
         style={{ paddingTop: IS_IOS ? insets.top : HEADER_HEIGHT }}
       >
-        <SearchBar placeholder="Search for people here" />
+        <SearchBar
+          placeholder="Search for people here"
+          onTouchEnd={() => router.push("/home/university/search")}
+        />
 
         <List
           data={[...users]}
