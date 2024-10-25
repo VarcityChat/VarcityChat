@@ -81,7 +81,11 @@ export default function ProfileScreen() {
 
           <ThemeSelect />
 
-          <SettingsItem name="tellafriend" label="Tell a friend" />
+          <SettingsItem
+            name="tellafriend"
+            label="Tell a friend"
+            onPress={() => router.push("home/tell-a-friend")}
+          />
 
           {/* Header */}
           <Text className="text-grey-500 mt-8 dark:text-grey-200">Safety</Text>
