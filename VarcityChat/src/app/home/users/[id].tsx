@@ -1,8 +1,8 @@
 import BackButton from "@/components/back-button";
-import { View, Text, WIDTH } from "@/ui";
+import { View, Text, WIDTH, colors } from "@/ui";
 import { userImg } from "@/ui/images";
 import { Stack, useRouter } from "expo-router";
-import { StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { TouchableOpacity, FlatList } from "react-native";
 import ChatsSvg from "@/ui/icons/chats";
 import Animated, {
   interpolate,
@@ -11,12 +11,14 @@ import Animated, {
   useScrollViewOffset,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
 
 const IMG_HEIGHT = 300;
 
 const hobbies = ["football", "baseball", "cooking", "movies"];
 
 export default function User() {
+  const { colorScheme } = useColorScheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -66,7 +68,7 @@ export default function User() {
           headerTransparent: true,
           headerTitle: () => (
             <Animated.Text
-              className={"font-semibold text-lg"}
+              className={"font-semibold text-lg dark:text-white"}
               style={[headerTextAnimatedStyle]}
             >
               Ebuka Varcity
@@ -75,7 +77,10 @@ export default function User() {
           headerBackground: () => (
             <Animated.View
               style={[
-                { height: 100, backgroundColor: "#fff" },
+                {
+                  height: 100,
+                  backgroundColor: colorScheme === "dark" ? "#151718" : "#fff",
+                },
                 headerAnimatedStyle,
               ]}
             ></Animated.View>
@@ -125,10 +130,10 @@ export default function User() {
           </View>
         </View>
 
-        <View className="min-h-screen px-6 py-8 bg-white">
+        <View className="min-h-screen px-6 py-8">
           <View className="flex-row">
             <View className="flex-1">
-              <Animated.Text className="font-bold text-2xl">
+              <Animated.Text className="font-bold text-2xl text-black dark:text-white">
                 Ebuka Varcity
               </Animated.Text>
               <Text className="text-grey-500 dark:text-grey-200">
@@ -188,5 +193,5 @@ export default function User() {
 }
 
 const Seperator = () => (
-  <View className="h-[1px] w-full bg-grey-50 mt-4 mb-6" />
+  <View className="h-[1px] w-full bg-grey-50 dark:bg-grey-700 mt-4 mb-6" />
 );
