@@ -1,0 +1,45 @@
+services:
+
+  # the backend server
+  server:
+    depends_on:
+      - db
+      - redis
+    build:
+      context: .
+    environment:
+      NODE_ENV: development
+      DB_URL: mongodb://db/varcity
+    ports:
+      - 8000:8000
+    develop:
+      watch:
+        - path: .
+          target: /app 
+          action: sync
+        - path: ./package.json
+          action: rebuild
+        - path: ./package-lock.json
+          action: rebuild
+
+  # start MongoDB
+  db:
+    image: mongo:latest
+    ports:
+      - 27018:27017
+    volumes:
+      - varcity:/data/db
+
+  # start Redis
+  redis:
+    image: redis:alpine
+    ports:
+      - 6380:6379
+    restart: always
+    volumes:
+      - cache:/data
+
+
+volumes:
+  varcity:
+  cache:
