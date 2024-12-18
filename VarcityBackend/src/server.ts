@@ -1,9 +1,10 @@
 import { Application, json, urlencoded, Response, Request, NextFunction } from 'express';
-import { CustomError, IErrorResponse } from './shared/globals/helpers/error-handler';
+import { CustomError, IErrorResponse } from '@global/helpers/error-handler';
+import { config } from '@root/config';
 import { Server } from 'socket.io';
 import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { config } from './config';
+import applicationRoutes from '@root/routes';
 import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -11,7 +12,6 @@ import hpp from 'hpp';
 import compression from 'compression';
 import mongosanitize from 'express-mongo-sanitize';
 import cookie_session from 'cookie-session';
-import applicationRoutes from './routes';
 import Logger from 'bunyan';
 import HTTP_STATUS from 'http-status-codes';
 import 'express-async-errors';
@@ -73,12 +73,13 @@ export class VarcityServer {
       res.status(HTTP_STATUS.NOT_FOUND).json({ message: `${req.originalUrl} not found` });
     });
 
-    app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      log.error(error);
-      if (error instanceof CustomError) {
-        return res.status(error.statusCode).json(error.serializeErrors());
+    app.use((err: IErrorResponse, req: Request, res: Response, next: NextFunction) => {
+      log.error(err);
+      if (err instanceof CustomError) {
+        res.status(err.statusCode).json(err.serializeErrors());
+      } else {
+        next();
       }
-      next();
     });
   }
 
@@ -114,5 +115,8 @@ export class VarcityServer {
     });
   }
 
-  private socketIOConnections(io: Server): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private socketIOConnections(io: Server): void {
+    log.info('socketIO Connections');
+  }
 }

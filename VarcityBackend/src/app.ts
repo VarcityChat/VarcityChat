@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
-import { VarcityServer } from './server';
-import { config } from './config';
-import dbConnection from './setupDb';
+import { VarcityServer } from '@root/server';
+import { config } from '@root/config';
+import dbConnection from '@root/setupDb';
 
 class Application {
   public init(): void {
