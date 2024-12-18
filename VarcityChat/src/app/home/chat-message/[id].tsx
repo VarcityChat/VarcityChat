@@ -17,8 +17,8 @@ import PictureSvg from "@/ui/icons/chat/picture-svg";
 import SendSvg from "@/ui/icons/chat/send-svg";
 import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
-import { Swipeable } from "react-native-gesture-handler";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
+import { Swipeable } from "react-native-gesture-handler";
 
 export default function ChatMessage() {
   const insets = useSafeAreaInsets();
