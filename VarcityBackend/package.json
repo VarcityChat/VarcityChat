@@ -18,6 +18,7 @@
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "bunyan": "^1.8.15",
+    "cloudinary": "^2.5.1",
     "compression": "^1.7.5",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
