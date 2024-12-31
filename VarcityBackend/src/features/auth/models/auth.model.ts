@@ -1,4 +1,4 @@
-import { IAuthDocument } from '@auth/interfaces/auth.interface';
+import { AuthProviders, IAuthDocument } from '@auth/interfaces/auth.interface';
 import { compare, hash } from 'bcryptjs';
 import { Model, Schema, model } from 'mongoose';
 
@@ -6,9 +6,22 @@ const SALT_ROUND = 11;
 
 const authSchema = new Schema(
   {
-    email: String,
-    password: String,
-    passwordResetToken: { type: String, default: '' }
+    email: {
+      type: String,
+      trim: true,
+      index: { unique: true, partialFilterExpression: { email: { type: 'string' } } },
+      sparse: true
+    },
+    password: { type: String, default: null },
+    passwordResetToken: { type: String, default: '' },
+    passwordResetExpiresIn: Number,
+    authProvider: {
+      type: String,
+      enum: [AuthProviders.LOCAL, AuthProviders.GOOGLE, AuthProviders.APPLE],
+      default: AuthProviders.LOCAL
+    },
+    providerId: { type: String, default: null },
+    providerData: { type: Map, of: String, default: {} }
   },
   {
     timestamps: true,

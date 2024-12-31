@@ -17,6 +17,9 @@ export interface AuthPayload {
 export interface IAuthDocument extends Document {
   _id: string | ObjectId;
   email: string;
+  authProvider: keyof typeof AuthProviders;
+  providerId: string;
+  providerData: object;
   password?: string;
   createdAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -26,7 +29,8 @@ export interface IAuthDocument extends Document {
 export interface ISignUpData {
   _id: ObjectId;
   gender: 'male' | 'female';
-  fullname: string;
+  firstname: string;
+  lastname: string;
   university: string;
   course: string;
   mobileNumber: string;
@@ -37,4 +41,10 @@ export interface ISignUpData {
   lookingFor: 'friendship' | 'relationship' | 'others';
   description: string;
   hobbies: string[];
+}
+
+export enum AuthProviders {
+  LOCAL = 'local',
+  GOOGLE = 'google',
+  APPLE = 'apple'
 }

@@ -29,6 +29,7 @@
       "@socket/*": ["./src/features/shared/sockets/*"],
       "@worker/*": ["./src/features/shared/workers/*"],
       "@auth/*": ["./src/features/auth/*"],
+      "@user/*": ["./src/features/user/*"],
       "@root/*": ["./src/*"]
     }
   }
