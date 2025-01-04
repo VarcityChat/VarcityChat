@@ -7,6 +7,7 @@ export interface IUserDocument extends Document {
   password?: string;
   firstname: string;
   lastname: string;
+  gender: keyof typeof Gender;
   images: string[];
   university: string;
   course: string;
@@ -21,6 +22,11 @@ export interface IUserDocument extends Document {
 export interface IUserImage {
   url: string;
   public_id?: string;
+}
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female'
 }
 
 export enum RelationshipStatus {
