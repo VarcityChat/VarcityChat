@@ -30,6 +30,7 @@
       "@worker/*": ["./src/features/shared/workers/*"],
       "@auth/*": ["./src/features/auth/*"],
       "@user/*": ["./src/features/user/*"],
+      "@uni/*": ["./src/features/universities/*"],
       "@root/*": ["./src/*"]
     }
   }
