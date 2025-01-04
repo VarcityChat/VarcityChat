@@ -9,6 +9,11 @@ class UniService {
   public async getUniByName(name: string): Promise<IUniDocument | null> {
     return await UniModel.findOne({ name: name.toLowerCase() });
   }
+
+  public async getUniversities(skip: number, limit: number): Promise<IUniDocument[]> {
+    const unis = await UniModel.find({}).skip(skip).limit(limit);
+    return unis;
+  }
 }
 
 export const uniService: UniService = new UniService();
