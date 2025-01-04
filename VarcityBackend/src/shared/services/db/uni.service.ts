@@ -10,6 +10,10 @@ class UniService {
     return await UniModel.findOne({ name: name.toLowerCase() });
   }
 
+  public async getUniByID(uniId: string): Promise<IUniDocument | null> {
+    return await UniModel.findOne({ _id: uniId });
+  }
+
   public async getUniversities(skip: number, limit: number): Promise<IUniDocument[]> {
     const unis = await UniModel.find({}).skip(skip).limit(limit);
     return unis;

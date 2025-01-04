@@ -13,5 +13,5 @@ const uniSchema: Schema = new Schema({
   }
 });
 
-const UniModel: Model<IUniDocument> = model<IUniDocument>('Uni', uniSchema, 'Uni');
+const UniModel: Model<IUniDocument> = model<IUniDocument>('University', uniSchema, 'University');
 export { UniModel };

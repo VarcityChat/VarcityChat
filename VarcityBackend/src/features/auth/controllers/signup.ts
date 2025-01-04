@@ -9,6 +9,7 @@ import { signupSchema } from '@auth/schemes/signup';
 import { UploadApiResponse } from 'cloudinary';
 import { uploadMultiple } from '@global/helpers/cloudinary-upload';
 import { userService } from '@root/shared/services/db/user.service';
+import { uniService } from '@root/shared/services/db/uni.service';
 import HTTP_STATUS from 'http-status-codes';
 
 class SignUp {
@@ -30,6 +31,11 @@ class SignUp {
     const userExists = await authService.getUserByEmail(Helpers.lowerCase(email));
     if (userExists) {
       throw new BadRequestError('User already exists');
+    }
+
+    const uni = await uniService.getUniByID(university);
+    if (!uni) {
+      throw new BadRequestError('We do not support this university at the time.');
     }
 
     // Images Upload
@@ -60,7 +66,7 @@ class SignUp {
       authId: authUser._id,
       firstname,
       lastname,
-      university,
+      university: uni._id,
       mobileNumber,
       course,
       images: uploadedImages,
