@@ -1,5 +1,10 @@
 import { model, Model, Schema, Types } from 'mongoose';
-import { IUserDocument, LookingFor, RelationshipStatus } from '@user/interfaces/user.interface';
+import {
+  Gender,
+  IUserDocument,
+  LookingFor,
+  RelationshipStatus
+} from '@user/interfaces/user.interface';
 
 const userSchema: Schema = new Schema(
   {
@@ -7,6 +12,7 @@ const userSchema: Schema = new Schema(
     firstname: { type: String, trim: true },
     lastname: { type: String, trim: true },
     course: { type: String, trim: true },
+    gender: { type: String, enum: [Gender.MALE, Gender.FEMALE] },
     images: [{ url: String, public_id: String }],
     university: { type: String, trim: true },
     mobileNumber: { type: String, trim: true },
