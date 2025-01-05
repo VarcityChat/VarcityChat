@@ -78,7 +78,6 @@ class SignUp {
 
     const jwtPayload = {
       email,
-      images,
       userId: user._id
     };
 

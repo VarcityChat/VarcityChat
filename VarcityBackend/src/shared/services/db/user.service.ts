@@ -11,6 +11,10 @@ class UserService {
     return await UserModel.findById(userId).populate('authId', 'email');
   }
 
+  public async getUserByAuthId(authId: string): Promise<IUserDocument | null> {
+    return await UserModel.findOne({ authId });
+  }
+
   public async deleteUser(userId: string): Promise<void> {
     const user = await this.getUserById(userId);
     if (user) {
