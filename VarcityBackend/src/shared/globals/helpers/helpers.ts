@@ -9,4 +9,13 @@ export class Helpers {
   static signToken(jwtPayload: object): string {
     return JWT.sign(jwtPayload, config.JWT_TOKEN!);
   }
+
+  static generateOtp(len: number): string {
+    const numbers = '0123456789';
+    let otp = '';
+    for (let i = 0; i < len; i++) {
+      otp += Math.floor(Math.random() * numbers.length);
+    }
+    return otp;
+  }
 }

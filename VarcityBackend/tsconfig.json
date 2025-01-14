@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2021",
     "module": "CommonJS",
-    "lib": ["DOM", "ES2020"],
+    "lib": ["DOM", "ES2021"],
     "baseUrl": ".",
     "outDir": "./build",
     "rootDir": "src",
@@ -25,7 +25,7 @@
     ],
     "paths": {
       "@global/*": ["./src/shared/globals/*"],
-      "@service/*": ["./src/features/shared/services/*"],
+      "@service/*": ["./src/shared/services/*"],
       "@socket/*": ["./src/features/shared/sockets/*"],
       "@worker/*": ["./src/features/shared/workers/*"],
       "@auth/*": ["./src/features/auth/*"],

@@ -13,6 +13,10 @@ class Config {
   public CLOUD_NAME: string | undefined;
   public CLOUD_API_KEY: string | undefined;
   public CLOUD_API_SECRET: string | undefined;
+  public EMAIL_HOST: string | undefined;
+  public EMAIL_PASS: string | undefined;
+  public EMAIL_PORT: string | undefined;
+  public EMAIL_USER: string | undefined;
 
   private readonly DEFAULT_DB_URL = 'mongodb://db/varcity';
   private readonly PORT = 8000;
@@ -26,6 +30,10 @@ class Config {
     this.CLOUD_NAME = process.env.CLOUD_NAME || '';
     this.CLOUD_API_KEY = process.env.CLOUD_API_KEY || '';
     this.CLOUD_API_SECRET = process.env.CLOUD_API_SECRET || '';
+    this.EMAIL_HOST = process.env.EMAIL_HOST || '';
+    this.EMAIL_PASS = process.env.EMAIL_PASS || '';
+    this.EMAIL_PORT = process.env.EMAIL_PORT || '';
+    this.EMAIL_USER = process.env.EMAIL_USER || '';
   }
 
   public validateConfig(): void {

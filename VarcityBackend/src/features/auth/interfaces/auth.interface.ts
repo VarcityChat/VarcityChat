@@ -21,6 +21,8 @@ export interface IAuthDocument extends Document {
   providerId: string;
   providerData: object;
   password?: string;
+  passwordResetToken?: string;
+  passwordResetExpiresIn?: string | number;
   createdAt: Date;
   comparePassword(password: string): Promise<boolean>;
   hashPassword(password: string): Promise<string>;
