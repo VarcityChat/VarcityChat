@@ -14,7 +14,7 @@ const userSchema: Schema = new Schema(
     course: { type: String, trim: true },
     gender: { type: String, enum: [Gender.MALE, Gender.FEMALE] },
     images: [{ url: String, public_id: String }],
-    university: { type: String, trim: true },
+    university: { type: Types.ObjectId, ref: 'University' },
     mobileNumber: { type: String, trim: true },
     relationshipStatus: {
       type: String,

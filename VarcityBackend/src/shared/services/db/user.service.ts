@@ -11,6 +11,10 @@ class UserService {
     return await UserModel.findById(userId).populate('authId', 'email');
   }
 
+  public async getUsersByUni(uniId: string, skip: number, limit: number): Promise<IUserDocument[]> {
+    return await UserModel.find({ university: uniId }).skip(skip).limit(limit);
+  }
+
   public async getUserByAuthId(authId: string): Promise<IUserDocument | null> {
     return await UserModel.findOne({ authId });
   }
