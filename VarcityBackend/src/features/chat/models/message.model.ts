@@ -16,6 +16,17 @@ const messageSchema: Schema = new Schema<IMessageDocument>(
       required: false,
       enum: [MEDIA_TYPE.audio, MEDIA_TYPE.video, MEDIA_TYPE.image]
     },
+    reply: {
+      messageId: { type: Schema.Types.ObjectId, ref: 'Message', required: false },
+      sender: { type: Schema.Types.ObjectId, ref: 'User' },
+      receiver: { type: Schema.Types.ObjectId, ref: 'User' },
+      content: String,
+      mediaType: {
+        type: String,
+        enum: [MEDIA_TYPE.audio, MEDIA_TYPE.video, MEDIA_TYPE.image]
+      },
+      mediaUrl: String
+    },
     seenAt: Date,
     readAt: Date
   },

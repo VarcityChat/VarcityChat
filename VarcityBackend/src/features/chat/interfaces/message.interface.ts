@@ -10,6 +10,14 @@ export interface IMessageDocument extends Document {
   mediaUrl?: string;
   mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
   seenAt: Date;
+  reply?: {
+    messageId: ObjectId;
+    content: string;
+    sender: ObjectId;
+    receiver: ObjectId;
+    mediaType: MEDIA_TYPE;
+    mediaUrl: string;
+  };
   readAt?: Date;
   createdAt: Date;
 }
