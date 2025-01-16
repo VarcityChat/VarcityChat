@@ -24,6 +24,7 @@
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "expo-server-sdk": "^3.13.0",
     "express": "^4.21.1",
     "express-async-errors": "^3.1.1",
     "express-mongo-sanitize": "^2.2.0",
