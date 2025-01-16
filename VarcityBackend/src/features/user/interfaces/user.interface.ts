@@ -17,6 +17,10 @@ export interface IUserDocument extends Document {
   about: string;
   hobbies: string[];
   expoPushToken?: string;
+  settings: {
+    notificationsEnabled: boolean;
+    activeStatus: boolean;
+  };
 }
 
 export interface IUserImage {
