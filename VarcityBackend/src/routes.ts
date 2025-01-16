@@ -3,6 +3,8 @@ import { uniRoutes } from '@uni/routes/uniRoutes';
 import { notificationRoutes } from '@notification/routes/notificationRoutes';
 import { Application } from 'express';
 import { config } from './config';
+import { authMiddleware } from '@global/middlewares/auth.middleware';
+import { chatRoutes } from '@chat/routes/chatRoutes';
 
 const BASE_PATH = '/api/v1';
 
@@ -14,6 +16,7 @@ export default (app: Application) => {
     if (config.NODE_ENV == 'development') {
       app.use(BASE_PATH, notificationRoutes.routes());
       app.use(BASE_PATH, uniRoutes.routes());
+      app.use(BASE_PATH, authMiddleware.protect, chatRoutes.routes());
     }
   };
 

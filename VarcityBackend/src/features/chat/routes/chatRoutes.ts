@@ -1,3 +1,4 @@
+import { createChat } from '@chat/controllers/create-chat';
 import { getChats } from '@chat/controllers/get-chats';
 import express, { Router } from 'express';
 
@@ -11,6 +12,10 @@ class ChatRoutes {
   public routes(): Router {
     // Get all conversations for the authenticated user
     this.router.get('/chat/conversations', getChats.conversationList);
+    this.router.get('/chat/:conversationId/messages', getChats.messages);
+
+    // Open a chat with a user
+    this.router.post('/chat/open', createChat.conversation);
 
     return this.router;
   }
