@@ -51,6 +51,7 @@ authSchema.methods.hashPassword = async function (password: string): Promise<str
   return hash(password, SALT_ROUND);
 };
 
+// This index helps to prevent duplicate accounts.
 authSchema.index({ authProvider: 1, providerId: 1 }, { unique: true });
 
 const AuthModel: Model<IAuthDocument> = model<IAuthDocument>('Auth', authSchema, 'Auth');
