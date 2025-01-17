@@ -2,8 +2,8 @@ import { Application, json, urlencoded, Response, Request, NextFunction } from '
 import { CustomError, IErrorResponse } from '@global/helpers/error-handler';
 import { config } from '@root/config';
 import { Server } from 'socket.io';
-import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
+import { redisConnection } from '@service/redis/redis.connection';
 import applicationRoutes from '@root/routes';
 import http from 'http';
 import cors from 'cors';
@@ -101,9 +101,8 @@ export class VarcityServer {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
       }
     });
-    const pubClient = createClient({ url: config.REDIS_HOST });
-    const subClient = pubClient.duplicate();
-    await Promise.all([pubClient.connect(), subClient.connect()]);
+    const pubClient = redisConnection.connect();
+    const subClient = redisConnection.connect();
     io.adapter(createAdapter(pubClient, subClient));
     return io;
   }
