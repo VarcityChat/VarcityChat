@@ -4,6 +4,7 @@ import { config } from '@root/config';
 import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { redisConnection } from '@service/redis/redis.connection';
+import { SocketIOUserHandler } from './shared/sockets/user';
 import applicationRoutes from '@root/routes';
 import http from 'http';
 import cors from 'cors';
@@ -102,7 +103,7 @@ export class VarcityServer {
       }
     });
     const pubClient = redisConnection.connect();
-    const subClient = redisConnection.connect();
+    const subClient = pubClient.duplicate();
     io.adapter(createAdapter(pubClient, subClient));
     return io;
   }
@@ -114,8 +115,8 @@ export class VarcityServer {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private socketIOConnections(io: Server): void {
-    log.info('socketIO Connections');
+    const userSocketHandler: SocketIOUserHandler = new SocketIOUserHandler(io);
+    userSocketHandler.listen();
   }
 }

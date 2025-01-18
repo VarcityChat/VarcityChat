@@ -26,6 +26,7 @@
     "paths": {
       "@global/*": ["./src/shared/globals/*"],
       "@service/*": ["./src/shared/services/*"],
+      "@socket/*": ["./src/shared/sockets/*"],
       "@socket/*": ["./src/features/shared/sockets/*"],
       "@worker/*": ["./src/features/shared/workers/*"],
       "@auth/*": ["./src/features/auth/*"],
