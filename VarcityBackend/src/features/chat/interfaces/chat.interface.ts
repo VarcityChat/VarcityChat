@@ -17,7 +17,7 @@ export interface IMessageDocument extends Document {
   sender: string | ObjectId;
   receiver: string | ObjectId;
   content?: string;
-  mediaUrl?: string | string[];
+  mediaUrls?: string[];
   mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
   seenAt: Date;
   reply?: {

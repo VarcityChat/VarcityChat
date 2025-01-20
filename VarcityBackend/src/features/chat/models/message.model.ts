@@ -7,10 +7,7 @@ const messageSchema: Schema = new Schema<IMessageDocument>(
     sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     receiver: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: false },
-    mediaUrl: {
-      type: String,
-      required: false
-    },
+    mediaUrls: [String],
     mediaType: {
       type: String,
       required: false,
