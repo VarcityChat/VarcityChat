@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Socket } from 'socket.io';
 
 export class ChatHandler {
@@ -8,8 +9,12 @@ export class ChatHandler {
   }
 
   handle(): void {
-    this.socket.on('message', (data) => {
+    this.socket.on('new-message', (data) => {
       console.log(data);
     });
+
+    this.socket.on('typing', (data) => {});
+
+    this.socket.on('message-read', (data) => {});
   }
 }

@@ -29,6 +29,8 @@ services:
       - 27018:27017
     volumes:
       - varcity:/data/db
+    logging:
+      driver: "none"
 
   # start Redis
   redis:
