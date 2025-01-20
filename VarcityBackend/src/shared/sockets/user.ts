@@ -43,14 +43,14 @@ export class SocketIOUserHandler {
 
     this.io.on('connection', (socket: UserSocket) => {
       const user: AuthPayload = socket.user!;
-      log.info('\n\nUser connected', user);
+      log.info('\nUser connected', user);
       this.io.emit('user-connected', user.userId);
 
       // The user joins the room with their userId
       socket.join(user.userId);
 
       // Pass the socket to the ChatHandler
-      new ChatHandler(socket);
+      new ChatHandler(socket).handle();
 
       socket.on('disconnect', () => {
         this.io.emit('user-disconnected', user.userId);

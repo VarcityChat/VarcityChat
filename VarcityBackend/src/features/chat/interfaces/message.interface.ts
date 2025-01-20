@@ -7,7 +7,7 @@ export interface IMessageDocument extends Document {
   sender: string | ObjectId;
   receiver: string | ObjectId;
   content?: string;
-  mediaUrl?: string;
+  mediaUrl?: string | string[];
   mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
   seenAt: Date;
   reply?: {
@@ -20,6 +20,23 @@ export interface IMessageDocument extends Document {
   };
   readAt?: Date;
   createdAt: Date;
+}
+
+export interface IMessageData {
+  conversationId: string | ObjectId;
+  sender: string | ObjectId;
+  receiver: string | ObjectId;
+  content?: string;
+  mediaUrl?: string[];
+  mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
+  reply?: {
+    messageId: ObjectId;
+    content: string;
+    sender: ObjectId;
+    receiver: ObjectId;
+    mediaType: MEDIA_TYPE;
+    mediaUrl: string;
+  };
 }
 
 export enum MEDIA_TYPE {
