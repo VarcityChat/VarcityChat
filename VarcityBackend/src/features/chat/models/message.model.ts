@@ -1,4 +1,4 @@
-import { IMessageDocument, MEDIA_TYPE } from '@chat/interfaces/message.interface';
+import { IMessageDocument, MEDIA_TYPE } from '@chat/interfaces/chat.interface';
 import { Model, model, Schema } from 'mongoose';
 
 const messageSchema: Schema = new Schema<IMessageDocument>(

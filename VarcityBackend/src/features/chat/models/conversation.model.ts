@@ -1,4 +1,4 @@
-import { IConversationDocument } from '@chat/interfaces/conversation.interface';
+import { IConversationDocument } from '@chat/interfaces/chat.interface';
 import { Model, Schema, model } from 'mongoose';
 
 const conversationSchema = new Schema<IConversationDocument>(

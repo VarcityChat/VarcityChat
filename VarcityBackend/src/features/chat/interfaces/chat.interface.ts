@@ -1,6 +1,16 @@
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
+export interface IConversationDocument extends Document {
+  _id: string | ObjectId;
+  user1: string | ObjectId;
+  user2: string | ObjectId;
+  lastMessage: string | null;
+  lastMessageTimestamp: Date | null;
+  unreadCountUser1: number;
+  unreadCountUser2: number;
+}
+
 export interface IMessageDocument extends Document {
   _id: string | ObjectId;
   conversationId: string | ObjectId;
@@ -37,6 +47,10 @@ export interface IMessageData {
     mediaType: MEDIA_TYPE;
     mediaUrl: string;
   };
+}
+
+export interface IMessageJob {
+  value: string | IMessageData | IMessageDocument;
 }
 
 export enum MEDIA_TYPE {

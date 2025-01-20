@@ -7,7 +7,7 @@ import Logger from 'bunyan';
 
 const log: Logger = config.createLogger('SocketIOUserHandler');
 
-export let socketIOUserObject: Server;
+export let ioInstance: Server;
 
 export interface UserSocket extends Socket {
   user?: AuthPayload;
@@ -18,7 +18,7 @@ export class SocketIOUserHandler {
 
   constructor(io: Server) {
     this.io = io;
-    socketIOUserObject = io;
+    ioInstance = io;
   }
 
   public listen(): void {

@@ -1,5 +1,5 @@
-import { IConversationDocument } from '@chat/interfaces/conversation.interface';
-import { IMessageDocument } from '@chat/interfaces/message.interface';
+import { IMessageData } from '@chat/interfaces/chat.interface';
+import { IMessageDocument, IConversationDocument } from '@chat/interfaces/chat.interface';
 import { ConversationModel } from '@chat/models/conversation.model';
 import { MessageModel } from '@chat/models/message.model';
 
@@ -20,6 +20,10 @@ class ChatService {
       { upsert: true, new: true }
     );
     return conversation;
+  }
+
+  public async addMessageToDB(message: IMessageData): Promise<void> {
+    await MessageModel.create(message);
   }
 
   // public async getConversation(): Promise<IConversationDocument | null> {}
