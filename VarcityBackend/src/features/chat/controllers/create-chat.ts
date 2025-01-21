@@ -1,4 +1,4 @@
-import { IConversationDocument } from '@chat/interfaces/conversation.interface';
+import { IConversationDocument } from '@chat/interfaces/chat.interface';
 import { BadRequestError } from '@global/helpers/error-handler';
 import { chatService } from '@service/db/chat.service';
 import { Request, Response } from 'express';
