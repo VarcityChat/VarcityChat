@@ -29,6 +29,9 @@ export class ChatHandler {
       }
 
       chatQueue.addChatJob(ChatJobs.addChatMessageToDB, { value: message });
+
+      // TODO: send notification to user using queue
+
       this.socket.to(`${message.receiver}`).emit('new-message', message);
     });
 
