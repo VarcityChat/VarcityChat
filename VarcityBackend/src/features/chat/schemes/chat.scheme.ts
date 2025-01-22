@@ -11,4 +11,12 @@ const addChatSchema: ObjectSchema = Joi.object().keys({
   conversationStatus: Joi.string().optional()
 });
 
-export { addChatSchema };
+const addConversationSchema: ObjectSchema = Joi.object().keys({
+  targetUserId: Joi.string().required()
+});
+
+const acceptConversationSchema: ObjectSchema = Joi.object().keys({
+  conversationId: Joi.string().required()
+});
+
+export { addChatSchema, addConversationSchema, acceptConversationSchema };

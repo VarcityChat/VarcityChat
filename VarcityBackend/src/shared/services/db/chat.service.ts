@@ -1,4 +1,4 @@
-import { IMessageData } from '@chat/interfaces/chat.interface';
+import { CONVERSATION_STATUS, IMessageData } from '@chat/interfaces/chat.interface';
 import { IMessageDocument, IConversationDocument } from '@chat/interfaces/chat.interface';
 import { ConversationModel } from '@chat/models/conversation.model';
 import { MessageModel } from '@chat/models/message.model';
@@ -19,6 +19,12 @@ class ChatService {
       conversation = await ConversationModel.create({ user1: currentUserId, user2: targetUserId });
     }
     return conversation;
+  }
+
+  public async acceptConversationRequest(conversationId: string): Promise<void> {
+    await ConversationModel.findByIdAndUpdate(conversationId, {
+      $set: { status: CONVERSATION_STATUS.accepted }
+    });
   }
 
   public async getConversationById(conversationId: string): Promise<IConversationDocument | null> {

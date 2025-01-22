@@ -12,7 +12,6 @@ import {
   conversationQueue
 } from '@service/queues/chat.queue';
 import { addChatSchema } from '@chat/schemes/chat.scheme';
-import { chatService } from '@service/db/chat.service';
 import { config } from '@root/config';
 import Logger from 'bunyan';
 import Joi from 'joi';

@@ -17,6 +17,8 @@ class ChatRoutes {
     // Open a chat with a user
     this.router.post('/chat/open', createChat.conversation);
 
+    this.router.put('/chat/accept', createChat.acceptConversationRequest);
+
     return this.router;
   }
 }
