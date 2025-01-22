@@ -1,8 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IMessageData } from '@chat/interfaces/chat.interface';
+import {
+  CONVERSATION_STATUS,
+  IConversationDocument,
+  IMessageData
+} from '@chat/interfaces/chat.interface';
 import { UserSocket } from './user';
-import { ChatJobs, chatQueue } from '@service/queues/chat.queue';
+import {
+  ChatJobs,
+  chatQueue,
+  ConversationJobs,
+  conversationQueue
+} from '@service/queues/chat.queue';
 import { addChatSchema } from '@chat/schemes/chat.scheme';
+import { chatService } from '@service/db/chat.service';
 import { config } from '@root/config';
 import Logger from 'bunyan';
 import Joi from 'joi';
@@ -18,6 +28,8 @@ export class ChatHandler {
 
   handle(): void {
     this.socket.on('new-message', async (message: IMessageData) => {
+      console.log('\nMESSAGE COMING IN:', message);
+
       const error = await this.validateChatMessage(message);
       if (error) {
         log.error('Validation Error:', error.details);
@@ -28,6 +40,19 @@ export class ChatHandler {
         return;
       }
 
+      // Check if the conversation hasn't been accepted by the other user
+      // if (message.conversationStatus === CONVERSATION_STATUS.pending) {
+      //   const conversation: IConversationDocument | null = await chatService.getConversationById(
+      //     `${message.conversationId}`
+      //   );
+      //   if (!conversation) {
+      //     return;
+      //   }
+      // }
+
+      conversationQueue.addConversationJob(ConversationJobs.increaseUnreadCount, {
+        value: { sender: message.sender, receiver: message.receiver }
+      });
       chatQueue.addChatJob(ChatJobs.addChatMessageToDB, { value: message });
 
       // TODO: send notification to user using queue

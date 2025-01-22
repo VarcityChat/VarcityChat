@@ -1,4 +1,4 @@
-import { IConversationDocument } from '@chat/interfaces/chat.interface';
+import { CONVERSATION_STATUS, IConversationDocument } from '@chat/interfaces/chat.interface';
 import { Model, Schema, model } from 'mongoose';
 
 const conversationSchema = new Schema<IConversationDocument>(
@@ -8,10 +8,21 @@ const conversationSchema = new Schema<IConversationDocument>(
     lastMessage: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
     lastMessageTimestamp: { type: Date, default: null },
     unreadCountUser1: { type: Number, default: 0 },
-    unreadCountUser2: { type: Number, default: 0 }
+    unreadCountUser2: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: [
+        CONVERSATION_STATUS.accepted,
+        CONVERSATION_STATUS.pending,
+        CONVERSATION_STATUS.rejected
+      ],
+      default: CONVERSATION_STATUS.pending
+    }
   },
   { timestamps: true }
 );
+
+conversationSchema.index({ user1: 1, user2: 1 });
 
 export const ConversationModel: Model<IConversationDocument> = model<IConversationDocument>(
   'Conversation',

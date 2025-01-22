@@ -14,12 +14,34 @@ class ChatService {
         { user1: targetUserId, user2: currentUserId }
       ]
     };
-    const conversation = await ConversationModel.findOneAndUpdate(
-      query,
-      {},
-      { upsert: true, new: true }
-    );
+    let conversation: IConversationDocument | null = await ConversationModel.findOne(query);
+    if (!conversation) {
+      conversation = await ConversationModel.create({ user1: currentUserId, user2: targetUserId });
+    }
     return conversation;
+  }
+
+  public async getConversationById(conversationId: string): Promise<IConversationDocument | null> {
+    return await ConversationModel.findById(conversationId);
+  }
+
+  public async increaseUnreadMessageCount(sender: string, receiver: string): Promise<void> {
+    const query = {
+      $or: [
+        { user1: sender, user2: receiver },
+        { user1: receiver, user2: sender }
+      ]
+    };
+    const conversation = await ConversationModel.findOne(query);
+    if (conversation) {
+      if (sender == conversation.user1) {
+        conversation.unreadCountUser2++;
+      } else {
+        // That means the sender is the second user
+        conversation.unreadCountUser1++;
+      }
+      await conversation.save();
+    }
   }
 
   public async addMessageToDB(message: IMessageData): Promise<void> {

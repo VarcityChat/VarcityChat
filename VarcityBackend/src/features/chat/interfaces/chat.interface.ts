@@ -9,6 +9,7 @@ export interface IConversationDocument extends Document {
   lastMessageTimestamp: Date | null;
   unreadCountUser1: number;
   unreadCountUser2: number;
+  status: CONVERSATION_STATUS.pending | CONVERSATION_STATUS.accepted | CONVERSATION_STATUS.rejected;
 }
 
 export interface IMessageDocument extends Document {
@@ -47,14 +48,33 @@ export interface IMessageData {
     mediaType: MEDIA_TYPE;
     mediaUrl: string;
   };
+  conversationStatus:
+    | CONVERSATION_STATUS.pending
+    | CONVERSATION_STATUS.accepted
+    | CONVERSATION_STATUS.rejected;
+}
+
+export interface ISenderReceiver {
+  sender: string | ObjectId;
+  receiver: string | ObjectId;
 }
 
 export interface IMessageJob {
   value: string | IMessageData | IMessageDocument;
 }
 
+export interface IConversationJob {
+  value: string | ISenderReceiver;
+}
+
 export enum MEDIA_TYPE {
   image = 'image',
   audio = 'audio',
   video = 'video'
+}
+
+export enum CONVERSATION_STATUS {
+  pending = 'pending',
+  accepted = 'accepted',
+  rejected = 'rejected'
 }

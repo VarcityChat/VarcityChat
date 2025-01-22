@@ -57,12 +57,14 @@ class NotificationService {
 
   public async saveNotificationToDb(
     userId: string,
-    notificationMessage: NotificationMessage
+    notificationMessage: NotificationMessage,
+    from?: string
   ): Promise<void> {
     await NotificationModel.create({
       to: userId,
       title: notificationMessage.title,
-      message: notificationMessage.body
+      message: notificationMessage.body,
+      from: from ? from : null
     });
   }
 

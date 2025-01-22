@@ -4,9 +4,9 @@ import { createBullBoard } from '@bull-board/api';
 import { BullAdapter } from '@bull-board/api/bullAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { config } from '@root/config';
-import { IMessageJob } from '@chat/interfaces/chat.interface';
+import { IConversationJob, IMessageJob } from '@chat/interfaces/chat.interface';
 
-type IBaseJobData = IMessageJob;
+type IBaseJobData = IMessageJob | IConversationJob;
 
 let bullAdapters: BullAdapter[] = [];
 

@@ -6,6 +6,7 @@ const notificationSchema = new Schema(
     message: { type: String, required: true },
     title: { type: String, required: true },
     to: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    from: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     read: { type: Boolean, default: false }
   },
   {

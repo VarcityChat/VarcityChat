@@ -6,6 +6,11 @@ export class Helpers {
     return str.toLowerCase();
   }
 
+  static capitalize(str: string): string {
+    if (str.length < 2) return str;
+    return str[0].toUpperCase() + str.substring(1);
+  }
+
   static signToken(jwtPayload: object): string {
     return JWT.sign(jwtPayload, config.JWT_TOKEN!);
   }
