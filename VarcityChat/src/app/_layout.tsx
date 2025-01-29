@@ -63,6 +63,8 @@ function RootLayoutNav() {
     }
   }, [fontsLoaded]);
 
+  if (!fontsLoaded) return null;
+
   return (
     <Providers>
       <Stack>

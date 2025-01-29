@@ -8,6 +8,9 @@ module.exports = {
   theme: {
     extend: {
       colors,
+      fontFamily: {
+        sans: ["PlusJakartaSans_400Regular", "PlusJakartaSans"],
+      },
     },
   },
   plugins: [],
