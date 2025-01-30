@@ -11,8 +11,13 @@ const avatar1 = require("../../../../../assets/images/avatars/avatar1.png");
 
 const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
   const { colorScheme } = useColorScheme();
+  const router = useRouter();
   const isDark = colorScheme === "dark";
   const snapPoints = useMemo(() => [300], []);
+
+  const handleLogout = () => {
+    router.replace("/login");
+  };
 
   return (
     <Modal
@@ -25,13 +30,13 @@ const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
       }}
     >
       <View className="flex flex-1 px-6 py-2">
-        <Text className="font-semibold text-lg">Logout</Text>
+        <Text className="font-sans-semibold text-lg">Logout</Text>
         <Text className="text-grey-500">
           Do you want to log-out of your account?
         </Text>
 
         <View className="flex flex-1 mt-8">
-          <Button label="Log out" />
+          <Button label="Log out" onPress={handleLogout} />
           <Button label="Go back" variant="tertiary" />
         </View>
       </View>
@@ -71,7 +76,7 @@ export default function ProfileScreen() {
             name="profile"
             label="Profile"
             onPress={() => {
-              router.push("/home/profile-detail");
+              router.push("/profile-detail");
             }}
           />
 
@@ -84,7 +89,7 @@ export default function ProfileScreen() {
           <SettingsItem
             name="tellafriend"
             label="Tell a friend"
-            onPress={() => router.push("/home/tell-a-friend")}
+            onPress={() => router.push("/tell-a-friend")}
           />
 
           {/* Header */}
@@ -101,7 +106,7 @@ export default function ProfileScreen() {
             onPress={logoutModal.present}
           >
             <LogoutIcon />
-            <Text className="text-primary-600 dark:text-primary-600">
+            <Text className="text-primary-600 dark:text-primary-600 font-sans-semibold">
               Log out
             </Text>
           </TouchableOpacity>

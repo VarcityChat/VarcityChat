@@ -53,12 +53,12 @@ export default function ProfileDetail() {
           <SettingsItem
             name="profile"
             label="Personal Information"
-            onPress={() => router.push("/home/personal-information")}
+            onPress={() => router.push("/personal-information")}
           />
           <SettingsItem
             name="profile"
             label="Personality"
-            onPress={() => router.push("/home/personality")}
+            onPress={() => router.push("/personality")}
           />
           <SettingsItem
             name="delete"
