@@ -1,7 +1,7 @@
 import { View, Text, Image, Button } from "@/ui";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native";
-const onboardingImage = require("../../../assets/images/onboarding/onboarding.png");
+const onboardingImage = require("../../../../assets/images/onboarding/onboarding.png");
 
 export default function OnboardingOne() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function OnboardingOne() {
           <Button
             label="Next"
             onPress={() => {
-              router.push("/onboarding/onboarding-two");
+              router.push("/onboarding-two");
             }}
           />
         </SafeAreaView>

@@ -3,7 +3,7 @@ import { Link, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { Pressable, SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-const logo = require("../../assets/icon.png");
+const logo = require("../../../assets/icon.png");
 
 export default function Login() {
   const { control } = useForm();
@@ -45,7 +45,10 @@ export default function Login() {
             </View>
 
             <View className="mt-10">
-              <Button label="Login" onPress={() => router.replace("/home")} />
+              <Button
+                label="Login"
+                onPress={() => router.replace("/(tabs)/discover")}
+              />
               <Pressable
                 onPress={() => {
                   router.push("/register");

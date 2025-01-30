@@ -1,6 +1,12 @@
 import { ReactNode, useEffect } from "react";
 import { StyleSheet } from "react-native";
-import { SplashScreen, Stack, useNavigationContainerRef } from "expo-router";
+import {
+  SplashScreen,
+  Stack,
+  useNavigationContainerRef,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useThemeConfig } from "@/core/use-theme-config";
@@ -28,14 +34,14 @@ export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
 
+export const unstable_settings = {
+  initialRouteName: "(auth)",
+};
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const navigationRef = useNavigationContainerRef();
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
     PlusJakartaSans_300Light,
@@ -53,23 +59,49 @@ function RootLayoutNav() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
-  const hideSplash = async () => {
-    await SplashScreen.hideAsync();
-  };
-
   useEffect(() => {
     if (fontsLoaded) {
-      hideSplash();
+      SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) return null;
-
   return (
     <Providers>
-      <Stack>
-        <Stack.Screen name="home" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <RootLayoutNav />
+    </Providers>
+  );
+}
+
+function RootLayoutNav() {
+  const router = useRouter();
+  const segments = useSegments();
+
+  // const hideSplash = async () => {
+  //   await SplashScreen.hideAsync();
+  // };
+
+  // useEffect(() => {
+  //   if (fontsLoaded) {
+  //     hideSplash();
+  //   }
+  // }, [fontsLoaded]);
+
+  // if (!fontsLoaded) return null;
+
+  const authenticated = false;
+
+  useEffect(() => {
+    if (authenticated) {
+      router.replace("/(app)");
+    } else {
+      router.replace("/onboarding-one");
+    }
+  }, [authenticated]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* <Stack.Screen name="home" options={{ headerShown: false }} /> */}
+      {/* <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen
@@ -82,9 +114,8 @@ function RootLayoutNav() {
         <Stack.Screen
           name="forgot-password-otp"
           options={{ headerShown: false }}
-        />
-      </Stack>
-    </Providers>
+        /> */}
+    </Stack>
   );
 }
 

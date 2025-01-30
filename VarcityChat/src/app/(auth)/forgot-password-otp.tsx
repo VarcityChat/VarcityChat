@@ -4,7 +4,7 @@ import { Link, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-const logo = require("../../assets/icon.png");
+const logo = require("../../../assets/icon.png");
 
 export default function ForgotPasswordOtp() {
   const router = useRouter();
