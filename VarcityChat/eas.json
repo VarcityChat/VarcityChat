@@ -8,6 +8,11 @@
       "distribution": "internal",
       "ios": {
         "simulator": true
+      },
+      "env": {
+        "APP_ENV": "development",
+        "EXPO_NO_DOTENV": "1",
+        "FLIPPER_DISABLE": "1"
       }
     },
     "preview": {
@@ -21,9 +26,20 @@
       "android": {
         "buildType": "apk",
         "image": "latest"
+      },
+      "env": {
+        "APP_ENV": "staging",
+        "EXPO_NO_DOTENV": "1",
+        "FLIPPER_DISABLE": "1"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_NO_DOTENV": "1",
+        "FLIPPER_DISABLE": "1"
+      }
+    }
   },
   "submit": {
     "production": {}

@@ -26,7 +26,7 @@ export default function OnboardingOne() {
           <Button
             label="Next"
             onPress={() => {
-              router.push("/onboarding-two");
+              router.push("/onboarding/onboarding-two");
             }}
           />
         </SafeAreaView>

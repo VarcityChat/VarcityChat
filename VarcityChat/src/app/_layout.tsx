@@ -29,6 +29,9 @@ import {
   PlusJakartaSans_800ExtraBold_Italic,
   useFonts,
 } from "@expo-google-fonts/plus-jakarta-sans";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistor, store } from "@/core/store/store";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -94,7 +97,7 @@ function RootLayoutNav() {
     if (authenticated) {
       router.replace("/(app)");
     } else {
-      router.replace("/onboarding-one");
+      router.replace("/onboarding/onboarding-one");
     }
   }, [authenticated]);
 
@@ -123,16 +126,20 @@ function Providers({ children }: { children: ReactNode }) {
   const theme = useThemeConfig();
 
   return (
-    <GestureHandlerRootView
-      style={styles.container}
-      className={theme.dark ? "dark" : undefined}
-    >
-      <ThemeProvider value={theme}>
-        <MenuProvider>
-          <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
-        </MenuProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <GestureHandlerRootView
+          style={styles.container}
+          className={theme.dark ? "dark" : undefined}
+        >
+          <ThemeProvider value={theme}>
+            <MenuProvider>
+              <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+            </MenuProvider>
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </PersistGate>
+    </Provider>
   );
 }
 

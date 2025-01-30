@@ -1,13 +1,36 @@
+import { useLoginMutation } from "@/api/auth-api";
 import { View, Text, Image, ControlledInput, Button } from "@/ui";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { Pressable, SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { z } from "zod";
 const logo = require("../../../assets/icon.png");
 
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+type FormType = z.infer<typeof schema>;
+
 export default function Login() {
-  const { control } = useForm();
+  const { control, handleSubmit } = useForm<FormType>({
+    resolver: zodResolver(schema),
+  });
   const router = useRouter();
+
+  const [login, { isLoading, isError }] = useLoginMutation();
+
+  const onSubmit = async (data: FormType) => {
+    try {
+      const payload = await login(data).unwrap();
+      console.log("\nPAYLOAD:", payload);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1">
@@ -47,7 +70,9 @@ export default function Login() {
             <View className="mt-10">
               <Button
                 label="Login"
-                onPress={() => router.replace("/(tabs)/discover")}
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading}
+                // onPress={() => router.replace("/(tabs)/discover")}
               />
               <Pressable
                 onPress={() => {
