@@ -14,8 +14,8 @@ export default function Login() {
       <KeyboardAwareScrollView contentContainerClassName="flex flex-1 items-center justify-center px-8">
         <Image source={logo} className="w-[50px] h-[50px] rounded-md mt-10" />
         <View className="flex flex-1 w-full items-center justify-center -mt-16">
-          <Text className="font-bold text-2xl">Login</Text>
-          <Text className="text-grey-500 text-sm mt-2">
+          <Text className="font-sans-bold text-2xl">Login</Text>
+          <Text className="text-grey-500 text-sm mt-2 font-sans">
             Fill in the information below to access your account
           </Text>
 
@@ -36,19 +36,22 @@ export default function Login() {
             />
 
             <View className="flex items-end mt-2">
-              <Link href="forgot-password" className="text-primary-500">
+              <Link
+                href="/forgot-password"
+                className="text-primary-500 font-sans-semibold text-sm"
+              >
                 Forgot password?
               </Link>
             </View>
 
             <View className="mt-10">
-              <Button label="Login" onPress={() => router.replace("home")} />
+              <Button label="Login" onPress={() => router.replace("/home")} />
               <Pressable
                 onPress={() => {
                   router.push("/register");
                 }}
               >
-                <Text className="font-bold text-primary-500 text-center my-3">
+                <Text className="font-sans-bold text-primary-500 text-center my-3">
                   I don't have an account!
                 </Text>
               </Pressable>

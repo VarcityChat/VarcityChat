@@ -86,7 +86,7 @@ export default function University() {
             <BackButton onPress={() => router.canGoBack() && router.back()} />
           </View>
 
-          <Text className="font-semibold text-lg">
+          <Text className="font-sans-semibold text-lg">
             {trimText("Lead City University")}
           </Text>
 

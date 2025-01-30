@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   ScrollView,
+  Platform,
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -45,10 +46,13 @@ export default function Index() {
     <SafeAreaView className="flex-1 justify-center items-center">
       <KeyboardAvoidingView behavior="padding">
         <ScrollView
-          className="flex flex-1 py-12"
+          className={`flex flex-1 ${Platform.select({
+            ios: "py-4",
+            android: "py-12",
+          })}`}
           scrollEnabled={currentIndex > 0}
         >
-          <View className="flex flex-row items-center justify-between px-8">
+          <View className="flex flex-row items-center justify-between px-6">
             <BackButton
               onPress={() => {
                 if (currentIndex === 0) {

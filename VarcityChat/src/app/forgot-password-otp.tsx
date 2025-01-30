@@ -17,16 +17,16 @@ export default function ForgotPasswordOtp() {
         <View className="flex flex-1 w-full items-center justify-center -mt-16">
           <Text className="font-bold text-2xl">Forgot password</Text>
           <View className="flex max-w-[90%]">
-            <Text className="text-grey-500 text-sm mt-2 text-center text-wrap">
+            <Text className="text-grey-500 text-sm mt-2 text-center text-wrap font-sans">
               We have sent a 4-digit code to{" "}
             </Text>
-            <Text className="text-black font-bold text-sm text-center text-wrap">
+            <Text className="text-black font-bold text-sm text-center text-wrap font-sans">
               promisesheggs@gmail.com
             </Text>
           </View>
           <View className="mt-3 flex flex-row items-center">
-            <Text className="text-grey-500">Resend code in </Text>
-            <Text className="text-primary-500 font-bold">00:59</Text>
+            <Text className="text-grey-500 font-sans">Resend code in </Text>
+            <Text className="text-primary-500 font-sans-bold">00:59</Text>
           </View>
 
           <View className="flex w-full mt-10">
@@ -35,11 +35,11 @@ export default function ForgotPasswordOtp() {
             <View className="mt-10">
               <Button
                 label="Continue"
-                onPress={() => router.navigate("reset-password")}
+                onPress={() => router.navigate("/reset-password")}
               />
               <Link
-                href="login"
-                className="font-bold text-primary-500 text-center my-3"
+                href="/login"
+                className="font-sans-bold text-primary-500 text-center my-3"
               >
                 Back to login
               </Link>

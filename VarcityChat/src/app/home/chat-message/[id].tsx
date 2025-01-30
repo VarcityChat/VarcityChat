@@ -84,7 +84,11 @@ export default function ChatMessage() {
           <Bubble
             {...props}
             textStyle={{
-              right: { color: "#000", fontSize: 15 },
+              right: {
+                color: "#000",
+                fontSize: 14,
+                fontFamily: "PlusJakartaSans_400Regular",
+              },
               left: { fontSize: 15 },
             }}
             wrapperStyle={{
@@ -162,7 +166,7 @@ function ChatEmptyComponent() {
       style={{ transform: [{ rotateX: "180deg" }] }}
     >
       <Image source={emptyChatImg} className="w-[50px] h-[50px]" />
-      <Text className="mt-4">Start a Conversation</Text>
+      <Text className="mt-4 font-sans-medium">Start a Conversation</Text>
     </View>
   );
 }

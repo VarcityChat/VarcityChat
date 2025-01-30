@@ -15,10 +15,10 @@ export default function OnboardingOne() {
           <View className="w-3 h-3 rounded-full bg-primary-600"></View>
           <View className="w-3 h-3 rounded-full bg-gray-300"></View>
         </View>
-        <Text className="text-base text-primary-500 font-bold">
+        <Text className="text-base text-primary-500 font-sans-bold">
           Connection 🌍
         </Text>
-        <Text className="text-2xl font-semibold mt-1">
+        <Text className="text-2xl font-semibold mt-1 font-sans-semibold">
           Connect easily with students around the globe
         </Text>
 
@@ -26,7 +26,7 @@ export default function OnboardingOne() {
           <Button
             label="Next"
             onPress={() => {
-              router.push("onboarding/onboarding-two");
+              router.push("/onboarding/onboarding-two");
             }}
           />
         </SafeAreaView>

@@ -10,6 +10,7 @@ import NewsActive from "@/ui/icons/news-active";
 import NewsSvg from "@/ui/icons/news";
 import CallsActive from "@/ui/icons/calls-active";
 import CallsSvg from "@/ui/icons/calls";
+import { Platform } from "react-native";
 
 export const unstable_settings = {
   initialRouteName: "discover",
@@ -23,10 +24,15 @@ const TabNavigation = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarLabelStyle: { fontSize: 13 },
+        tabBarLabelStyle: {
+          fontSize: 13,
+          fontFamily: "PlusJakartaSans_400Regular",
+          marginBottom: Platform.OS === "android" ? 12 : 0,
+        },
         tabBarStyle: {
-          paddingTop: 4,
+          paddingTop: 6,
           backgroundColor: isDark ? colors.black : colors.white,
+          height: Platform.OS === "android" ? 65 : 80,
         },
         tabBarHideOnKeyboard: true,
       }}

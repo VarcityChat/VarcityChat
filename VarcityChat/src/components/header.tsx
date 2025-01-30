@@ -65,7 +65,7 @@ export default function Header({
             )}
           </View>
           <View className="items-center">
-            <Text className="font-semibold text-lg">{title}</Text>
+            <Text className="font-sans-bold text-lg">{title}</Text>
           </View>
           <View className="flex-1 items-end">{headerRight}</View>
         </View>

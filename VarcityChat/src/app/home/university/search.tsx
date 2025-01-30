@@ -17,7 +17,7 @@ export default function Search() {
             ListEmptyComponent={
               <View className="flex h-full items-center justify-center">
                 <EmptySearchSvg />
-                <Text className="mt-4 text-grey-500 dark:text-grey-200">
+                <Text className="mt-4 text-grey-500 dark:text-grey-200 font-sans-medium">
                   You haven't made any search yet
                 </Text>
               </View>

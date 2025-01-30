@@ -25,7 +25,7 @@ import NotificationSvg from "@/ui/icons/notification";
 import { useEffect } from "react";
 
 const HEADER_HEIGHT =
-  Platform.OS === "ios" ? 100 : 70 + (StatusBar?.currentHeight ?? 0);
+  Platform.OS === "ios" ? 100 : 60 + (StatusBar?.currentHeight ?? 0);
 
 export default function DiscoverScreen() {
   const { colorScheme } = useColorScheme();
@@ -77,10 +77,10 @@ export default function DiscoverScreen() {
         ]}
       >
         <View
-          className="flex flex-1 flex-row justify-between items-end px-6 pb-3"
+          className="flex flex-1 flex-row justify-between items-end px-6"
           style={{ marginTop: insets.top }}
         >
-          <Text className="font-semibold text-xl text-primary-600 dark:text-primary-600">
+          <Text className="font-sans-semibold text-xl text-primary-600 dark:text-primary-600">
             Varcity Chat
           </Text>
           <TouchableOpacity
@@ -94,15 +94,21 @@ export default function DiscoverScreen() {
       </Animated.View>
 
       <Animated.ScrollView
-        className="flex flex-1 flex-grow px-6"
+        className="flex flex-1 flex-grow px-6 pt-4"
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         style={{ paddingTop: IS_IOS ? insets.top : HEADER_HEIGHT }}
       >
-        <SearchBar placeholder="Discover more people here" />
+        <View
+          className={`${Platform.select({ ios: "pt-0", android: "pt-4" })}`}
+        >
+          <SearchBar placeholder="Discover more people here" />
+        </View>
         <List
           ListHeaderComponent={
-            <Text className="mb-4 font-bold text-lg">List of Universities</Text>
+            <Text className="mb-4 font-sans-bold text-lg">
+              List of Universities
+            </Text>
           }
           data={[...universities]}
           keyExtractor={(_, index) => `university-${index}`}
@@ -126,11 +132,12 @@ export default function DiscoverScreen() {
                   ) : null}
                 </View>
                 <View className="mt-2">
-                  <Text className="font-semibold">{item.name}</Text>
+                  <Text className="font-sans-semibold">{item.name}</Text>
                   <View className="flex flex-row items-center">
                     <LocationSvg className="mr-1" />
-                    <Text className="text-sm text-grey-500 dark:text-grey-200">
-                      {item.location}
+                    <Text className="text-sm text-grey-500 dark:text-grey-200 font-sans">
+                      {item.location.substring(0, 12) +
+                        (item.location.length > 12 ? "..." : "")}
                     </Text>
                   </View>
                 </View>

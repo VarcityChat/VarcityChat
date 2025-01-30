@@ -39,8 +39,8 @@ export default function PersonalInformationForm({
 
   return (
     <View className="flex flex-1 justify-center items-center mt-6">
-      <Text className="font-bold text-2xl">Personal information</Text>
-      <Text className="text-grey-500 dark:text-grey-200">
+      <Text className="font-sans-semibold text-2xl">Personal information</Text>
+      <Text className="text-grey-500 dark:text-grey-200 font-sans-regular">
         We need your information to setup your account
       </Text>
 

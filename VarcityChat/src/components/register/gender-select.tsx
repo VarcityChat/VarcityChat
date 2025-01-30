@@ -14,8 +14,8 @@ export default function GenderSelect({ onNextPress }: GenderSelectProps) {
 
   return (
     <View className="flex flex-1 items-center justify-center -mt-16">
-      <Text className="font-bold text-2xl">I am a</Text>
-      <Text className="text-grey-500 dark:text-grey-200">
+      <Text className="font-sans-semibold text-2xl">I am a</Text>
+      <Text className="text-grey-500 dark:text-grey-200 font-sans-regular">
         This is to help us Personalize your experience
       </Text>
 
@@ -41,7 +41,7 @@ export default function GenderSelect({ onNextPress }: GenderSelectProps) {
             `}
         >
           <Text
-            className={`text-xl
+            className={`text-xl font-sans-regular
             ${
               isMale
                 ? "text-primary-600 dark:text-primary-600"
@@ -67,7 +67,7 @@ export default function GenderSelect({ onNextPress }: GenderSelectProps) {
           `}
         >
           <Text
-            className={`text-xl ${
+            className={`text-xl font-sans-regular ${
               !isMale
                 ? "text-primary-600 dark:text-primary-600"
                 : "text-grey-500 dark:text-grey-300"
@@ -89,7 +89,7 @@ export default function GenderSelect({ onNextPress }: GenderSelectProps) {
             router.navigate("/login");
           }}
         >
-          <Text className="text-center mt-2 font-bold text-primary-500 p-3">
+          <Text className="text-center mt-2 font-sans-bold text-primary-500 p-3">
             I have an account!
           </Text>
         </Pressable>

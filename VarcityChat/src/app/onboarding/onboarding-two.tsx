@@ -16,10 +16,10 @@ export default function OnboardingTwo() {
           <View className="w-3 h-3 rounded-full bg-primary-600"></View>
         </View>
 
-        <Text className="text-base text-primary-500 font-bold">
+        <Text className="text-base text-primary-500 font-sans-bold">
           Relationships ❤️
         </Text>
-        <Text className="text-2xl font-semibold mt-2 text-black dark:text-white">
+        <Text className="text-2xl font-sans-semibold mt-2 text-black dark:text-white">
           Build long lasting bonds with Varcity Chat
         </Text>
 

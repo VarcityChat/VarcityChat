@@ -12,8 +12,8 @@ export default function Personality() {
       <Header title="Personality">
         <KeyboardAvoidingView className="flex flex-1 justify-center mt-6 px-6">
           <View>
-            <Text className="font-bold text-grey-500">Images</Text>
-            <Text className="text-grey-500 dark:text-grey-200 text-sm font-light">
+            <Text className="font-sans-bold text-grey-500">Images</Text>
+            <Text className="text-grey-500 dark:text-grey-200 text-sm font-sans">
               Lets put a face to the name, add images of yourself
             </Text>
 
@@ -26,7 +26,9 @@ export default function Personality() {
           </View>
 
           <View className="mt-2">
-            <Text className="text-grey-500 font-bold">Relationship Status</Text>
+            <Text className="text-grey-500 font-sans-bold">
+              Relationship Status
+            </Text>
             <View className="flex flex-row flex-wrap gap-4 py-3">
               <TouchableOpacity
                 activeOpacity={0.7}
@@ -57,7 +59,7 @@ export default function Personality() {
           </View>
 
           <View className="mt-2">
-            <Text className="text-grey-500 font-bold">
+            <Text className="text-grey-500 font-sans-bold">
               What are you looking for?
             </Text>
 

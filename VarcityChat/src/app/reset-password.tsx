@@ -13,8 +13,8 @@ export default function ResetPassword() {
       <KeyboardAwareScrollView contentContainerClassName="flex flex-1 items-center justify-center px-8">
         <Image source={logo} className="w-[50px] h-[50px] rounded-md mt-10" />
         <View className="flex flex-1 w-full items-center justify-center -mt-16">
-          <Text className="font-bold text-2xl">Reset password</Text>
-          <Text className="text-grey-500 text-sm mt-2">
+          <Text className="font-sans-bold text-2xl">Reset password</Text>
+          <Text className="text-grey-500 text-sm mt-2 font-sans">
             Kindly create a new password for your account
           </Text>
 
@@ -37,8 +37,8 @@ export default function ResetPassword() {
             <View className="mt-10">
               <Button label="Done" />
               <Link
-                href="login"
-                className="font-bold text-primary-500 text-center my-3"
+                href="/login"
+                className="font-sans-bold text-primary-500 text-center my-3"
               >
                 Back to login
               </Link>

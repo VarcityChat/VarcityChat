@@ -1,4 +1,4 @@
-import { View, Text, Input } from "@/ui";
+import { View } from "@/ui";
 import { useState, useRef, useEffect } from "react";
 import { TextInput } from "react-native";
 
@@ -75,7 +75,7 @@ export default function OtpInput({
               ref={(element) => (inputRefs.current[index] = element)}
               maxLength={1}
               keyboardType="number-pad"
-              className="w-full h-full flex text-center text-2xl dark:text-white"
+              className="w-full h-full flex text-center text-2xl dark:text-white font-sans"
               onChangeText={handleChange}
             />
           </View>

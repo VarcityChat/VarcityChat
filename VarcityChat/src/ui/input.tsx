@@ -16,9 +16,9 @@ import { Text } from "./text";
 const inputTv = tv({
   slots: {
     container: "mb-3",
-    label: "text-black mb-1 text-base dark:text-white",
+    label: "text-black mb-1 text-base dark:text-white font-sans-regular",
     input:
-      "mt-0 rounded-xl border-[0.5px] border-grey-50 bg-grey-50 px-2 py-2 h-[44px] font-inter text-base leading-5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white",
+      "mt-0 rounded-xl border-[0.5px] border-grey-50 bg-grey-50 px-2 py-2 h-[44px] font-sans-regular text-base leading-5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white",
     passwordButton: "w-[40px] h-[40px] flex items-center justify-center",
   },
 
@@ -114,7 +114,7 @@ export const Input = forwardRef<TextInput, NInputProps>((props, ref) => {
             <NTextInput
               ref={ref}
               placeholderTextColor={"#9CA1AA"}
-              className={`h-full flex-1 dark:text-white`}
+              className={`h-full flex-1 dark:text-white font-sans-regular`}
               onBlur={onBlur}
               onFocus={onFocus}
               secureTextEntry={showPassword}
@@ -130,7 +130,7 @@ export const Input = forwardRef<TextInput, NInputProps>((props, ref) => {
         </View>
       )}
       {error && (
-        <Text className="text-sm text-danger-400 dark:text-danger-600">
+        <Text className="text-sm text-danger-400 dark:text-danger-600 font-sans-thin">
           {error}
         </Text>
       )}

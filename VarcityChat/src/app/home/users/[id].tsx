@@ -17,6 +17,7 @@ import { useColorScheme } from "nativewind";
 import CallsActive from "@/ui/icons/calls-active";
 import ChatUserSvg from "@/ui/icons/user/chat-user-svg";
 import { HEADER_HEIGHT } from "@/components/header";
+import React from "react";
 
 const IMG_HEIGHT = 300;
 
@@ -99,7 +100,7 @@ export default function User() {
             </View>
             <View className="items-center">
               <Animated.Text
-                className="font-semibold text-lg dark:text-white"
+                className="font-sans-semibold text-lg dark:text-white"
                 style={[headerTextAnimatedStyle]}
               >
                 Ebuka Varcity
@@ -149,7 +150,7 @@ export default function User() {
             <View className="min-h-screen px-6 py-8">
               <View className="flex-row">
                 <View className="flex-1">
-                  <Animated.Text className="font-bold text-2xl text-black dark:text-white">
+                  <Animated.Text className="font-sans-bold text-2xl text-black dark:text-white">
                     Ebuka Varcity
                   </Animated.Text>
                   <Text className="text-grey-500 dark:text-grey-200">
@@ -183,7 +184,7 @@ export default function User() {
 
               <Seperator />
 
-              <Text className="font-bold text-lg">About Me</Text>
+              <Text className="font-sans-bold text-lg">About Me</Text>
               <Text className="text-grey-500 dark:text-grey-200">
                 Lorem ipsum dolor sit amet consectetur. Integer arcu amet tempor
                 porttitor sapien varius. Dolor porttitor ut cursus ut vel
@@ -198,7 +199,7 @@ export default function User() {
 
               <Seperator />
 
-              <Text className="font-bold text-lg">Hobbies</Text>
+              <Text className="font-sans-bold text-lg">Hobbies</Text>
               <View className="flex-row gap-3 mt-4">
                 {hobbies.map((hobby, index) => (
                   <View

@@ -3,18 +3,19 @@ import PlusSvg from "@/ui/icons/register/plus-svg";
 import MarriedSvg from "@/ui/icons/register/married-svg";
 import InARelationshipSvg from "@/ui/icons/register/in-a-relationship-svg";
 import SingleSvg from "@/ui/icons/register/single-svg";
+import { Platform } from "react-native";
 
 export default function Personality() {
   return (
     <View className="flex flex-1 justify-center items-center mt-6">
-      <Text className="font-bold text-2xl">Personality</Text>
+      <Text className="font-sans-semibold text-2xl">Personality</Text>
       <Text className="text-grey-500 dark:text-grey-200">
         Let's get to find out more about you
       </Text>
 
       <View className="flex flex-1 w-full pt-8">
         <View>
-          <Text className="font-bold text-grey-500">Images</Text>
+          <Text className="font-sans">Images</Text>
           <Text className="text-grey-500 dark:text-grey-200 text-sm font-light">
             Lets put a face to the name, add images of yourself
           </Text>
@@ -28,7 +29,7 @@ export default function Personality() {
         </View>
 
         <View className="mt-2">
-          <Text className="text-grey-500 font-bold">Relationship Status</Text>
+          <Text className="font-sans">Relationship Status</Text>
           <View className="flex flex-row flex-wrap gap-4 py-3">
             <TouchableOpacity
               activeOpacity={0.7}
@@ -57,9 +58,7 @@ export default function Personality() {
         </View>
 
         <View className="mt-2">
-          <Text className="text-grey-500 font-bold">
-            What are you looking for?
-          </Text>
+          <Text className="font-sans">What are you looking for?</Text>
 
           <View className="flex flex-row flex-wrap gap-4 py-3">
             <TouchableOpacity
@@ -88,31 +87,33 @@ export default function Personality() {
         </View>
 
         <View className="mt-2">
-          <Text className="font-semibold text-sm my-2">Describe yourself</Text>
+          <Text className="font-sans my-2">Describe yourself</Text>
           <Input
             multiline
-            style={{ height: 80 }}
+            style={{ height: 80, textAlignVertical: "top" }}
             placeholder="What do you want others to know about you?"
           />
         </View>
 
         <View className="mt-1">
           <View className="flex flex-row gap-2 items-center">
-            <Text className="font-semibold text-sm my-2">Hobbies</Text>
+            <Text className="font-sans my-2">Hobbies</Text>
             <Text className="text-grey-300">( Click space to Move )</Text>
           </View>
           <Input
             multiline
-            style={{ height: 80 }}
+            style={{ height: 80, textAlignVertical: "top" }}
             placeholder="List the things you like"
           />
         </View>
 
-        <View className="mt-4">
+        <View className="mt-2">
           <Button label="Next" disabled />
         </View>
 
-        <View className="h-[40px]" />
+        <View
+          className={Platform.select({ ios: "h-[40px]", android: "h-[100px]" })}
+        />
       </View>
     </View>
   );

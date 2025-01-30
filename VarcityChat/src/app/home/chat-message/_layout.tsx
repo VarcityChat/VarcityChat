@@ -29,10 +29,10 @@ export default function ChatMessageLayout() {
               <View
                 style={{ flexDirection: "row", gap: 30, alignItems: "center" }}
               >
-                <TouchableOpacity activeOpacity={0.7}>
+                <TouchableOpacity activeOpacity={0.3}>
                   <CallsActive />
                 </TouchableOpacity>
-                <TouchableOpacity activeOpacity={0.7} className="w-[15px]">
+                <TouchableOpacity activeOpacity={0.3} className="w-[15px]">
                   <ThreeDotsSvg />
                 </TouchableOpacity>
               </View>
@@ -57,8 +57,8 @@ export default function ChatMessageLayout() {
                   style={{ width: 40, height: 40, borderRadius: 50 }}
                 />
                 <View>
-                  <Text className="font-semibold">Promise Sheggsmann</Text>
-                  <Text className="text-sm text-grey-500">
+                  <Text className="font-sans-semibold">Promise Sheggsmann</Text>
+                  <Text className="text-sm text-grey-500 font-sans-regular">
                     Active 5 mins ago
                   </Text>
                 </View>

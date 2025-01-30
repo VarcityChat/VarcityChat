@@ -1,7 +1,7 @@
 import SearchBar from "@/components/search-bar";
 import { Image, View, Text, TouchableOpacity } from "@/ui";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native";
+import { Platform, SafeAreaView } from "react-native";
 import { chats } from "../../../../constants/chats";
 import Animated, {
   useSharedValue,
@@ -9,10 +9,13 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
 } from "react-native-reanimated";
+import { HEADER_HEIGHT } from "@/components/header";
 import React, { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Chats() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -30,8 +33,16 @@ export default function Chats() {
 
   return (
     <SafeAreaView className="flex flex-1">
-      <Animated.View className="items-center mt-4">
-        <Animated.Text className="font-inter font-semibold text-lg dark:text-white">
+      <Animated.View
+        className="items-center mt-4"
+        style={[
+          Platform.OS === "android" && {
+            paddingTop: insets.top,
+            height: HEADER_HEIGHT,
+          },
+        ]}
+      >
+        <Animated.Text className="font-sans-bold text-lg dark:text-white">
           Chats
         </Animated.Text>
 
@@ -72,18 +83,20 @@ export default function Chats() {
             </View>
 
             <View className="justify-between flex-1">
-              <Text className="font-semibold text-lg">{item.name}</Text>
-              <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400">
+              <Text className="font-sans-semibold text-base">{item.name}</Text>
+              <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
                 {item.lastMessage}
               </Text>
             </View>
 
             <View className="flex items-end justify-end">
-              <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400">
+              <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
                 {item.timestamp}
               </Text>
               <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
-                <Text className="text-white dark:text-white">1</Text>
+                <Text className="text-white dark:text-white font-sans-thin text-sm">
+                  1
+                </Text>
               </View>
             </View>
           </TouchableOpacity>

@@ -47,7 +47,7 @@ export default function ProfileScreen() {
     <SafeAreaView className="flex flex-1">
       <ScrollView className="flex">
         <View className="flex flex-1 items-center">
-          <Text className="font-semibold text-lg mt-10 mb-4">Profile</Text>
+          <Text className="font-sans-bold text-lg mt-10 mb-4">Profile</Text>
 
           <View className="w-[80px] h-[80px] rounded-full overflow-hidden mb-2">
             <Image
@@ -71,7 +71,7 @@ export default function ProfileScreen() {
             name="profile"
             label="Profile"
             onPress={() => {
-              router.push("home/profile-detail");
+              router.push("/home/profile-detail");
             }}
           />
 
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
           <SettingsItem
             name="tellafriend"
             label="Tell a friend"
-            onPress={() => router.push("home/tell-a-friend")}
+            onPress={() => router.push("/home/tell-a-friend")}
           />
 
           {/* Header */}
