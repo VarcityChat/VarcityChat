@@ -32,10 +32,12 @@ import {
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor, store } from "@/core/store/store";
+import Toast from "react-native-toast-message";
 
 export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
+import { useAuth } from "@/core/hooks/use-auth";
 
 export const unstable_settings = {
   initialRouteName: "(auth)",
@@ -71,6 +73,7 @@ export default function RootLayout() {
   return (
     <Providers>
       <RootLayoutNav />
+      <Toast />
     </Providers>
   );
 }
@@ -78,28 +81,15 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
-
-  // const hideSplash = async () => {
-  //   await SplashScreen.hideAsync();
-  // };
-
-  // useEffect(() => {
-  //   if (fontsLoaded) {
-  //     hideSplash();
-  //   }
-  // }, [fontsLoaded]);
-
-  // if (!fontsLoaded) return null;
-
-  const authenticated = false;
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (authenticated) {
-      router.replace("/(app)");
+    if (isAuthenticated) {
+      router.replace("/(tabs)/discover");
     } else {
       router.replace("/onboarding/onboarding-one");
     }
-  }, [authenticated]);
+  }, [isAuthenticated]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

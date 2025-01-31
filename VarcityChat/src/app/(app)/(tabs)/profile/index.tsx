@@ -7,16 +7,17 @@ import { useColorScheme } from "nativewind";
 import { forwardRef, useMemo } from "react";
 import { SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import LogoutIcon from "@/ui/icons/settings/logout-icon";
+import { useAuth } from "@/core/hooks/use-auth";
 const avatar1 = require("../../../../../assets/images/avatars/avatar1.png");
 
 const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
   const { colorScheme } = useColorScheme();
-  const router = useRouter();
+  const { logout } = useAuth();
   const isDark = colorScheme === "dark";
   const snapPoints = useMemo(() => [300], []);
 
   const handleLogout = () => {
-    router.replace("/login");
+    logout();
   };
 
   return (
@@ -31,7 +32,7 @@ const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
     >
       <View className="flex flex-1 px-6 py-2">
         <Text className="font-sans-semibold text-lg">Logout</Text>
-        <Text className="text-grey-500">
+        <Text className="text-grey-500 text-base">
           Do you want to log-out of your account?
         </Text>
 

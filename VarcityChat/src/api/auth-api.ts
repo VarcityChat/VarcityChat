@@ -3,6 +3,7 @@ import { ILoginCredentials, ILoginResponse } from "@/types/user";
 import { api } from "./api";
 
 export const authApi = api.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     login: builder.mutation<ILoginResponse, ILoginCredentials>({
       query: (credentials) => ({
@@ -14,36 +15,10 @@ export const authApi = api.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           dispatch(setAuth({ token: data.token, user: data.user }));
-        } catch (error) {
-          console.error("Login error:", error);
-        }
+        } catch (error) {}
       },
     }),
   }),
 });
-
-// createApi({
-//   reducerPath: "authApi",
-//   baseQuery: fetchBaseQuery({
-//     baseUrl: "",
-//   }),
-//   endpoints: (builder) => ({
-//     login: builder.mutation<ILoginResponse, ILoginCredentials>({
-//       query: (credentials) => ({
-//         url: "/signin",
-//         method: "POST",
-//         body: credentials,
-//       }),
-//       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-//         try {
-//           const { data } = await queryFulfilled;
-//           dispatch(setAuth({ token: data.token, user: data.user }));
-//         } catch (error) {
-//           console.error("Login error:", error);
-//         }
-//       },
-//     }),
-//   }),
-// });
 
 export const { useLoginMutation } = authApi;

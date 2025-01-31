@@ -1,4 +1,5 @@
 import { useLoginMutation } from "@/api/auth-api";
+import { useApi } from "@/core/hooks/use-api";
 import { View, Text, Image, ControlledInput, Button } from "@/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
@@ -16,20 +17,15 @@ const schema = z.object({
 type FormType = z.infer<typeof schema>;
 
 export default function Login() {
+  const router = useRouter();
   const { control, handleSubmit } = useForm<FormType>({
     resolver: zodResolver(schema),
   });
-  const router = useRouter();
-
-  const [login, { isLoading, isError }] = useLoginMutation();
+  const { callMutationWithErrorHandler } = useApi();
+  const [login, { isLoading }] = useLoginMutation();
 
   const onSubmit = async (data: FormType) => {
-    try {
-      const payload = await login(data).unwrap();
-      console.log("\nPAYLOAD:", payload);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
+    await callMutationWithErrorHandler(() => login(data).unwrap());
   };
 
   return (
