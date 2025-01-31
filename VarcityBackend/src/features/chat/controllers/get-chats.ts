@@ -1,5 +1,4 @@
-import { IConversationDocument } from '@chat/interfaces/conversation.interface';
-import { IMessageDocument } from '@chat/interfaces/message.interface';
+import { IMessageDocument, IConversationDocument } from '@chat/interfaces/chat.interface';
 import { chatService } from '@service/db/chat.service';
 import { Request, Response } from 'express';
 import HTTP_STATUS from 'http-status-codes';
