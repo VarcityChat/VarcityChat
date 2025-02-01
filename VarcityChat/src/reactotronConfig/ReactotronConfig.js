@@ -1,9 +1,18 @@
 import ReactTotron, { networking } from "reactotron-react-native";
 import { reactotronRedux } from "reactotron-redux";
+import { MMKV } from "react-native-mmkv";
+import mmkvPlugin from "reactotron-react-native-mmkv";
 
-ReactTotron.configure()
+const REACTOTRON_ASYNC_CLIENT_ID = "@REACTOTRON/clientId";
+const storage = new MMKV({ id: REACTOTRON_ASYNC_CLIENT_ID });
+const getClientId = async () => storage.getString(REACTOTRON_ASYNC_CLIENT_ID);
+const setClientId = async (clientId) =>
+  storage.set(REACTOTRON_ASYNC_CLIENT_ID, clientId);
+
+ReactTotron.configure({ getClientId, setClientId })
   .useReactNative()
   .use(reactotronRedux())
+  .use(mmkvPlugin({ storage, ignore: ["secret", "persist:root"] }))
   .use(networking())
   .connect();
 

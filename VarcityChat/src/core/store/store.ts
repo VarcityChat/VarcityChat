@@ -16,15 +16,15 @@ import {
   persistStore,
 } from "redux-persist";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { authApi } from "@/api/auth-api";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import authSlice from "../auth/auth-slice";
 import { api } from "@/api/api";
+import { reduxStorage } from "../storage";
+import authSlice from "../auth/auth-slice";
 
 const persistConfig = {
   key: "root",
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
   blacklist: ["auth", "clientApi", "_persist"],
 };
 
@@ -41,7 +41,7 @@ const persistConfig = {
 
 const reducer = combineReducers({
   auth: authSlice,
-  [authApi.reducerPath]: authApi.reducer,
+  [api.reducerPath]: api.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);

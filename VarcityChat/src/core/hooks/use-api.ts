@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 interface SerializedError {
@@ -18,6 +19,8 @@ const isSerializedError = (error: unknown): error is SerializedError => {
 };
 
 export const useApi = () => {
+  const insets = useSafeAreaInsets();
+
   const callMutationWithErrorHandler = async <T>(
     handlerFunc: () => Promise<T>
   ): Promise<T | void> => {
@@ -30,6 +33,7 @@ export const useApi = () => {
           type: "error",
           text1: "An error occurred",
           text2: error.data.message,
+          topOffset: insets.top + 5,
         });
       }
     }

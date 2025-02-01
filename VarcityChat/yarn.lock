@@ -7526,6 +7526,11 @@ react-native-lightbox-v2@0.9.0:
   resolved "https://registry.yarnpkg.com/react-native-lightbox-v2/-/react-native-lightbox-v2-0.9.0.tgz#b97be4d892ebb959069c451948b11da390bc46d8"
   integrity sha512-Fc5VFHFj2vokS+OegyTsANKb1CYoUlOtAv+EBH5wtpJn1b5cey6jVXH7136G5+8OC9JmKWSgKHc5thFwOoZTUg==
 
+react-native-mmkv@2.6.3:
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-2.6.3.tgz#6bfd1b3dd4b264c86e68adbaa9692f3388af2b5d"
+  integrity sha512-CkLAU5EX18eDw0Q+h6qEXPvynb+NVDu54cOY3h4h9VUhaaflfAmGWBJRQCBQz5M0VdnS8utjgJNryTAWKUTqpw==
+
 react-native-parsed-text@0.0.22:
   version "0.0.22"
   resolved "https://registry.yarnpkg.com/react-native-parsed-text/-/react-native-parsed-text-0.0.22.tgz#a23c756eaa5d6724296814755085127f9072e5f5"
@@ -7688,6 +7693,11 @@ reactotron-core-contract@0.2.5:
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/reactotron-core-contract/-/reactotron-core-contract-0.2.5.tgz#927160c026895798bfe931bd2462fdd5d4e435f9"
   integrity sha512-pxuXFG1jffAWQSdT0FBws+/Xvl8++6T6WrAi4g7AxIZU5FPeut2wq//0yDhDWx6lF82eAo5JTZK7zECQy45QxA==
+
+reactotron-react-native-mmkv@^0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/reactotron-react-native-mmkv/-/reactotron-react-native-mmkv-0.2.8.tgz#bbb40c9fe15edff5323ce5ea001236a75fd1fcab"
+  integrity sha512-Rz6Axaw9ymC8lHFDsJ14wYyMsw8PkfesLwbT570WzB6H5e+savz+0qliE9EtP8U002oFMFThV3FP+WkbzvqN6A==
 
 reactotron-react-native@^5.1.12:
   version "5.1.12"
