@@ -5,6 +5,8 @@ export interface ILoginResponse {
   user: IUser;
 }
 
+export interface ISignupResponse extends ILoginResponse {}
+
 export interface ILoginBody {
   email: string;
   password: string;
@@ -18,4 +20,16 @@ export interface IResetPasswordBody {
   otp: string;
   email: string;
   password: string;
+}
+
+export interface ISignupBody {
+  email?: string;
+  gender?: string;
+  password?: string;
+  university?: string;
+  firstname?: string;
+  lastname?: string;
+  relationshipStatus?: string;
+  lookingFor?: string;
+  images?: string[];
 }

@@ -1,14 +1,17 @@
+import { ISignupBody } from "@/api/auth/types";
 import { IUser } from "@/types/user";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SliceState {
   token: string | null;
   user: IUser | null;
+  signupData: ISignupBody | null;
 }
 
 const initialState: SliceState = {
   token: null,
   user: null,
+  signupData: null,
 };
 
 const authSlice = createSlice({
@@ -19,6 +22,9 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.user = action.payload.user;
     },
+    setSignupData: (state, action: PayloadAction<ISignupBody>) => {
+      state.signupData = { ...state.signupData, ...action.payload };
+    },
     logout: (state) => {
       state.token = null;
       state.user = null;
@@ -26,6 +32,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuth, logout } = authSlice.actions;
+export const { setAuth, setSignupData, logout } = authSlice.actions;
 
 export default authSlice.reducer;

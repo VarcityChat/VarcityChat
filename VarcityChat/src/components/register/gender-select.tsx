@@ -2,6 +2,8 @@ import { View, Text, Image, TouchableOpacity, Button, Pressable } from "@/ui";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { maleImg, femaleImg } from "@/ui/images";
+import { useAppDispatch } from "@/core/store/store";
+import { setSignupData } from "@/core/auth/auth-slice";
 
 interface GenderSelectProps {
   onNextPress?: () => void;
@@ -9,8 +11,14 @@ interface GenderSelectProps {
 
 export default function GenderSelect({ onNextPress }: GenderSelectProps) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [gender, setGender] = useState<"male" | "female">("male");
   const isMale = gender === "male";
+
+  const handleNext = () => {
+    dispatch(setSignupData({ gender }));
+    onNextPress?.();
+  };
 
   return (
     <View className="flex flex-1 items-center justify-center -mt-16">
@@ -82,7 +90,7 @@ export default function GenderSelect({ onNextPress }: GenderSelectProps) {
         <Button
           label="Next"
           className="w-full items-center justify-center"
-          onPress={onNextPress}
+          onPress={handleNext}
         />
         <Pressable
           onPress={() => {

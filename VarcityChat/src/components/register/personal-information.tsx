@@ -2,24 +2,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { View, Text, ControlledInput, Button, ControlledSelect } from "@/ui";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as z from "zod";
+import { useAppDispatch } from "@/core/store/store";
+import { setSignupData } from "@/core/auth/auth-slice";
+import { useGetUniversitiesQuery } from "@/api/universities/university-api";
+import { useToast } from "@/core/hooks/use-toast";
+import { capitalize } from "@/core/utils";
 
 const schema = z
   .object({
-    fullName: z.string({ required_error: "Full Name is required" }),
+    firstname: z.string({ required_error: "First name is required" }),
+    lastname: z.string({ required_error: "Last name is required" }),
     university: z.string({ required_error: "Select a university" }),
     course: z.string().optional(),
     phoneNumber: z.string().optional(),
-    password: z.string(),
-    confirmPassword: z.string(),
+    password: z
+      .string({ required_error: "Password is required" })
+      .min(6, { message: "Password must contain at least 6 character(s)" }),
+    confirmPassword: z.string({
+      required_error: "Confirm Password is required",
+    }),
   })
-  .superRefine(({ confirmPassword, password }, ctx) => {
-    if (confirmPassword !== password) {
-      ctx.addIssue({
-        code: "custom",
-        message: "The passwords did not match",
-        path: ["confirmPassword"],
-      });
-    }
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
   });
 
 export type FormType = z.infer<typeof schema>;
@@ -33,9 +38,33 @@ export default function PersonalInformationForm({
   onSubmit = () => {},
   onNextPress,
 }: PersonalInformationFormProps) {
-  const { handleSubmit, control } = useForm<FormType>({
+  const dispatch = useAppDispatch();
+  const { showToast } = useToast();
+  const { control, handleSubmit } = useForm<FormType>({
     resolver: zodResolver(schema),
   });
+
+  const {
+    data: universities,
+    isLoading,
+    isError,
+  } = useGetUniversitiesQuery(null);
+
+  const handleNext = (data: FormType) => {
+    if (!isError) {
+      dispatch(setSignupData({ ...data }));
+      onNextPress?.();
+    }
+  };
+
+  if (isError) {
+    showToast({
+      type: "error",
+      text1: "Error",
+      text2:
+        "Could not get universities at the moment, check your internet connection and try again",
+    });
+  }
 
   return (
     <View className="flex flex-1 justify-center items-center mt-6">
@@ -47,9 +76,15 @@ export default function PersonalInformationForm({
       <View className="flex flex-1 w-full pt-10">
         <ControlledInput
           control={control}
-          name="fullName"
-          label="Full name"
-          placeholder="What is your full name"
+          name="firstname"
+          label="First name"
+          placeholder="First name"
+        />
+        <ControlledInput
+          control={control}
+          name="lastname"
+          label="Last name"
+          placeholder="Last name"
         />
 
         <ControlledSelect
@@ -58,35 +93,19 @@ export default function PersonalInformationForm({
           placeholder="Select your university"
           control={control}
           showSearch
-          options={[
-            { label: "Abraham Adesanya University", value: "a" },
-            { label: "Adekunle Ajasin University", value: "aj" },
-            { label: "University of Lagos", value: "unilag" },
-            { label: "University of Ibadan", value: "ui" },
-            { label: "Obafemi Awolowo University", value: "OA" },
-            { label: "Olabisi Onabannjo University", value: "olabisi" },
-            { label: "Lead City Unviersity", value: "lead city" },
-            { label: "BackCock Unviersity", value: "babcock" },
-            { label: "Convenant Unviersity", value: "convenant" },
-            { label: "Abuad University", value: "Abuad" },
-            { label: "Madona University", value: "madona" },
-            { label: "Nile University", value: "nile" },
-          ]}
+          loading={isLoading}
+          options={universities?.map((university) => ({
+            label: capitalize(university.name),
+            value: university._id,
+          }))}
           onSelect={() => {}}
         />
 
         <ControlledInput
           control={control}
           name="course"
-          label="Course"
+          label="Course of Study"
           placeholder="E.g Computer science"
-        />
-        <ControlledInput
-          control={control}
-          name="phoneNumber"
-          label="Phone number"
-          placeholder="Enter your phone number"
-          keyboardType="number-pad"
         />
         <ControlledInput
           control={control}
@@ -103,7 +122,7 @@ export default function PersonalInformationForm({
           isPassword
         />
         <View className="mt-2">
-          <Button label="Next" onPress={onNextPress} />
+          <Button label="Next" onPress={handleSubmit(handleNext)} />
         </View>
       </View>
     </View>

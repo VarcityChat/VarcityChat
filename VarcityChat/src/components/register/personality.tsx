@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { View, Text, Button, TouchableOpacity, Input } from "@/ui";
 import PlusSvg from "@/ui/icons/register/plus-svg";
 import MarriedSvg from "@/ui/icons/register/married-svg";
 import InARelationshipSvg from "@/ui/icons/register/in-a-relationship-svg";
 import SingleSvg from "@/ui/icons/register/single-svg";
 import { Platform } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 export default function Personality() {
+  const [images, setImages] = useState<string[]>([""]);
+
   return (
     <View className="flex flex-1 justify-center items-center mt-6">
       <Text className="font-sans-semibold text-2xl">Personality</Text>
@@ -108,7 +112,7 @@ export default function Personality() {
         </View>
 
         <View className="mt-2">
-          <Button label="Next" disabled />
+          <Button label="Sign Up" disabled />
         </View>
 
         <View
@@ -119,11 +123,29 @@ export default function Personality() {
   );
 }
 
-const ImageSelectCard = () => {
+type ImageSelectProps = {
+  onSelectImage?: (image: string) => void;
+};
+
+const ImageSelectCard = ({ onSelectImage }: ImageSelectProps) => {
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      onSelectImage?.(result.assets[0].uri);
+    }
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       className="flex flex-1 h-[90px] bg-grey-50 dark:bg-grey-800 rounded-md items-center justify-center"
+      onPress={pickImage}
     >
       <PlusSvg />
     </TouchableOpacity>

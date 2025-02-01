@@ -21,4 +21,5 @@ export const api = createApi({
   reducerPath: "clientApi",
   baseQuery,
   endpoints: () => ({}),
+  tagTypes: ["Universities"],
 });

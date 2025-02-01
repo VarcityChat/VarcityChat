@@ -10,6 +10,20 @@ import { api } from "../api";
 export const authApi = api.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
+    signup: builder.mutation({
+      query: (body) => ({
+        url: "/signup",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setAuth({ token: data.token, user: data.user }));
+        } catch (error) {}
+      },
+    }),
+
     login: builder.mutation<ILoginResponse, ILoginBody>({
       query: (body) => ({
         url: "/signin",
@@ -46,4 +60,5 @@ export const {
   useLoginMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useSignupMutation,
 } = authApi;

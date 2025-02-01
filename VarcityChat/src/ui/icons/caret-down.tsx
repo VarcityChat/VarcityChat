@@ -1,13 +1,15 @@
 import type { SvgProps } from "react-native-svg";
 import Svg, { Path } from "react-native-svg";
 
-export const CaretDown = ({ ...props }: SvgProps) => (
+export const CaretDown = ({ ...props }: SvgProps & { error?: boolean }) => (
   <Svg
     width={12}
     height={13}
     fill="none"
+    className={`stroke-black dark:stroke-white ${
+      props?.error ? "stroke-red-500" : ""
+    }`}
     {...props}
-    className="stroke-black dark:stroke-white"
   >
     <Path
       strokeLinecap="round"

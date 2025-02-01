@@ -15,6 +15,7 @@ import {
   Pressable,
   type PressableProps,
   useWindowDimensions,
+  ActivityIndicator,
 } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import Svg, { Path } from "react-native-svg";
@@ -71,6 +72,7 @@ type OptionProps = {
   onSelect: (option: Option) => void;
   value?: string | number;
   showSearch?: boolean;
+  loading?: boolean;
 };
 
 function keyExtractor(item: Option) {
@@ -78,11 +80,11 @@ function keyExtractor(item: Option) {
 }
 
 export const Options = forwardRef<BottomSheetModal, OptionProps>(
-  ({ options, onSelect, value, showSearch }, ref) => {
+  ({ options, onSelect, value, showSearch, loading }, ref) => {
     const { height: screenHeight } = useWindowDimensions();
     const [searchTerm, setSearchTerm] = useState("");
     const { colorScheme } = useColorScheme();
-    const height = Math.min(options.length * 70 + 100, screenHeight * 0.8);
+    const height = Math.min(options.length * 70 + 150, screenHeight * 0.8);
     const snapPoints = useMemo(() => [height], [height]);
     const isDark = colorScheme === "dark";
 
@@ -120,7 +122,16 @@ export const Options = forwardRef<BottomSheetModal, OptionProps>(
               </View>
             ) : null
           }
-          ListFooterComponent={<View className="h-[30px]" />}
+          ListEmptyComponent={() => {
+            if (loading) {
+              return (
+                <View>
+                  <ActivityIndicator size={30} />
+                </View>
+              );
+            }
+            return null;
+          }}
           data={options.filter((option) => option.label.startsWith(searchTerm))}
           keyExtractor={keyExtractor}
           renderItem={renderSelectItem}
@@ -158,6 +169,7 @@ export interface SelectProps {
   onSelect: (value: string | number) => void;
   placeholder?: string;
   showSearch?: boolean;
+  loading?: boolean;
 }
 
 interface ControlledSelectProps<T extends FieldValues>
@@ -173,6 +185,7 @@ export const Select = (props: SelectProps) => {
     placeholder = "select...",
     disabled = false,
     showSearch = false,
+    loading = false,
     onSelect,
   } = props;
 
@@ -211,20 +224,15 @@ export const Select = (props: SelectProps) => {
           <View className="flex-1">
             <Text className={styles.inputValue()}>{textValue}</Text>
           </View>
-          <CaretDown />
+          <CaretDown error={!!error} />
         </TouchableOpacity>
-
-        {error && (
-          <Text className="text-sm text-danger dark:text-danger-600 font-sans-thin">
-            {error}
-          </Text>
-        )}
       </View>
       <Options
         ref={modal.ref}
         options={options}
         onSelect={onSelectOption}
         showSearch={showSearch}
+        loading={loading}
       />
     </>
   );
@@ -233,7 +241,14 @@ export const Select = (props: SelectProps) => {
 export function ControlledSelect<T extends FieldValues>(
   props: ControlledSelectProps<T>
 ) {
-  const { name, control, rules, onSelect: onNSelect, ...selectProps } = props;
+  const {
+    name,
+    control,
+    rules,
+    onSelect: onNSelect,
+    loading,
+    ...selectProps
+  } = props;
 
   const { field, fieldState } = useController({ name, control, rules });
   const onSelect = useCallback(
@@ -249,6 +264,7 @@ export function ControlledSelect<T extends FieldValues>(
       onSelect={onSelect}
       value={field.value}
       error={fieldState.error?.message}
+      loading={loading}
       {...selectProps}
     />
   );
