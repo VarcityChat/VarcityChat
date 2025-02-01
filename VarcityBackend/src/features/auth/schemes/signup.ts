@@ -1,4 +1,4 @@
-import { RelationshipStatus } from '@user/interfaces/user.interface';
+import { Gender, RelationshipStatus } from '@user/interfaces/user.interface';
 import Joi, { ObjectSchema } from 'joi';
 
 const signupSchema: ObjectSchema = Joi.object().keys({
@@ -33,6 +33,10 @@ const signupSchema: ObjectSchema = Joi.object().keys({
     'string.base': 'University must be of type string',
     'string.max': 'University name too long',
     'string.empty': 'University is a required field'
+  }),
+  gender: Joi.string().allow(Gender.FEMALE, Gender.MALE).required().messages({
+    'string.base': 'Gender must be of type string',
+    'string.empty': 'Please select your gender'
   }),
   mobileNumber: Joi.string().max(20).messages({
     'string.base': 'Mobile Number must be of type string',
