@@ -1,17 +1,19 @@
-import { useLoginMutation } from "@/api/auth-api";
+import { useLoginMutation } from "@/api/auth/auth-api";
 import { useApi } from "@/core/hooks/use-api";
 import { View, Text, Image, ControlledInput, Button } from "@/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
-import { Pressable, SafeAreaView } from "react-native";
+import { Platform, Pressable, SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { z } from "zod";
 const logo = require("../../../assets/icon.png");
 
 const schema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z
+    .string()
+    .min(6, { message: "Password must contain at least 6 character(s)" }),
 });
 
 type FormType = z.infer<typeof schema>;
@@ -30,9 +32,22 @@ export default function Login() {
 
   return (
     <SafeAreaView className="flex-1">
-      <KeyboardAwareScrollView contentContainerClassName="flex flex-1 items-center justify-center px-8">
-        <Image source={logo} className="w-[50px] h-[50px] rounded-md mt-10" />
-        <View className="flex flex-1 w-full items-center justify-center -mt-16">
+      <KeyboardAwareScrollView
+        contentContainerClassName="flex-1 flex-grow items-center px-8 gap-24"
+        enableOnAndroid={true}
+        enableAutomaticScroll={Platform.OS === "ios"}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <View className="items-center">
+          <Image
+            source={logo}
+            className={`w-[50px] h-[50px] rounded-md ${Platform.select({
+              android: "mt-12",
+              ios: "mt-6",
+            })}`}
+          />
+        </View>
+        <View className="w-full items-center justify-center pb-20">
           <Text className="font-sans-bold text-2xl">Login</Text>
           <Text className="text-grey-500 text-sm mt-2 font-sans">
             Fill in the information below to access your account

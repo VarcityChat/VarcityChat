@@ -1,5 +1,5 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { useToast } from "./use-toast";
 
 interface SerializedError {
   data: {
@@ -8,6 +8,9 @@ interface SerializedError {
     message: string;
   };
 }
+
+const isFetchBaseQueryError = (error: unknown): error is FetchBaseQueryError =>
+  typeof error === "object" && error !== null && "status" in error;
 
 const isSerializedError = (error: unknown): error is SerializedError => {
   return (
@@ -19,23 +22,31 @@ const isSerializedError = (error: unknown): error is SerializedError => {
 };
 
 export const useApi = () => {
-  const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
 
   const callMutationWithErrorHandler = async <T>(
     handlerFunc: () => Promise<T>
-  ): Promise<T | void> => {
+  ): Promise<{ data?: T; error?: string; isError: boolean }> => {
     try {
       const payload = await handlerFunc();
-      return payload;
+      return { data: payload, isError: false };
     } catch (error) {
+      let errorMessage = "Something went wrong";
+      // if (isFetchBaseQueryError(error)) {
+      //   errorMessage =
+      //     "API Error:" + (error.data ? JSON.stringify(error.data) : "Unknown");
+      // } else
+
       if (isSerializedError(error)) {
-        Toast.show({
-          type: "error",
-          text1: "An error occurred",
-          text2: error.data.message,
-          topOffset: insets.top + 5,
-        });
+        errorMessage = error.data.message;
       }
+
+      showToast({
+        type: "error",
+        text1: "An error occurred",
+        text2: errorMessage,
+      });
+      return { error: errorMessage, isError: true };
     }
   };
 

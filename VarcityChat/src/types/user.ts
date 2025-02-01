@@ -38,13 +38,3 @@ export enum LookingFor {
   RELATIONSHIP = "relationship",
   OTHERS = "others",
 }
-
-export interface ILoginResponse {
-  token: string;
-  user: IUser;
-}
-
-export interface ILoginCredentials {
-  email: string;
-  password: string;
-}
