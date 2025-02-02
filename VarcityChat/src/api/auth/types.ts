@@ -33,3 +33,19 @@ export interface ISignupBody {
   lookingFor?: string;
   images?: string[];
 }
+
+export interface IGetSignedUrlResponse {
+  cloudName: string;
+  apiKey: string;
+  timestamp: string;
+  signature: string;
+  folder: string;
+}
+
+export interface IUserExistsResponse {
+  exists: boolean;
+}
+
+export interface IUserExistsBody {
+  email: string;
+}

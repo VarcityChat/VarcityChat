@@ -83,7 +83,6 @@ export default function Login() {
                 label="Login"
                 onPress={handleSubmit(onSubmit)}
                 loading={isLoading}
-                // onPress={() => router.replace("/(tabs)/discover")}
               />
               <Pressable
                 onPress={() => {
@@ -91,7 +90,7 @@ export default function Login() {
                 }}
               >
                 <Text className="font-sans-bold text-primary-500 text-center my-3">
-                  I don't have an account!
+                  Create Account
                 </Text>
               </Pressable>
             </View>

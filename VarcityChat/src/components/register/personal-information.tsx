@@ -8,24 +8,21 @@ import { useGetUniversitiesQuery } from "@/api/universities/university-api";
 import { useToast } from "@/core/hooks/use-toast";
 import { capitalize } from "@/core/utils";
 
-const schema = z
-  .object({
-    firstname: z.string({ required_error: "First name is required" }),
-    lastname: z.string({ required_error: "Last name is required" }),
-    university: z.string({ required_error: "Select a university" }),
-    course: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    password: z
-      .string({ required_error: "Password is required" })
-      .min(6, { message: "Password must contain at least 6 character(s)" }),
-    confirmPassword: z.string({
-      required_error: "Confirm Password is required",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+const schema = z.object({
+  firstname: z
+    .string({ required_error: "First name is required" })
+    .min(2, { message: "First name must contain at least 2 character(s)." }),
+  lastname: z
+    .string({ required_error: "Last name is required" })
+    .min(2, { message: "Last name must contain at least 2 character(s)." }),
+  email: z.string({ required_error: "Email is required" }).email(),
+  university: z.string({ required_error: "Select a university" }),
+  course: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  password: z
+    .string({ required_error: "Password is required" })
+    .min(6, { message: "Password must contain at least 6 character(s)" }),
+});
 
 export type FormType = z.infer<typeof schema>;
 
@@ -87,6 +84,19 @@ export default function PersonalInformationForm({
           placeholder="Last name"
         />
 
+        <ControlledInput
+          control={control}
+          name="email"
+          label="Email"
+          placeholder="Email"
+        />
+        <ControlledInput
+          control={control}
+          name="password"
+          label="Password"
+          placeholder="Create password"
+          isPassword
+        />
         <ControlledSelect
           label="University"
           name="university"
@@ -104,22 +114,8 @@ export default function PersonalInformationForm({
         <ControlledInput
           control={control}
           name="course"
-          label="Course of Study"
+          label="Course of Study (?)"
           placeholder="E.g Computer science"
-        />
-        <ControlledInput
-          control={control}
-          name="password"
-          label="Password"
-          placeholder="Create password"
-          isPassword
-        />
-        <ControlledInput
-          control={control}
-          name="confirmPassword"
-          label="Confirm password"
-          placeholder="Re-enter password"
-          isPassword
         />
         <View className="mt-2">
           <Button label="Next" onPress={handleSubmit(handleNext)} />

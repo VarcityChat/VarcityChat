@@ -21,7 +21,7 @@ export default function GenderSelect({ onNextPress }: GenderSelectProps) {
   };
 
   return (
-    <View className="flex flex-1 items-center justify-center -mt-16">
+    <View className="flex flex-1 items-center justify-center">
       <Text className="font-sans-semibold text-2xl">I am a</Text>
       <Text className="text-grey-500 dark:text-grey-200 font-sans-regular">
         This is to help us Personalize your experience

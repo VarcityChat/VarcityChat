@@ -1,16 +1,20 @@
 import { setAuth } from "@/core/auth/auth-slice";
 import {
   IForgotPasswordBody,
+  IGetSignedUrlResponse,
   ILoginBody,
   ILoginResponse,
   IResetPasswordBody,
+  ISignupBody,
+  IUserExistsBody,
+  IUserExistsResponse,
 } from "./types";
 import { api } from "../api";
 
 export const authApi = api.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    signup: builder.mutation({
+    signup: builder.mutation<any, ISignupBody>({
       query: (body) => ({
         url: "/signup",
         method: "POST",
@@ -19,9 +23,21 @@ export const authApi = api.injectEndpoints({
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setAuth({ token: data.token, user: data.user }));
+          // dispatch(setAuth({ token: data.token, user: data.user }));
         } catch (error) {}
       },
+      invalidatesTags: ["Auth"],
+    }),
+
+    getSignedUrl: builder.query<IGetSignedUrlResponse, null>({
+      query: () => "/get-cloudinary-signed-url",
+    }),
+
+    userExists: builder.query<IUserExistsResponse, string>({
+      query: (email) => ({
+        url: `/user-exists?email=${email}`,
+      }),
+      keepUnusedDataFor: 0,
     }),
 
     login: builder.mutation<ILoginResponse, ILoginBody>({
@@ -36,6 +52,7 @@ export const authApi = api.injectEndpoints({
           dispatch(setAuth({ token: data.token, user: data.user }));
         } catch (error) {}
       },
+      invalidatesTags: ["Auth"],
     }),
 
     forgotPassword: builder.mutation<Response, IForgotPasswordBody>({
@@ -44,6 +61,7 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Auth"],
     }),
 
     resetPassword: builder.mutation<Response, IResetPasswordBody>({
@@ -52,6 +70,7 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Auth"],
     }),
   }),
 });
@@ -61,4 +80,5 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useSignupMutation,
+  useLazyUserExistsQuery,
 } = authApi;

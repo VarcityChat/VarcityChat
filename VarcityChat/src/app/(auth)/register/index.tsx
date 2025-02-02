@@ -19,7 +19,6 @@ import Paginator from "@/components/register/paginator";
 import PersonalInformationForm from "@/components/register/personal-information";
 import Personality from "@/components/register/personality";
 import BackButton from "@/components/back-button";
-import { useAppDispatch } from "@/core/store/store";
 
 export default function Index() {
   const router = useRouter();
