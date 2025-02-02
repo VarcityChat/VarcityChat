@@ -50,7 +50,7 @@ const signupSchema: ObjectSchema = Joi.object().keys({
       'string.base': 'Relationship Status must be of type string',
       'string.empty': 'Please select your relationship status'
     }),
-  lookingFor: Joi.string().max(40).messages({
+  lookingFor: Joi.string().required().max(40).messages({
     'string.base': 'Looking for must be of type string'
   }),
   about: Joi.string().max(250).messages({

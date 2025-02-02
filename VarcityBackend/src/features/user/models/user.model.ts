@@ -13,7 +13,7 @@ const userSchema: Schema = new Schema(
     lastname: { type: String, trim: true },
     course: { type: String, trim: true },
     gender: { type: String, enum: [Gender.MALE, Gender.FEMALE] },
-    images: [{ url: String, public_id: String }],
+    images: [String],
     university: { type: Types.ObjectId, ref: 'University' },
     mobileNumber: { type: String, trim: true },
     relationshipStatus: {

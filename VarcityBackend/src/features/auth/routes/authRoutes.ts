@@ -13,9 +13,11 @@ class AuthRoutes {
   public routes(): Router {
     this.router.post('/signin', signin.read);
     this.router.post('/signup', signup.create);
-
     this.router.post('/forgot-password', password.create);
     this.router.post('/reset-password', password.update);
+
+    this.router.get('/user-exists', signup.userExists);
+    this.router.get('/get-cloudinary-signed-url', signup.getSignedUploadUrl);
     return this.router;
   }
 }

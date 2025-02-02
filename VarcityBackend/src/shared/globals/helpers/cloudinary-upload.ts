@@ -4,6 +4,7 @@ export type UploadReturnType = UploadApiResponse | UploadApiErrorResponse | unde
 
 export function uploadFile(
   file: string,
+  folder?: string,
   public_id?: string,
   overwrite?: boolean,
   invalidate?: boolean
@@ -12,6 +13,7 @@ export function uploadFile(
     cloudinary.v2.uploader.upload(
       file,
       {
+        folder: folder || '',
         invalidate,
         overwrite,
         public_id,
@@ -27,11 +29,12 @@ export function uploadFile(
 
 export const uploadMultiple = async (
   files: string[],
+  folder?: string,
   public_id?: string,
   invalidate?: boolean,
   overwrite?: boolean
 ): Promise<UploadReturnType[]> => {
-  const promises = files.map((file) => uploadFile(file, public_id, overwrite, invalidate));
+  const promises = files.map((file) => uploadFile(file, folder, public_id, overwrite, invalidate));
   const results: UploadReturnType[] = await Promise.all(promises);
   return results;
 };

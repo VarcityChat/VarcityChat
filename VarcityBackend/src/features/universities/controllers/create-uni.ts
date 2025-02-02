@@ -23,7 +23,7 @@ class Create {
 
     let imageResponse: UploadApiResponse = {} as UploadApiResponse;
     if (image) {
-      const uploadResponse = await uploadFile(image, `${uniObjectId}`, true, true);
+      const uploadResponse = await uploadFile(image, 'varcity/universities',`${uniObjectId}`, true, true);
       if (!uploadResponse?.public_id) {
         throw new BadRequestError('Error uploading image');
       }
