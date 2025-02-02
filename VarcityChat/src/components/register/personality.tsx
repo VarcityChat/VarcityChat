@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, Button, TouchableOpacity, Input, Image } from "@/ui";
 import PlusSvg from "@/ui/icons/register/plus-svg";
 import MarriedSvg from "@/ui/icons/register/married-svg";
@@ -38,14 +38,14 @@ export default function Personality() {
     useLazyUserExistsQuery();
   const [signup, { isLoading: isSubmitting }] = useSignupMutation();
 
-  const onSelectImage = (
-    image: ImagePicker.ImagePickerAsset,
-    index: number
-  ) => {
-    const previousImages = [...images];
-    previousImages[index] = image;
-    setImages(previousImages as ImagePicker.ImagePickerAsset[]);
-  };
+  const onSelectImage = useCallback(
+    (image: ImagePicker.ImagePickerAsset, index: number) => {
+      const previousImages = [...images];
+      previousImages[index] = image;
+      setImages(previousImages as ImagePicker.ImagePickerAsset[]);
+    },
+    [images]
+  );
 
   const handleSignUp = async () => {
     // perform some validation

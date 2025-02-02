@@ -1,4 +1,4 @@
-import { Text, View } from "@/ui";
+import { View } from "@/ui";
 import { PropsWithChildren } from "react";
 import { useWindowDimensions } from "react-native";
 

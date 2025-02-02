@@ -11,7 +11,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import { useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import RegisterItem from "@/components/register/register-item";
 import GenderSelect from "@/components/register/gender-select";
@@ -19,6 +19,8 @@ import Paginator from "@/components/register/paginator";
 import PersonalInformationForm from "@/components/register/personal-information";
 import Personality from "@/components/register/personality";
 import BackButton from "@/components/back-button";
+
+const MemoizedPersonality = memo(Personality);
 
 export default function Index() {
   const router = useRouter();
@@ -41,6 +43,36 @@ export default function Index() {
   const onNextPress = (index: number) => {
     slideRef.current?.scrollToIndex({ index, animated: true });
   };
+
+  const slides = useMemo(
+    () => [
+      {
+        id: "gender",
+        component: (
+          <View className="flex flex-1 px-8">
+            <GenderSelect onNextPress={() => onNextPress(1)} />
+          </View>
+        ),
+      },
+      {
+        id: "personal-information",
+        component: (
+          <View className="flex flex-1 px-8">
+            <PersonalInformationForm onNextPress={() => onNextPress(2)} />
+          </View>
+        ),
+      },
+      {
+        id: "personality",
+        component: (
+          <View className="flex flex-1 px-8">
+            <MemoizedPersonality />
+          </View>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center">
@@ -72,23 +104,16 @@ export default function Index() {
 
           <View className="flex-3">
             <Animated.FlatList
-              data={[
-                <View className="flex flex-1 px-8">
-                  <GenderSelect onNextPress={() => onNextPress(1)} />
-                </View>,
-                <View className="flex flex-1 px-8">
-                  <PersonalInformationForm onNextPress={() => onNextPress(2)} />
-                </View>,
-                <View className="flex flex-1 px-8">
-                  <Personality />
-                </View>,
-              ]}
-              keyExtractor={(_, index) => index.toString()}
-              renderItem={({ item }) => <RegisterItem>{item}</RegisterItem>}
+              data={slides}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <RegisterItem>{item.component}</RegisterItem>
+              )}
               showsHorizontalScrollIndicator={false}
               horizontal
               pagingEnabled
               bounces={false}
+              scrollEnabled={false}
               scrollEventThrottle={32}
               onScroll={scrollHandler}
               onViewableItemsChanged={viewableItemChanged}
