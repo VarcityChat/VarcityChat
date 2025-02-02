@@ -294,20 +294,6 @@ export default function Personality() {
           />
         </View>
 
-        {/* <View className="mt-1">
-          <View className="flex flex-row gap-2 items-center">
-            <Text className="font-sans my-2">Hobbies</Text>
-            <Text className="text-grey-300">( Click space to Move )</Text>
-          </View>
-          <Input
-            multiline
-            style={{ height: 80, textAlignVertical: "top" }}
-            placeholder="List the things you like"
-            value={hobbies}
-            onChangeText={text =>}
-          />
-        </View> */}
-
         <View className="mt-2">
           <Button
             label="Sign Up"
