@@ -121,7 +121,6 @@ export default function Index() {
             ios: "py-4",
             android: "py-12",
           })}`}
-          // scrollEnabled
           scrollEnabled={currentIndex > 0}
         >
           <View className="flex flex-row items-center justify-between px-6">
