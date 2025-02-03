@@ -14,7 +14,6 @@ import { useLazyUserExistsQuery, useSignupMutation } from "@/api/auth/auth-api";
 import { uploadToCloudinary } from "@/core/utils";
 import { useApi } from "@/core/hooks/use-api";
 import {
-  setAuth,
   setShowSuccessModal,
   setSignupResponseDraft,
 } from "@/core/auth/auth-slice";
