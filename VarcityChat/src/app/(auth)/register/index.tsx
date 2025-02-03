@@ -3,8 +3,6 @@ import {
   FlatList,
   ViewToken,
   SafeAreaView,
-  KeyboardAvoidingView,
-  ScrollView,
   Platform,
   Pressable,
 } from "react-native";
@@ -23,6 +21,7 @@ import Paginator from "@/components/register/paginator";
 import PersonalInformationForm from "@/components/register/personal-information";
 import Personality from "@/components/register/personality";
 import BackButton from "@/components/back-button";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import RegisterSuccessSvg from "@/ui/icons/register/success-svg";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { setAuth, setShowSuccessModal } from "@/core/auth/auth-slice";
@@ -111,57 +110,52 @@ export default function Index() {
   }, [showSuccessModal]);
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-red-200">
-      <KeyboardAvoidingView
-        className="w-full h-screen bg-green-200"
-        behavior={"padding"}
+    <SafeAreaView className="flex-1 justify-center items-center">
+      <KeyboardAwareScrollView
+        className={`h-screen flex flex-1 ${Platform.select({
+          ios: "py-4",
+          android: "py-12",
+        })}`}
+        scrollEnabled={currentIndex > 0}
       >
-        <ScrollView
-          className={`flex flex-1 ${Platform.select({
-            ios: "py-4",
-            android: "py-12",
-          })}`}
-          scrollEnabled={currentIndex > 0}
-        >
-          <View className="flex flex-row items-center justify-between px-6">
-            <BackButton
-              onPress={() => {
-                if (currentIndex === 0) {
-                  router.back();
-                  return;
-                }
-                if (currentIndex === 1) {
-                  slideRef.current?.scrollToIndex({ index: 0, animated: true });
-                  return;
-                }
-                slideRef.current?.scrollToIndex({ index: 1, animated: true });
-              }}
-            />
-            <Paginator data={[1, 2, 3]} currentIndex={currentIndex} />
-            <View className="w-[35px]" />
-          </View>
+        <View className="flex flex-row items-center justify-between px-6">
+          <BackButton
+            onPress={() => {
+              if (currentIndex === 0) {
+                router.back();
+                return;
+              }
+              if (currentIndex === 1) {
+                slideRef.current?.scrollToIndex({ index: 0, animated: true });
+                return;
+              }
+              slideRef.current?.scrollToIndex({ index: 1, animated: true });
+            }}
+          />
+          <Paginator data={[1, 2, 3]} currentIndex={currentIndex} />
+          <View className="w-[35px]" />
+        </View>
 
-          <View className="flex-3">
-            <Animated.FlatList
-              data={slides}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <RegisterItem>{item.component}</RegisterItem>
-              )}
-              showsHorizontalScrollIndicator={false}
-              horizontal
-              pagingEnabled
-              bounces={false}
-              scrollEnabled={false}
-              scrollEventThrottle={32}
-              onScroll={scrollHandler}
-              onViewableItemsChanged={viewableItemChanged}
-              viewabilityConfig={viewConfig}
-              ref={slideRef}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <View className="flex-3">
+          <Animated.FlatList
+            data={slides}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <RegisterItem>{item.component}</RegisterItem>
+            )}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            pagingEnabled
+            bounces={false}
+            scrollEnabled={false}
+            scrollEventThrottle={32}
+            onScroll={scrollHandler}
+            onViewableItemsChanged={viewableItemChanged}
+            viewabilityConfig={viewConfig}
+            ref={slideRef}
+          />
+        </View>
+      </KeyboardAwareScrollView>
 
       {/* Background Overlay */}
       {showSuccessModal && (
