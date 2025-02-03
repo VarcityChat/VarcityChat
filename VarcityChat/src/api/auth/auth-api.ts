@@ -6,7 +6,7 @@ import {
   ILoginResponse,
   IResetPasswordBody,
   ISignupBody,
-  IUserExistsBody,
+  ISignupResponse,
   IUserExistsResponse,
 } from "./types";
 import { api } from "../api";
@@ -14,7 +14,7 @@ import { api } from "../api";
 export const authApi = api.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    signup: builder.mutation<any, ISignupBody>({
+    signup: builder.mutation<ISignupResponse, ISignupBody>({
       query: (body) => ({
         url: "/signup",
         method: "POST",
@@ -23,7 +23,6 @@ export const authApi = api.injectEndpoints({
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          // dispatch(setAuth({ token: data.token, user: data.user }));
         } catch (error) {}
       },
       invalidatesTags: ["Auth"],

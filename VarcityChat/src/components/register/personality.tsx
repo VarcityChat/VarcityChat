@@ -8,13 +8,19 @@ import { Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { LookingFor, RelationshipStatus } from "@/types/user";
 import { twMerge } from "tailwind-merge";
-import { useAppSelector } from "@/core/store/store";
+import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { useToast } from "@/core/hooks/use-toast";
 import { useLazyUserExistsQuery, useSignupMutation } from "@/api/auth/auth-api";
 import { uploadToCloudinary } from "@/core/utils";
 import { useApi } from "@/core/hooks/use-api";
+import {
+  setAuth,
+  setShowSuccessModal,
+  setSignupResponseDraft,
+} from "@/core/auth/auth-slice";
 
 export default function Personality() {
+  const dispatch = useAppDispatch();
   const signupData = useAppSelector((state) => state.auth.signupData);
   const { showToast } = useToast();
   const { callMutationWithErrorHandler } = useApi();
@@ -129,7 +135,7 @@ export default function Personality() {
     }
     setIsUploading(false);
 
-    const { data, isError } = await callMutationWithErrorHandler(() =>
+    const { isError, data } = await callMutationWithErrorHandler(() =>
       signup({
         email: signupData?.email,
         gender: signupData?.gender,
@@ -142,11 +148,11 @@ export default function Personality() {
         images: successfulUploads,
       }).unwrap()
     );
-    if (!isError) {
-      console.log(data);
-    }
 
-    // TODO: call signup mutation
+    if (!isError && data) {
+      dispatch(setShowSuccessModal(true));
+      dispatch(setSignupResponseDraft(data));
+    }
   };
 
   return (
@@ -303,7 +309,10 @@ export default function Personality() {
         </View>
 
         <View
-          className={Platform.select({ ios: "h-[40px]", android: "h-[100px]" })}
+          className={Platform.select({
+            ios: "h-[40px]",
+            android: "h-[100px]",
+          })}
         />
       </View>
     </View>

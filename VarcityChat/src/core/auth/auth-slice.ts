@@ -1,4 +1,4 @@
-import { ISignupBody } from "@/api/auth/types";
+import { ISignupBody, ISignupResponse } from "@/api/auth/types";
 import { IUser } from "@/types/user";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -6,12 +6,16 @@ interface SliceState {
   token: string | null;
   user: IUser | null;
   signupData: ISignupBody | null;
+  signupResponseDraft: { token: string; user: IUser | null };
+  showSuccessModal: boolean;
 }
 
 const initialState: SliceState = {
   token: null,
   user: null,
   signupData: null,
+  signupResponseDraft: { token: "", user: null },
+  showSuccessModal: false,
 };
 
 const authSlice = createSlice({
@@ -25,13 +29,26 @@ const authSlice = createSlice({
     setSignupData: (state, action: PayloadAction<ISignupBody>) => {
       state.signupData = { ...state.signupData, ...action.payload };
     },
+    setSignupResponseDraft: (state, action: PayloadAction<ISignupResponse>) => {
+      state.signupResponseDraft = { ...action.payload };
+    },
+    setShowSuccessModal: (state, action: PayloadAction<boolean>) => {
+      state.showSuccessModal = action.payload;
+    },
     logout: (state) => {
       state.token = null;
       state.user = null;
+      state.signupResponseDraft = { token: "", user: null };
     },
   },
 });
 
-export const { setAuth, setSignupData, logout } = authSlice.actions;
+export const {
+  setAuth,
+  setSignupData,
+  setSignupResponseDraft,
+  setShowSuccessModal,
+  logout,
+} = authSlice.actions;
 
 export default authSlice.reducer;

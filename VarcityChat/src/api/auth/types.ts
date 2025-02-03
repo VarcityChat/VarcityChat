@@ -45,7 +45,3 @@ export interface IGetSignedUrlResponse {
 export interface IUserExistsResponse {
   exists: boolean;
 }
-
-export interface IUserExistsBody {
-  email: string;
-}
