@@ -2,13 +2,15 @@ import SearchBar from "@/components/search-bar";
 import { View, Text, TouchableOpacity, IS_IOS, colors, List } from "@/ui";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
-import { SafeAreaView, StatusBar } from "react-native";
+import { Platform, SafeAreaView, StatusBar } from "react-native";
 import Animated, {
   clamp,
+  Extrapolation,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { useEffect, useState } from "react";
 import { users } from "../../../../constants/users";
@@ -25,40 +27,74 @@ import {
 } from "react-native-popup-menu";
 import { Checkbox } from "@/ui/checkbox";
 
-const HEADER_HEIGHT = IS_IOS ? 100 : 70 + (StatusBar?.currentHeight ?? 0);
+const HEADER_HEIGHT =
+  Platform.OS === "ios" ? 110 : 70 + (StatusBar?.currentHeight ?? 0);
+const SCROLL_THRESHOLD = 10; // Minimum scroll distance to trigger header animation
 
 export default function University() {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const scrollY = useSharedValue(0);
   const [popupOpen, setPopupOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "male" | "female">("all");
 
+  // Track scroll position and direction
+  const scrollY = useSharedValue(0);
+  const lastScrollY = useSharedValue(0);
+  const headerVisible = useSharedValue(1);
+
+  // Reset header state when screen comes into focus
+  useEffect(() => {
+    headerVisible.value = withTiming(1, { duration: 500 });
+    scrollY.value = 0;
+    lastScrollY.value = 0;
+  }, []);
+
   const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event, ctx: { prevY: number }) => {
-      const diff = event.contentOffset.y - ctx.prevY;
-      scrollY.value = clamp(scrollY.value + diff, 0, HEADER_HEIGHT);
-    },
-    onBeginDrag: (event, ctx: { prevY: number }) => {
-      ctx.prevY = event.contentOffset.y;
+    onScroll: (event) => {
+      const currentScrollY = event.contentOffset.y;
+      const scrollDiff = currentScrollY - lastScrollY.value;
+
+      // Only update header visibility after passing threshold
+      if (Math.abs(scrollDiff) > SCROLL_THRESHOLD) {
+        // Scrolling up - hide header
+        if (scrollDiff > 0 && currentScrollY > HEADER_HEIGHT) {
+          headerVisible.value = withTiming(0, { duration: 100 });
+        }
+        // Scrolling down - show header
+        else if (scrollDiff < 0 || currentScrollY <= 0) {
+          headerVisible.value = withTiming(1, { duration: 100 });
+        }
+      }
+
+      scrollY.value = currentScrollY;
+      lastScrollY.value = currentScrollY;
     },
   });
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const headerY = interpolate(
-      scrollY.value,
-      [0, HEADER_HEIGHT],
-      [0, -HEADER_HEIGHT]
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      headerVisible.value,
+      [0, 1],
+      [-HEADER_HEIGHT, 0],
+      Extrapolation.CLAMP
     );
     return {
-      transform: [{ translateY: headerY }],
+      transform: [{ translateY }],
+      opacity: interpolate(
+        headerVisible.value,
+        [0, 1],
+        [0.8, 1],
+        Extrapolation.CLAMP
+      ),
     };
   });
 
   useEffect(() => {
+    headerVisible.value = withTiming(1, { duration: 500 });
     scrollY.value = 0;
+    lastScrollY.value = 0;
   }, []);
 
   return (
@@ -75,7 +111,7 @@ export default function University() {
             zIndex: 1000,
             elevation: 1000,
           },
-          animatedStyle,
+          headerAnimatedStyle,
         ]}
       >
         <View
@@ -160,7 +196,7 @@ export default function University() {
       >
         <SearchBar
           placeholder="Search for people here"
-          onTouchEnd={() => router.push("/home/university/search")}
+          onTouchEnd={() => router.push("/university/search")}
         />
 
         <List
