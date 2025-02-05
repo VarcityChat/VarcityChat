@@ -45,7 +45,10 @@ export default function PersonalInformationForm({
     data: universities,
     isLoading,
     isError,
-  } = useGetUniversitiesQuery(null);
+  } = useGetUniversitiesQuery(null, {
+    pollingInterval: 60000,
+    skipPollingIfUnfocused: true,
+  });
 
   const handleNext = (data: FormType) => {
     if (!isError) {
