@@ -1,5 +1,7 @@
+import { IUser } from "@/types/user";
 import { MMKV } from "react-native-mmkv";
 import { Storage } from "redux-persist";
+import * as SecureStore from "expo-secure-store";
 
 export const storage = new MMKV();
 
@@ -30,3 +32,32 @@ export const reduxStorage: Storage = {
     return Promise.resolve();
   },
 };
+
+// Handles secure store storages
+class AuthStorage {
+  private authDataKey = "authData";
+
+  async storeAuthData(token: string, user: IUser, isAuthenticated: boolean) {
+    await SecureStore.setItemAsync(
+      this.authDataKey,
+      JSON.stringify({ token, user, isAuthenticated })
+    );
+  }
+
+  async getAuthData(): Promise<{
+    token: string;
+    user: IUser;
+    isAuthenticated: boolean;
+  } | null> {
+    const authData = await SecureStore.getItemAsync(this.authDataKey);
+    return authData && typeof authData === "string"
+      ? JSON.parse(authData)
+      : null;
+  }
+
+  removeAuthData() {
+    SecureStore.deleteItemAsync(this.authDataKey);
+  }
+}
+
+export const authStorage: AuthStorage = new AuthStorage();

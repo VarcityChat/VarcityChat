@@ -13,10 +13,7 @@ import { useToast } from "@/core/hooks/use-toast";
 import { useLazyUserExistsQuery, useSignupMutation } from "@/api/auth/auth-api";
 import { uploadToCloudinary } from "@/core/utils";
 import { useApi } from "@/core/hooks/use-api";
-import {
-  setShowSuccessModal,
-  setSignupResponseDraft,
-} from "@/core/auth/auth-slice";
+import { setAuth, setShowSuccessModal } from "@/core/auth/auth-slice";
 
 export default function Personality() {
   const dispatch = useAppDispatch();
@@ -150,7 +147,7 @@ export default function Personality() {
 
     if (!isError && data) {
       dispatch(setShowSuccessModal(true));
-      dispatch(setSignupResponseDraft(data));
+      dispatch(setAuth({ ...data, isAuthenticated: false }));
     }
   };
 

@@ -31,11 +31,8 @@ const MemoizedPersonality = memo(Personality);
 export default function Index() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const authDataFromSignup = useAppSelector(
-    (state) => state.auth.signupResponseDraft
-  );
-  const showSuccessModal = useAppSelector(
-    (state) => state.auth.showSuccessModal
+  const { token, user, showSuccessModal } = useAppSelector(
+    (state) => state.auth
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const slideRef = useRef<FlatList>(null);
@@ -187,14 +184,9 @@ export default function Index() {
               modalTranslateY.value = withSpring(500);
               overlayOpacity.value = withTiming(0, { duration: 300 });
               setTimeout(() => {
-                dispatch(setShowSuccessModal(false));
-                if (authDataFromSignup.token && authDataFromSignup.user) {
-                  dispatch(
-                    setAuth({
-                      token: authDataFromSignup.token,
-                      user: authDataFromSignup.user,
-                    })
-                  );
+                if (token && user !== null) {
+                  dispatch(setShowSuccessModal(false));
+                  dispatch(setAuth({ isAuthenticated: true }));
                 }
               }, 320);
             }}

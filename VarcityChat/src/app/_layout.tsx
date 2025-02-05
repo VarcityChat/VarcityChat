@@ -31,13 +31,15 @@ import {
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { persistor, store } from "@/core/store/store";
+import { persistor, store, useAppDispatch } from "@/core/store/store";
+import { useAuth } from "@/core/hooks/use-auth";
+import { authStorage } from "@/core/storage";
+import { setAuth } from "@/core/auth/auth-slice";
 import Toast from "react-native-toast-message";
 
 export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
-import { useAuth } from "@/core/hooks/use-auth";
 
 export const unstable_settings = {
   initialRouteName: "(auth)",
@@ -47,6 +49,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const navigationRef = useNavigationContainerRef();
+  const dispatch = useAppDispatch();
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
     PlusJakartaSans_300Light,
@@ -65,9 +68,20 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
+    const handleInitialize = async () => {
+      const authData = await authStorage.getAuthData();
+      if (authData) {
+        dispatch(setAuth({ ...authData, isAuthenticated: true }));
+      } else {
+        dispatch(setAuth({ token: "", isAuthenticated: false }));
+      }
+
+      if (fontsLoaded) {
+        SplashScreen.hideAsync();
+      }
+    };
+
+    handleInitialize();
   }, [fontsLoaded]);
 
   return (
@@ -91,25 +105,7 @@ function RootLayoutNav() {
     }
   }, [isAuthenticated]);
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name="home" options={{ headerShown: false }} /> */}
-      {/* <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="register" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="forgot-password"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen name="reset-password" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="forgot-password-otp"
-          options={{ headerShown: false }}
-        /> */}
-    </Stack>
-  );
+  return <Stack screenOptions={{ headerShown: false }}></Stack>;
 }
 
 function Providers({ children }: { children: ReactNode }) {

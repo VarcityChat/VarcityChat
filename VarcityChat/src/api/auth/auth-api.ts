@@ -20,11 +20,6 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-        } catch (error) {}
-      },
       invalidatesTags: ["Auth"],
     }),
 
@@ -48,7 +43,13 @@ export const authApi = api.injectEndpoints({
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setAuth({ token: data.token, user: data.user }));
+          dispatch(
+            setAuth({
+              token: data.token,
+              user: data.user,
+              isAuthenticated: true,
+            })
+          );
         } catch (error) {}
       },
       invalidatesTags: ["Auth"],
