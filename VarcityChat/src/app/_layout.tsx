@@ -1,11 +1,10 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import {
   SplashScreen,
   Stack,
   useNavigationContainerRef,
   useRouter,
-  useSegments,
 } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -49,7 +48,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const navigationRef = useNavigationContainerRef();
-  const dispatch = useAppDispatch();
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
     PlusJakartaSans_300Light,
@@ -68,20 +66,9 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    const handleInitialize = async () => {
-      const authData = await authStorage.getAuthData();
-      if (authData) {
-        dispatch(setAuth({ ...authData, isAuthenticated: true }));
-      } else {
-        dispatch(setAuth({ token: "", isAuthenticated: false }));
-      }
-
-      if (fontsLoaded) {
-        SplashScreen.hideAsync();
-      }
-    };
-
-    handleInitialize();
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
   }, [fontsLoaded]);
 
   return (
@@ -94,16 +81,37 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const router = useRouter();
-  const segments = useSegments();
+  const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/(tabs)/discover");
-    } else {
-      router.replace("/onboarding/onboarding-one");
+    const handleInitialize = async () => {
+      try {
+        const authData = await authStorage.getAuthData();
+        if (authData) {
+          dispatch(setAuth({ ...authData, isAuthenticated: true }));
+        } else {
+          dispatch(setAuth({ token: "", isAuthenticated: false }));
+        }
+      } finally {
+        setIsAuthChecked(true);
+      }
+    };
+    handleInitialize();
+  }, []);
+
+  useEffect(() => {
+    if (isAuthChecked) {
+      if (isAuthenticated) {
+        router.replace("/(tabs)/discover");
+      } else {
+        router.replace("/onboarding/onboarding-one");
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isAuthChecked]);
+
+  if (!isAuthChecked) return null;
 
   return <Stack screenOptions={{ headerShown: false }}></Stack>;
 }
