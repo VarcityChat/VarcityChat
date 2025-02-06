@@ -1,11 +1,9 @@
 import Animated, {
-  clamp,
   Extrapolation,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import {
@@ -19,13 +17,16 @@ import {
 } from "@/ui";
 import { useRouter } from "expo-router";
 import { Platform, SafeAreaView, StatusBar } from "react-native";
-import { universities } from "../../../../../constants/unis";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEffect, useCallback, useState } from "react";
+import { useGetUniversitiesQuery } from "@/api/universities/university-api";
+import { IUniversity } from "@/api/universities/types";
+import { capitalize } from "@/core/utils";
 import LocationSvg from "@/ui/icons/location";
 import SearchBar from "@/components/search-bar";
 import NotificationSvg from "@/ui/icons/notification";
-import { useEffect, useCallback } from "react";
+import UniversitySkeleton from "@/components/university/university-skeleton";
 
 const HEADER_HEIGHT =
   Platform.OS === "ios" ? 110 : 70 + (StatusBar?.currentHeight ?? 0);
@@ -36,6 +37,10 @@ export default function DiscoverScreen() {
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [search, setSearch] = useState("");
+
+  // API calls
+  const { data: universities, isLoading } = useGetUniversitiesQuery(null);
 
   // Track scroll position and direction
   const scrollY = useSharedValue(0);
@@ -90,7 +95,7 @@ export default function DiscoverScreen() {
   });
 
   const renderUniversityItem = useCallback(
-    ({ item, index }: { item: any; index: number }) => {
+    ({ item, index }: { item: IUniversity; index: number }) => {
       return (
         <TouchableOpacity
           onPress={() => router.push("/university/lead-city")}
@@ -104,25 +109,27 @@ export default function DiscoverScreen() {
           <View className="w-full h-[90] bg-grey-50 rounded-md dark:bg-grey-800 items-center justify-center">
             {item.image ? (
               <Image
-                source={item.image}
-                className="w-[60] h-[60] object-contain"
+                source={{ uri: item?.image }}
+                className="w-[50] h-[50] object-contain"
               />
             ) : null}
           </View>
           <View className="mt-2">
-            <Text className="font-sans-semibold">{item.name}</Text>
+            <Text className="font-sans-semibold">{capitalize(item.name)}</Text>
             <View className="flex flex-row items-center">
               <LocationSvg className="mr-1" />
               <Text className="text-sm text-grey-500 dark:text-grey-200 font-sans">
-                {item.location.substring(0, 12) +
-                  (item.location.length > 12 ? "..." : "")}
+                {item.location?.address
+                  ? item.location.address.substring(0, 12) +
+                    (item.location.address.length > 12 ? "..." : "")
+                  : ""}
               </Text>
             </View>
           </View>
         </TouchableOpacity>
       );
     },
-    [router]
+    [router, universities]
   );
 
   return (
@@ -168,22 +175,31 @@ export default function DiscoverScreen() {
         <View
           className={`${Platform.select({ ios: "pt-0", android: "pt-4" })}`}
         >
-          <SearchBar placeholder="Discover more people here" />
+          <SearchBar
+            placeholder="Discover more people here"
+            onChangeText={(text) => setSearch(text)}
+          />
         </View>
-        <List
-          ListHeaderComponent={
-            <Text className="mb-4 font-sans-bold text-lg">
-              List of Universities
-            </Text>
-          }
-          data={[...universities]}
-          keyExtractor={(_, index) => `university-${index}`}
-          renderItem={renderUniversityItem}
-          numColumns={3}
-          contentContainerClassName="flex flex-1 flex-grow"
-          estimatedItemSize={50}
-          ListFooterComponent={<View style={{ height: 150 }} />}
-        />
+        {isLoading ? (
+          <UniversitySkeleton />
+        ) : (
+          <List
+            ListHeaderComponent={
+              <Text className="mb-4 font-sans-bold text-lg">
+                List of Universities
+              </Text>
+            }
+            data={universities?.filter((university) =>
+              university.name.toLowerCase().includes(search.toLowerCase())
+            )}
+            keyExtractor={(_, index) => `university-${index}`}
+            renderItem={renderUniversityItem}
+            numColumns={3}
+            contentContainerClassName="flex flex-1 flex-grow"
+            estimatedItemSize={50}
+            ListFooterComponent={<View style={{ height: 150 }} />}
+          />
+        )}
       </Animated.ScrollView>
     </SafeAreaView>
   );

@@ -4,6 +4,7 @@ export interface IUniversity {
       type: string;
       coordinates: number[];
     };
+    address: string;
   };
   _id: string;
   name: string;
