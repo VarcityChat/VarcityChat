@@ -58,7 +58,7 @@ export default function ChatsSkeleton() {
               </View>
             </View>
             {index !== 5 && (
-              <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-800" />
+              <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-900" />
             )}
           </View>
         ))}

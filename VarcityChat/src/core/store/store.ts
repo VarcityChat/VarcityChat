@@ -20,27 +20,29 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { api } from "@/api/api";
 import { reduxStorage } from "../storage";
 import authSlice from "../auth/auth-slice";
+import messagesSlice from "../chats/message-slice";
 
 const persistConfig = {
   key: "root",
   version: 1,
   storage: reduxStorage,
-  blacklist: ["auth", "clientApi", "_persist"],
+  blacklist: ["auth", "clientApi", "messages", "_persist"],
 };
 
-// export const rtkQueryErrorLogger =
-//   (_api: any) =>
-//   (next: (arg0: any) => any) =>
-//   (action: { error: any; payload: any }) => {
-//     if (isRejectedWithValue(action)) {
-//       console.log("isRejectWithValue", action.error, action.payload);
-//       alert(JSON.stringify(action));
-//     }
-//     return next(action);
-//   };
+export const rtkQueryErrorLogger =
+  (api: any) =>
+  (next: (action: any) => any) =>
+  (action: { error: any; payload: any }) => {
+    if (isRejectedWithValue(action)) {
+      console.log("isRejectWithValue", action.error, action.payload);
+      alert(JSON.stringify(action));
+    }
+    return next(action);
+  };
 
 const reducer = combineReducers({
   auth: authSlice,
+  messages: messagesSlice,
   [api.reducerPath]: api.reducer,
 });
 
@@ -53,7 +55,9 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REGISTER, REHYDRATE, PAUSE, PERSIST, PURGE],
       },
-    }).concat(api.middleware);
+    })
+      .concat(api.middleware)
+      .concat(rtkQueryErrorLogger as any);
   },
   enhancers: (getDefaultEnhancers) => {
     if (__DEV__) {

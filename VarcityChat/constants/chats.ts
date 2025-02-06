@@ -87,3 +87,6 @@ export const chats = [
     image: avatar2,
   },
 ];
+
+export const defaultAvatarUrl =
+  "https://res.cloudinary.com/dvjr6r50f/image/upload/v1738842678/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3383_avqqd6.avif";

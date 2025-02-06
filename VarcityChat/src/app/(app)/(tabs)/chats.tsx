@@ -2,7 +2,6 @@ import SearchBar from "@/components/search-bar";
 import { Image, View, Text, TouchableOpacity } from "@/ui";
 import { useRouter } from "expo-router";
 import { Platform, SafeAreaView } from "react-native";
-import { chats } from "../../../../constants/chats";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -13,10 +12,17 @@ import { HEADER_HEIGHT } from "@/components/header";
 import React, { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
+import { useChats } from "@/core/hooks/use-chats";
+import { useAuth } from "@/core/hooks/use-auth";
+import { useToast } from "@/core/hooks/use-toast";
+import { defaultAvatarUrl } from "../../../../constants/chats";
 
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { chats, isLoading, error } = useChats();
+  const { showToast } = useToast();
+  const { user } = useAuth();
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -31,6 +37,10 @@ export default function Chats() {
       opacity: opacityStyle,
     };
   });
+
+  if (error) {
+    showToast({ type: "error", text1: "Error", text2: `${error}` });
+  }
 
   return (
     <SafeAreaView className="flex flex-1">
@@ -53,7 +63,7 @@ export default function Chats() {
         />
       </Animated.View>
 
-      {true ? (
+      {isLoading ? (
         <ChatsSkeleton />
       ) : (
         <Animated.FlatList
@@ -82,28 +92,47 @@ export default function Chats() {
               <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
                 <Image
                   className="object-cover w-full h-full"
-                  source={item.image}
+                  source={{
+                    uri:
+                      item.user1._id === user?._id
+                        ? item.user2.images[0] || defaultAvatarUrl
+                        : item.user1.images[0] || defaultAvatarUrl,
+                  }}
                 />
               </View>
 
               <View className="justify-between flex-1">
                 <Text className="font-sans-semibold text-base">
-                  {item.name}
+                  {item.user1._id === user?._id
+                    ? item.user2.firstname
+                    : item.user1.firstname}
                 </Text>
                 <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
-                  {item.lastMessage}
+                  {item.lastMessage ||
+                    (item.status !== "accepted" && "Pending request")}
                 </Text>
               </View>
 
               <View className="flex items-end justify-end">
                 <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
-                  {item.timestamp}
+                  {item.lastMessageTimestamp}
                 </Text>
-                <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
-                  <Text className="text-white dark:text-white font-sans-thin text-sm">
-                    1
-                  </Text>
-                </View>
+
+                {item.user1._id == user?._id && item.unreadCountUser2 > 0 ? (
+                  <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
+                    <Text className="text-white dark:text-white font-sans-thin text-sm">
+                      {item.unreadCountUser2}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {item.user2._id === user?._id && item.unreadCountUser1 > 0 ? (
+                  <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
+                    <Text className="text-white dark:text-white font-sans-thin text-sm">
+                      {item.unreadCountUser1}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
             </TouchableOpacity>
           )}
