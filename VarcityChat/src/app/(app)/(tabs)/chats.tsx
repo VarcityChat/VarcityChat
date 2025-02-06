@@ -107,7 +107,7 @@ export default function Chats() {
               <TouchableOpacity
                 activeOpacity={0.7}
                 className="w-full flex-row items-center bg-red"
-                onPress={() => router.push("/chat-message/1")}
+                onPress={() => router.push(`/chat-message/${item._id}`)}
               >
                 <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
                   <Image

@@ -19,8 +19,14 @@ import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import { Swipeable } from "react-native-gesture-handler";
+import { useLocalSearchParams } from "expo-router";
+import { useActiveChat } from "@/core/hooks/use-chats";
+import ChatsActive from "@/ui/icons/chats-active";
 
 export default function ChatMessage() {
+  const { id } = useLocalSearchParams();
+  const { chat, activeChatUser } = useActiveChat(id as string);
+
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");

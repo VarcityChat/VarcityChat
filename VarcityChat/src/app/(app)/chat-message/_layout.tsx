@@ -1,11 +1,15 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Image, View, Text, TouchableOpacity, IS_IOS } from "@/ui";
 import ThreeDotsSvg from "@/ui/icons/three-dots";
 import CallsActive from "@/ui/icons/calls-active";
 import BackButton from "@/components/back-button";
+import { useActiveChat } from "@/core/hooks/use-chats";
+import { defaultAvatarUrl } from "../../../../constants/chats";
 
 export default function ChatMessageLayout() {
   const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const { activeChatUser } = useActiveChat(id as string);
 
   return (
     <Stack>
@@ -52,12 +56,14 @@ export default function ChatMessageLayout() {
               >
                 <Image
                   source={{
-                    uri: "https://promisesheggsmann.netlify.app/img/testimonial/1.jpg",
+                    uri: activeChatUser?.images[0] || defaultAvatarUrl,
                   }}
                   style={{ width: 40, height: 40, borderRadius: 50 }}
                 />
                 <View>
-                  <Text className="font-sans-semibold">Promise Sheggsmann</Text>
+                  <Text className="font-sans-semibold">
+                    {activeChatUser?.firstname} {activeChatUser?.lastname}
+                  </Text>
                   <Text className="text-sm text-grey-500 font-sans-regular">
                     Active 5 mins ago
                   </Text>

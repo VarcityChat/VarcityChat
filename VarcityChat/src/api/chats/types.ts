@@ -36,6 +36,7 @@ export interface Message {
 export interface IChatUser {
   _id: string;
   firstname: string;
+  lastname: string;
   images: string[];
 }
 export interface IChat {

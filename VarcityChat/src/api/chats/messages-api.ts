@@ -1,6 +1,7 @@
 import { createEntityAdapter } from "@reduxjs/toolkit";
 import { api } from "@/api/api";
 import { IChat, ExtendedMessage } from "./types";
+import { RootState } from "@/core/store/store";
 
 // Create entity adapter for normalized state management
 export const messagesAdapter = createEntityAdapter({
@@ -38,3 +39,11 @@ export const messagesApi = api.injectEndpoints({
 export const { useGetChatsQuery, useGetMessagesQuery } = messagesApi;
 
 export default messagesApi;
+
+export const selectChatById = (chatId: string) => (state: RootState) => {
+  return (
+    messagesApi.endpoints.getChats
+      .select()(state)
+      .data?.find((chat) => chat._id === chatId) || null
+  );
+};

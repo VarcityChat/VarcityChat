@@ -1,7 +1,11 @@
 import { LayoutAnimation } from "react-native";
-import messagesApi, { useGetChatsQuery } from "@/api/chats/messages-api";
+import messagesApi, {
+  selectChatById,
+  useGetChatsQuery,
+} from "@/api/chats/messages-api";
 import { ExtendedMessage, IChat } from "@/api/chats/types";
-import { useAppDispatch } from "../store/store";
+import { useAppDispatch, useAppSelector } from "../store/store";
+import { useAuth } from "./use-auth";
 
 export const useChats = () => {
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
@@ -43,4 +47,17 @@ export const useChats = () => {
   };
 
   return { chats, isLoading, loadChats, updateChatOrder, error };
+};
+
+export const useActiveChat = (chatId: string) => {
+  const chat = useAppSelector(selectChatById(chatId));
+  const { user } = useAuth();
+
+  const activeChatUser = chat
+    ? chat.user1._id === user?._id
+      ? chat.user2
+      : chat.user1
+    : null;
+
+  return { chat, activeChatUser };
 };
