@@ -12,6 +12,7 @@ import Animated, {
 import { HEADER_HEIGHT } from "@/components/header";
 import React, { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ChatsSkeleton from "@/components/chats/chats-skeleton";
 
 export default function Chats() {
   const router = useRouter();
@@ -52,57 +53,63 @@ export default function Chats() {
         />
       </Animated.View>
 
-      <Animated.FlatList
-        showsVerticalScrollIndicator={false}
-        onScroll={scrollHandler}
-        ListHeaderComponent={
-          <>
-            <SearchBar placeholder="Search" />
-            <ChatFilter />
-          </>
-        }
-        contentContainerClassName="px-6"
-        style={{ flex: 1 }}
-        keyExtractor={(_, index) => `item-${index}`}
-        contentContainerStyle={{ paddingHorizontal: 6 }}
-        data={chats}
-        ItemSeparatorComponent={() => (
-          <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-800" />
-        )}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            className="w-full flex-row items-center bg-red"
-            onPress={() => router.push("/home/chat-message/1")}
-          >
-            <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
-              <Image
-                className="object-cover w-full h-full"
-                source={item.image}
-              />
-            </View>
+      {true ? (
+        <ChatsSkeleton />
+      ) : (
+        <Animated.FlatList
+          showsVerticalScrollIndicator={false}
+          onScroll={scrollHandler}
+          ListHeaderComponent={
+            <>
+              <SearchBar placeholder="Search" />
+              <ChatFilter />
+            </>
+          }
+          contentContainerClassName="px-6"
+          style={{ flex: 1 }}
+          keyExtractor={(_, index) => `item-${index}`}
+          contentContainerStyle={{ paddingHorizontal: 6 }}
+          data={chats}
+          ItemSeparatorComponent={() => (
+            <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-800" />
+          )}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              className="w-full flex-row items-center bg-red"
+              onPress={() => router.push("/chat-message/1")}
+            >
+              <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
+                <Image
+                  className="object-cover w-full h-full"
+                  source={item.image}
+                />
+              </View>
 
-            <View className="justify-between flex-1">
-              <Text className="font-sans-semibold text-base">{item.name}</Text>
-              <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
-                {item.lastMessage}
-              </Text>
-            </View>
-
-            <View className="flex items-end justify-end">
-              <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
-                {item.timestamp}
-              </Text>
-              <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
-                <Text className="text-white dark:text-white font-sans-thin text-sm">
-                  1
+              <View className="justify-between flex-1">
+                <Text className="font-sans-semibold text-base">
+                  {item.name}
+                </Text>
+                <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
+                  {item.lastMessage}
                 </Text>
               </View>
-            </View>
-          </TouchableOpacity>
-        )}
-        ListFooterComponent={<View className="h-16" />}
-      />
+
+              <View className="flex items-end justify-end">
+                <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
+                  {item.timestamp}
+                </Text>
+                <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
+                  <Text className="text-white dark:text-white font-sans-thin text-sm">
+                    1
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={<View className="h-16" />}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -120,7 +127,7 @@ function ChatFilter() {
         } rounded-full`}
       >
         <Text
-          className={`text-sm  ${
+          className={`text-sm font-sans ${
             filter === "all"
               ? " text-primary-500 dark:text-primary-500"
               : "text-grey-500 dark:text-grey-200"
@@ -138,7 +145,7 @@ function ChatFilter() {
         } rounded-full`}
       >
         <Text
-          className={`text-sm  ${
+          className={`text-sm  font-sans ${
             filter === "unread"
               ? " text-primary-500 dark:text-primary-500"
               : "text-grey-500 dark:text-grey-200"

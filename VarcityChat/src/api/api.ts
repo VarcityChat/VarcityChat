@@ -1,7 +1,8 @@
 import { RootState } from "@/core/store/store";
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 
-const BASE_ENDPOINT = "https://1b6a-102-89-69-92.ngrok-free.app/api/v1";
+export const BASE_ENDPOINT = "https://1b6a-102-89-69-92.ngrok-free.app/api/v1";
+export const BASE_SOCKET_ENDPOINT = "https://1b6a-102-89-69-92.ngrok-free.app";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_ENDPOINT,

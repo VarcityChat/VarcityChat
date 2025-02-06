@@ -2,7 +2,6 @@ import { View, Text, List } from "@/ui";
 import Header from "@/components/header";
 import SearchBar from "@/components/search-bar";
 import UserCard from "@/components/university/user-card";
-import { users } from "../../../../constants/users";
 import EmptySearchSvg from "@/ui/icons/university/empty-search-svg";
 
 export default function Search() {

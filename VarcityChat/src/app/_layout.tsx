@@ -39,6 +39,7 @@ import Toast from "react-native-toast-message";
 export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
+import { SocketProvider } from "@/context/SocketContext";
 
 export const unstable_settings = {
   initialRouteName: "(auth)",
@@ -127,9 +128,11 @@ function Providers({ children }: { children: ReactNode }) {
           className={theme.dark ? "dark" : undefined}
         >
           <ThemeProvider value={theme}>
-            <MenuProvider>
-              <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
-            </MenuProvider>
+            <SocketProvider>
+              <MenuProvider>
+                <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+              </MenuProvider>
+            </SocketProvider>
           </ThemeProvider>
         </GestureHandlerRootView>
       </PersistGate>
