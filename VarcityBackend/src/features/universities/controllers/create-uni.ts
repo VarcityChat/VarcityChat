@@ -23,11 +23,15 @@ class Create {
 
     let imageResponse: UploadApiResponse = {} as UploadApiResponse;
     if (image) {
-      const uploadResponse = await uploadFile(image, 'varcity/universities',`${uniObjectId}`, true, true);
-      if (!uploadResponse?.public_id) {
-        throw new BadRequestError('Error uploading image');
+      try {
+        const uploadResponse = await uploadFile(image, 'varcity/universities');
+        if (!uploadResponse?.public_id) {
+          throw new BadRequestError('Error uploading image');
+        }
+        imageResponse = uploadResponse as UploadApiResponse;
+      } catch (error) {
+        throw new BadRequestError('File upload error: ' + error);
       }
-      imageResponse = uploadResponse as UploadApiResponse;
     }
 
     const uni = await uniService.createUni({

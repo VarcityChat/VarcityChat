@@ -9,7 +9,7 @@ export function uploadFile(
   overwrite?: boolean,
   invalidate?: boolean
 ): Promise<UploadReturnType> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     cloudinary.v2.uploader.upload(
       file,
       {
@@ -17,11 +17,12 @@ export function uploadFile(
         invalidate,
         overwrite,
         public_id,
-        use_filename: true
+        use_filename: true,
+        resource_type: 'auto'
       },
       (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
-        if (error) resolve(error);
-        resolve(result);
+        if (error) reject(error);
+        else resolve(result);
       }
     );
   });
