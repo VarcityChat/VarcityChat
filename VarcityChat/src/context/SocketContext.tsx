@@ -45,9 +45,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    setSocket(null);
-
-    if (!isConnected && socket === null) {
+    if (!isConnected || socket === null) {
       translateY.value = withSpring(0, {
         damping: 12,
         stiffness: 100,
@@ -79,9 +77,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     socketInstance.on("connect", () => {
       console.log("CONNECTED TO SERVER");
-      setIsConnected(true);
       setSocket(socketInstance);
+      setIsConnected(true);
     });
+
+    socketInstance.on("connect_error", (error) => {
+      console.log("ERROR CONNECTING TO SERVER", error);
+    });
+
     socketInstance.on("disconnect", () => setIsConnected(false));
   };
 

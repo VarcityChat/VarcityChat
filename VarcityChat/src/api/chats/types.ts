@@ -5,6 +5,7 @@ import { EntityId } from "@reduxjs/toolkit";
 export interface ExtendedMessage extends IMessage {
   _id: string;
   chatId: string;
+  conversationId: string;
   deliveryStatus: "sent" | "delivered" | "read" | "failed";
   localId?: string; // For optimistic updates
   deliveredAt?: number;
@@ -37,12 +38,12 @@ export interface IChatUser {
   firstname: string;
   images: string[];
 }
-export interface Chat {
+export interface IChat {
   _id: string;
   user1: IChatUser;
   user2: IChatUser;
   lastMessage: string;
-  lastMessageTimestamp: string;
+  lastMessageTimestamp: Date;
   unreadCountUser1: number;
   unreadCountUser2: number;
   status: "pending" | "rejected" | "accepted";
