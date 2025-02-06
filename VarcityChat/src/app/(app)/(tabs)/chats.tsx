@@ -29,6 +29,7 @@ export default function Chats() {
   const { chats, isLoading, error, updateChatOrder } = useChats();
   const { showToast } = useToast();
   const { user } = useAuth();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     socket?.on("new-message", (message: ExtendedMessage) => {
@@ -87,7 +88,10 @@ export default function Chats() {
           onScroll={scrollHandler}
           ListHeaderComponent={
             <>
-              <SearchBar placeholder="Search" />
+              <SearchBar
+                placeholder="Search"
+                onChangeText={(text) => setSearch(text)}
+              />
               <ChatFilter />
             </>
           }
@@ -95,7 +99,15 @@ export default function Chats() {
           style={{ flex: 1 }}
           keyExtractor={(item) => `${item._id}`}
           contentContainerStyle={{ paddingHorizontal: 6 }}
-          data={chats}
+          data={chats?.filter((item) => {
+            if (search === "") return true;
+            return (
+              item.user1.firstname
+                .toLowerCase()
+                .includes(search.toLowerCase()) ||
+              item.user2.firstname.toLowerCase().includes(search.toLowerCase())
+            );
+          })}
           ItemSeparatorComponent={() => (
             <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-800" />
           )}
