@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { messagesAdapter } from "@/api/chats/messages-api";
+import { messagesAdapter } from "@/api/chats/chat-api";
 
 const messagesSlice = createSlice({
   name: "messages",

@@ -24,7 +24,7 @@ const isSerializedError = (error: unknown): error is SerializedError => {
 export const useApi = () => {
   const { showToast } = useToast();
 
-  const callMutationWithErrorHandler = async <T>(
+  const callMutationWithErrorHandler = async <T,>(
     handlerFunc: () => Promise<T>
   ): Promise<{ data?: T; error?: string; isError: boolean }> => {
     try {

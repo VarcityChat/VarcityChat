@@ -1,6 +1,6 @@
 import { createEntityAdapter } from "@reduxjs/toolkit";
 import { api } from "@/api/api";
-import { IChat, ExtendedMessage } from "./types";
+import { IChat, ExtendedMessage, IUpdateChatRequest } from "./types";
 import { RootState } from "@/core/store/store";
 
 // Create entity adapter for normalized state management
@@ -33,10 +33,33 @@ export const messagesApi = api.injectEndpoints({
         ),
       providesTags: ["Chats"],
     }),
+
+    acceptChatRequest: builder.mutation<IUpdateChatRequest, string>({
+      query: (chatId) => ({
+        url: `/chat/accept`,
+        method: "PUT",
+        body: { conversationId: chatId },
+      }),
+      invalidatesTags: ["Chats"],
+    }),
+
+    rejectChatRequest: builder.mutation<IUpdateChatRequest, string>({
+      query: (chatId) => ({
+        url: `/chat/reject`,
+        method: "PUT",
+        body: { conversationId: chatId },
+      }),
+      invalidatesTags: ["Chats"],
+    }),
   }),
 });
 
-export const { useGetChatsQuery, useGetMessagesQuery } = messagesApi;
+export const {
+  useGetChatsQuery,
+  useGetMessagesQuery,
+  useAcceptChatRequestMutation,
+  useRejectChatRequestMutation,
+} = messagesApi;
 
 export default messagesApi;
 

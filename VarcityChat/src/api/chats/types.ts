@@ -49,3 +49,7 @@ export interface IChat {
   unreadCountUser2: number;
   status: "pending" | "rejected" | "accepted";
 }
+
+export interface IUpdateChatRequest {
+  conversationId: string;
+}

@@ -2,7 +2,7 @@ import { LayoutAnimation } from "react-native";
 import messagesApi, {
   selectChatById,
   useGetChatsQuery,
-} from "@/api/chats/messages-api";
+} from "@/api/chats/chat-api";
 import { ExtendedMessage, IChat } from "@/api/chats/types";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { useAuth } from "./use-auth";
@@ -18,7 +18,7 @@ export const useChats = () => {
     dispatch(
       messagesApi.util.updateQueryData(
         "getChats",
-        undefined,
+        undefined as any,
         (draft: IChat[]) => {
           const chatIndex = draft.findIndex(
             (chat) => chat._id === newMessage.conversationId
@@ -41,17 +41,46 @@ export const useChats = () => {
     );
   };
 
+  const updateChatStatus = (
+    chatId: string,
+    status: "accepted" | "rejected"
+  ) => {
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getChats",
+        undefined as any,
+        (draft: IChat[]) => {
+          const chatIndex = draft.findIndex((chat) => chat._id === chatId);
+          if (chatIndex > -1) {
+            draft[chatIndex].status = status;
+          }
+        }
+      )
+    );
+  };
+
   const loadChats = async () => {
     // Trigger refetch of chats
     await refetch();
   };
 
-  return { chats, isLoading, loadChats, updateChatOrder, error };
+  return {
+    chats,
+    isLoading,
+    loadChats,
+    updateChatOrder,
+    updateChatStatus,
+    error,
+  };
 };
 
 export const useActiveChat = (chatId: string) => {
   const chat = useAppSelector(selectChatById(chatId));
   const { user } = useAuth();
+
+  const handleAcceptRequest = async () => {};
+
+  const handleRejectRequest = async () => {};
 
   const activeChatUser = chat
     ? chat.user1._id === user?._id
@@ -59,5 +88,11 @@ export const useActiveChat = (chatId: string) => {
       : chat.user1
     : null;
 
-  return { chat, activeChatUser };
+  return {
+    chat,
+    activeChatUser,
+    handleAcceptRequest,
+    handleRejectRequest,
+    isPending: chat?.status === "pending",
+  };
 };

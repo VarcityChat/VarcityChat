@@ -21,11 +21,11 @@ import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import { Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import { useActiveChat } from "@/core/hooks/use-chats";
-import ChatsActive from "@/ui/icons/chats-active";
+import { MessageRequest } from "@/components/chats/message-request";
 
 export default function ChatMessage() {
   const { id } = useLocalSearchParams();
-  const { chat, activeChatUser } = useActiveChat(id as string);
+  const { chat, activeChatUser, isPending } = useActiveChat(id as string);
 
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -35,19 +35,19 @@ export default function ChatMessage() {
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
   useEffect(() => {
-    setMessages([
-      ...messagesData.map((message) => {
-        return {
-          _id: message._id,
-          text: message.text,
-          createdAt: new Date(),
-          user: {
-            _id: message.from,
-            name: message.from ? "You" : "Bob",
-          },
-        };
-      }),
-    ]);
+    // setMessages([
+    //   ...messagesData.map((message) => {
+    //     return {
+    //       _id: message._id,
+    //       text: message.text,
+    //       createdAt: new Date(),
+    //       user: {
+    //         _id: message.from,
+    //         name: message.from ? "You" : "Bob",
+    //       },
+    //     };
+    //   }),
+    // ]);
   }, []);
 
   const onSend = useCallback((messages = []) => {
@@ -78,89 +78,93 @@ export default function ChatMessage() {
 
   return (
     <View className="flex flex-1" style={{ marginBottom: insets.bottom }}>
-      <GiftedChat
-        messages={messages}
-        onSend={(messages: any) => onSend(messages)}
-        user={{ _id: 1 }}
-        onInputTextChanged={setText}
-        bottomOffset={insets.bottom}
-        renderAvatar={null}
-        maxComposerHeight={100}
-        renderBubble={(props) => (
-          <Bubble
-            {...props}
-            textStyle={{
-              right: {
-                color: "#000",
-                fontSize: 14,
-                fontFamily: "PlusJakartaSans_400Regular",
-              },
-              left: { fontSize: 15 },
-            }}
-            wrapperStyle={{
-              left: { backgroundColor: colors.grey[50] },
-              right: { backgroundColor: colors.primary[50] },
-            }}
-          />
-        )}
-        renderSend={(props) => (
-          <View
-            style={{
-              flexDirection: "row",
-              height: 44,
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              paddingHorizontal: 14,
-            }}
-          >
-            {text.length > 0 && (
-              <Send {...props} containerStyle={{ justifyContent: "center" }}>
-                <SendSvg />
-              </Send>
-            )}
-            {text.length === 0 && (
-              <>
-                <TouchableOpacity>
-                  <MicrophoneSvg />
+      {isPending ? (
+        <MessageRequest chat={chat!} />
+      ) : (
+        <GiftedChat
+          messages={messages}
+          onSend={(messages: any) => onSend(messages)}
+          user={{ _id: 1 }}
+          onInputTextChanged={setText}
+          bottomOffset={insets.bottom}
+          renderAvatar={null}
+          maxComposerHeight={100}
+          renderBubble={(props) => (
+            <Bubble
+              {...props}
+              textStyle={{
+                right: {
+                  color: "#000",
+                  fontSize: 14,
+                  fontFamily: "PlusJakartaSans_400Regular",
+                },
+                left: { fontSize: 15 },
+              }}
+              wrapperStyle={{
+                left: { backgroundColor: colors.grey[50] },
+                right: { backgroundColor: colors.primary[50] },
+              }}
+            />
+          )}
+          renderSend={(props) => (
+            <View
+              style={{
+                flexDirection: "row",
+                height: 44,
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                paddingHorizontal: 14,
+              }}
+            >
+              {text.length > 0 && (
+                <Send {...props} containerStyle={{ justifyContent: "center" }}>
+                  <SendSvg />
+                </Send>
+              )}
+              {text.length === 0 && (
+                <>
+                  <TouchableOpacity>
+                    <MicrophoneSvg />
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                    <AttachmentSvg />
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                    <PictureSvg />
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          )}
+          textInputProps={styles.composer}
+          renderInputToolbar={(props) => (
+            <InputToolbar
+              {...props}
+              containerStyle={{}}
+              renderActions={() => (
+                <TouchableOpacity className="h-[44px] justify-center items-center left-3">
+                  <EmojiSelectSvg />
                 </TouchableOpacity>
-                <TouchableOpacity>
-                  <AttachmentSvg />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                  <PictureSvg />
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        )}
-        textInputProps={styles.composer}
-        renderInputToolbar={(props) => (
-          <InputToolbar
-            {...props}
-            containerStyle={{}}
-            renderActions={() => (
-              <TouchableOpacity className="h-[44px] justify-center items-center left-3">
-                <EmojiSelectSvg />
-              </TouchableOpacity>
-            )}
-          />
-        )}
-        renderMessage={(props) => (
-          <ChatMessageBox
-            {...props}
-            setReplyOnSwipe={setReplyMessage}
-            updateRowRef={updateRowRef}
-          />
-        )}
-        renderChatFooter={() => (
-          <ReplyMessageBar
-            clearReply={() => setReplyMessage(null)}
-            message={replyMessage}
-          />
-        )}
-        renderChatEmpty={() => <ChatEmptyComponent />}
-      />
+              )}
+            />
+          )}
+          renderMessage={(props) => (
+            <ChatMessageBox
+              {...props}
+              setReplyOnSwipe={setReplyMessage}
+              updateRowRef={updateRowRef}
+            />
+          )}
+          renderChatFooter={() => (
+            <ReplyMessageBar
+              clearReply={() => setReplyMessage(null)}
+              message={replyMessage}
+            />
+          )}
+          renderChatEmpty={() => <ChatEmptyComponent />}
+        />
+      )}
     </View>
   );
 }
