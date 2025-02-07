@@ -27,6 +27,12 @@ class ChatService {
     });
   }
 
+  public async rejectConversationRequest(conversationId: string): Promise<void> {
+    await ConversationModel.findByIdAndUpdate(conversationId, {
+      $set: { status: CONVERSATION_STATUS.rejected }
+    });
+  }
+
   public async getConversationById(conversationId: string): Promise<IConversationDocument | null> {
     return await ConversationModel.findById(conversationId);
   }

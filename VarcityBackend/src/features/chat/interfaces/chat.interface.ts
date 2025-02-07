@@ -52,6 +52,7 @@ export interface IMessageData {
     | CONVERSATION_STATUS.pending
     | CONVERSATION_STATUS.accepted
     | CONVERSATION_STATUS.rejected;
+  createdAt?: Date;
 }
 
 export interface ISenderReceiver {

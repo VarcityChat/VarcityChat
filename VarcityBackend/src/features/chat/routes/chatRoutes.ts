@@ -18,6 +18,7 @@ class ChatRoutes {
     this.router.post('/chat/open', createChat.conversation);
 
     this.router.put('/chat/accept', createChat.acceptConversationRequest);
+    this.router.put('/chat/reject', createChat.rejectConversationRequest);
 
     return this.router;
   }

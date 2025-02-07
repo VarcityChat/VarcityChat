@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import { createUni } from '@uni/controllers/create-uni';
 import { getUnis } from '@uni/controllers/get-uni';
 import { getStudents } from '@uni/controllers/get-students';
+import { authMiddleware } from '@global/middlewares/auth.middleware';
 
 class UniRoutes {
   private router: Router;
@@ -11,9 +12,9 @@ class UniRoutes {
   }
 
   public routes(): Router {
-    this.router.post('/uni', createUni.uni);
     this.router.get('/unis', getUnis.unis);
-    this.router.get('/uni/:uniId/students', getStudents.students);
+    this.router.post('/uni', authMiddleware.protect, createUni.uni);
+    this.router.get('/uni/:uniId/students', authMiddleware.protect, getStudents.students);
     return this.router;
   }
 }

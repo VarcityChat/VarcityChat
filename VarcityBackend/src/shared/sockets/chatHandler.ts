@@ -11,6 +11,7 @@ import {
   ConversationJobs,
   conversationQueue
 } from '@service/queues/chat.queue';
+import { chatService } from '@service/db/chat.service';
 import { addChatSchema } from '@chat/schemes/chat.scheme';
 import { config } from '@root/config';
 import Logger from 'bunyan';
@@ -39,15 +40,17 @@ export class ChatHandler {
         return;
       }
 
+      const createdAt = new Date();
+
       // Check if the conversation hasn't been accepted by the other user
-      // if (message.conversationStatus === CONVERSATION_STATUS.pending) {
-      //   const conversation: IConversationDocument | null = await chatService.getConversationById(
-      //     `${message.conversationId}`
-      //   );
-      //   if (!conversation) {
-      //     return;
-      //   }
-      // }
+      if (message.conversationStatus === CONVERSATION_STATUS.pending) {
+        const conversation: IConversationDocument | null = await chatService.getConversationById(
+          `${message.conversationId}`
+        );
+        if (!conversation) {
+          return;
+        }
+      }
 
       conversationQueue.addConversationJob(ConversationJobs.increaseUnreadCount, {
         value: { sender: message.sender, receiver: message.receiver }
@@ -55,6 +58,8 @@ export class ChatHandler {
       chatQueue.addChatJob(ChatJobs.addChatMessageToDB, { value: message });
 
       // TODO: send notification to user using queue
+      console.log('SENDING MESSAGE TO USER:', message.receiver);
+      message.createdAt = createdAt;
 
       this.socket.to(`${message.receiver}`).emit('new-message', message);
     });
