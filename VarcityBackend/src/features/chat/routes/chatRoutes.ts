@@ -1,5 +1,6 @@
 import { createChat } from '@chat/controllers/create-chat';
 import { getChats } from '@chat/controllers/get-chats';
+import { updateChat } from '@chat/controllers/update-chat';
 import express, { Router } from 'express';
 
 class ChatRoutes {
@@ -17,8 +18,8 @@ class ChatRoutes {
     // Open a chat with a user
     this.router.post('/chat/open', createChat.conversation);
 
-    this.router.put('/chat/accept', createChat.acceptConversationRequest);
-    this.router.put('/chat/reject', createChat.rejectConversationRequest);
+    this.router.put('/chat/accept', updateChat.acceptConversationRequest);
+    this.router.put('/chat/reject', updateChat.rejectConversationRequest);
 
     return this.router;
   }
