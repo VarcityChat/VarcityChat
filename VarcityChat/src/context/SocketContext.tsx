@@ -101,7 +101,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       value={{ socket, isConnected, connect, disconnect }}
     >
       <Animated.View
-        className="absolute left-0 right-0 bg-yellow-500 p-2 z-50 h-[40px]"
+        className="absolute left-0 right-0 bg-yellow-500 dark:bg-yellow-500 p-2 z-50 h-[40px]"
         style={[bannerStyle, { top: insets.top }]}
       >
         <View className="flex flex-row items-center justify-center gap-2">
