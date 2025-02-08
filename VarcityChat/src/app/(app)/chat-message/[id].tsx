@@ -28,6 +28,10 @@ import { useRealm } from "@realm/react";
 import { convertToGiftedChatMessage } from "@/core/utils";
 import { Ionicons } from "@expo/vector-icons";
 
+const MESSAGES_PER_PAGE = 50;
+const MESSAGE_ARCHIVE_THRESHOLD = 1000; // Archive messages beyound this count
+const MESSAGE_CLEANUP_DAYS = 10;
+
 export default function ChatMessage() {
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
@@ -40,6 +44,8 @@ export default function ChatMessage() {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const currentPage = useRef(1);
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);

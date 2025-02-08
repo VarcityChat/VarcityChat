@@ -1,5 +1,5 @@
 import { ExtendedMessage } from "@/api/chats/types";
-import { BSON } from "realm";
+import { BSON, index } from "realm";
 
 export class MessageSchema extends Realm.Object<ExtendedMessage> {
   _id!: BSON.ObjectID;
@@ -11,6 +11,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
   receiver!: string;
   isQueued!: boolean;
   messageId?: string;
+  isArchived?: boolean;
   lastSyncTimestamp?: Date;
 
   static schema: Realm.ObjectSchema = {
@@ -18,15 +19,16 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
     primaryKey: "_id",
     properties: {
       _id: "objectId",
-      conversationId: "string",
+      conversationId: { type: "string", indexed: true },
       content: "string",
-      createdAt: "date",
+      createdAt: { type: "date", indexed: true },
       deliveryStatus: { type: "string", default: "pending" },
       sender: "string",
       receiver: "string",
       isQueued: { type: "bool", default: false },
-      messageId: "string?",
-      lastSyncTimestamp: "date?",
+      messageId: { type: "string", optional: true, indexed: true },
+      isArchived: { type: "bool", default: false },
+      lastSyncTimestamp: { type: "date", optional: true },
     },
   };
 }
