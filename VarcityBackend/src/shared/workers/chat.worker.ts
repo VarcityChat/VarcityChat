@@ -1,7 +1,7 @@
 import { DoneCallback, Job } from 'bull';
 import { config } from '@root/config';
 import { chatService } from '@service/db/chat.service';
-import { ISenderReceiver } from '@chat/interfaces/chat.interface';
+import { ISenderReceiver, IUpdateConversation } from '@chat/interfaces/chat.interface';
 import Logger from 'bunyan';
 
 const log: Logger = config.createLogger('chatWorker');
@@ -27,6 +27,23 @@ class ConversationWorker {
       await chatService.increaseUnreadMessageCount(
         `${(value as ISenderReceiver).sender}`,
         `${(value as ISenderReceiver).receiver}`
+      );
+      job.progress(100);
+      done(null, job.data);
+    } catch (error) {
+      log.error(error);
+      done(error as Error);
+    }
+  }
+
+  async updateConversationForNewMessage(job: Job, done: DoneCallback): Promise<void> {
+    try {
+      const { value } = job.data;
+      await chatService.updateConversationForNewMessage(
+        `${(value as IUpdateConversation).sender}`,
+        `${(value as IUpdateConversation).receiver}`,
+        (value as IUpdateConversation).lastMessageTimestamp,
+        (value as IUpdateConversation).lastMessage
       );
       job.progress(100);
       done(null, job.data);

@@ -7,7 +7,8 @@ export enum ChatJobs {
 }
 
 export enum ConversationJobs {
-  increaseUnreadCount = 'increaseUnreadCount'
+  increaseUnreadCount = 'increaseUnreadCount',
+  updateConversationForNewMessage = 'updateConversationForNewMessage'
 }
 
 class ChatQueue extends BaseQueue {
@@ -28,6 +29,11 @@ class ConversationQueue extends BaseQueue {
       ConversationJobs.increaseUnreadCount,
       10,
       conversationWorker.increaseUnreadMessageCount
+    );
+    this.processJob(
+      ConversationJobs.updateConversationForNewMessage,
+      10,
+      conversationWorker.updateConversationForNewMessage
     );
   }
 

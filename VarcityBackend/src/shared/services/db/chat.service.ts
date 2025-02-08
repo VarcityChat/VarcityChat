@@ -56,8 +56,42 @@ class ChatService {
     }
   }
 
+  public async updateConversationForNewMessage(
+    sender: string,
+    receiver: string,
+    lastMessageTimestamp: Date,
+    lastMessage: string
+  ): Promise<void> {
+    const query = {
+      $or: [
+        { user1: sender, user2: receiver },
+        { user1: receiver, user2: sender }
+      ]
+    };
+    const conversation = await ConversationModel.findOne(query);
+    if (conversation) {
+      if (sender == conversation.user1) {
+        conversation.unreadCountUser2++;
+      } else {
+        // That means the sender is the second user
+        conversation.unreadCountUser1++;
+      }
+      conversation.lastMessageTimestamp = lastMessageTimestamp;
+      conversation.lastMessage = lastMessage;
+      await conversation.save();
+    }
+  }
+
   public async addMessageToDB(message: IMessageData): Promise<void> {
     await MessageModel.create(message);
+  }
+
+  public async getNextSequence(conversationId: string): Promise<number> {
+    const result = await ConversationModel.findOneAndUpdate(
+      { _id: conversationId },
+      { $inc: { messageSequence: 1 } }
+    );
+    return result?.messageSequence || 0;
   }
 
   // public async getConversation(): Promise<IConversationDocument | null> {}
@@ -66,7 +100,7 @@ class ChatService {
     const conversations: IConversationDocument[] = await ConversationModel.find({
       $or: [{ user1: userId }, { user2: userId }]
     })
-      .populate('user1 user2 lastMessage.messageId')
+      .populate('user1 user2 lastMessage')
       .sort({ lastMessageTimestamp: -1 });
     return conversations;
   }

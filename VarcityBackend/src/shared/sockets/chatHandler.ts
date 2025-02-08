@@ -16,6 +16,7 @@ import { addChatSchema } from '@chat/schemes/chat.scheme';
 import { config } from '@root/config';
 import Logger from 'bunyan';
 import Joi from 'joi';
+import { ObjectId } from 'mongodb';
 
 const log: Logger = config.createLogger('ChatSocket Handler');
 
@@ -27,7 +28,7 @@ export class ChatHandler {
   }
 
   handle(): void {
-    this.socket.on('new-message', async (message: IMessageData) => {
+    this.socket.on('new-message', async (message: IMessageData, callback) => {
       console.log('\nMESSAGE COMING IN:', message);
 
       const error = await this.validateChatMessage(message);
@@ -37,10 +38,9 @@ export class ChatHandler {
           message: 'Validation Failed',
           details: error.details
         });
+        callback({ success: false });
         return;
       }
-
-      const createdAt = new Date();
 
       // Check if the conversation hasn't been accepted by the other user
       if (message.conversationStatus === CONVERSATION_STATUS.pending) {
@@ -52,16 +52,32 @@ export class ChatHandler {
         }
       }
 
-      conversationQueue.addConversationJob(ConversationJobs.increaseUnreadCount, {
-        value: { sender: message.sender, receiver: message.receiver }
+      const messageObjectID = new ObjectId();
+      const sequence = await chatService.getNextSequence(`${message.conversationId}`);
+      message.sequence = sequence;
+      message.createdAt = new Date();
+
+      conversationQueue.addConversationJob(ConversationJobs.updateConversationForNewMessage, {
+        value: {
+          sender: message.sender,
+          receiver: message.receiver,
+          lastMessageTimestamp: message.createdAt,
+          lastMessage: `${messageObjectID}`
+        }
       });
-      chatQueue.addChatJob(ChatJobs.addChatMessageToDB, { value: message });
+      chatQueue.addChatJob(ChatJobs.addChatMessageToDB, {
+        value: { ...message, _id: messageObjectID }
+      });
 
       // TODO: send notification to user using queue
-      console.log('SENDING MESSAGE TO USER:', message.receiver);
-      message.createdAt = createdAt;
+      console.log('SENDING MESSAGE TO RECEIVER:', message.receiver);
 
-      this.socket.to(`${message.receiver}`).emit('new-message', message);
+      this.socket
+        .to(`${message.receiver}`)
+        .emit('new-message', { _id: messageObjectID, ...message });
+      if (callback) {
+        callback({ success: true, messageId: messageObjectID });
+      }
     });
 
     this.socket.on('typing', (data) => {});

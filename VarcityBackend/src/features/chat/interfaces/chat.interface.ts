@@ -10,6 +10,7 @@ export interface IConversationDocument extends Document {
   unreadCountUser1: number;
   unreadCountUser2: number;
   status: CONVERSATION_STATUS.pending | CONVERSATION_STATUS.accepted | CONVERSATION_STATUS.rejected;
+  messageSequence: number;
 }
 
 export interface IMessageDocument extends Document {
@@ -31,6 +32,8 @@ export interface IMessageDocument extends Document {
   };
   readAt?: Date;
   createdAt: Date;
+  localId: string;
+  sequence: number;
 }
 
 export interface IMessageData {
@@ -53,6 +56,8 @@ export interface IMessageData {
     | CONVERSATION_STATUS.accepted
     | CONVERSATION_STATUS.rejected;
   createdAt?: Date;
+  localId: string;
+  sequence: number;
 }
 
 export interface ISenderReceiver {
@@ -60,12 +65,19 @@ export interface ISenderReceiver {
   receiver: string | ObjectId;
 }
 
+export interface IUpdateConversation {
+  sender: string | ObjectId;
+  receiver: string | ObjectId;
+  lastMessageTimestamp: Date;
+  lastMessage: string;
+}
+
 export interface IMessageJob {
   value: string | IMessageData | IMessageDocument;
 }
 
 export interface IConversationJob {
-  value: string | ISenderReceiver;
+  value: string | ISenderReceiver | IUpdateConversation;
 }
 
 export enum MEDIA_TYPE {

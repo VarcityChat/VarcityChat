@@ -25,7 +25,9 @@ const messageSchema: Schema = new Schema<IMessageDocument>(
       mediaUrl: String
     },
     seenAt: Date,
-    readAt: Date
+    readAt: Date,
+    sequence: { type: Number, required: true },
+    localId: String
   },
   { timestamps: true }
 );

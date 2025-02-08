@@ -17,7 +17,8 @@ const conversationSchema = new Schema<IConversationDocument>(
         CONVERSATION_STATUS.rejected
       ],
       default: CONVERSATION_STATUS.pending
-    }
+    },
+    messageSequence: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

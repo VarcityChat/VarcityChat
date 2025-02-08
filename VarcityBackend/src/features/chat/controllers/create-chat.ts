@@ -26,8 +26,8 @@ class Add {
       body: `${targetUser.firstname}: sent you a new message request`,
       title: 'New Message Request'
     });
-    // TODO: send push notification to 'targetUserId' informing on new message request
 
+    // TODO: send push notification to 'targetUserId' informing on new message request
     res.status(HTTP_STATUS.CREATED).json({ message: 'Conversation created', conversation });
   }
 }

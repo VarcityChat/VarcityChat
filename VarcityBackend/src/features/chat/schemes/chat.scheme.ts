@@ -8,7 +8,8 @@ const addChatSchema: ObjectSchema = Joi.object().keys({
   mediaUrls: Joi.array().max(5).optional(),
   mediaType: Joi.string().optional().allow(null, ''),
   reply: Joi.object().optional(),
-  conversationStatus: Joi.string().optional()
+  conversationStatus: Joi.string().optional(),
+  localId: Joi.string().required()
 });
 
 const addConversationSchema: ObjectSchema = Joi.object().keys({
