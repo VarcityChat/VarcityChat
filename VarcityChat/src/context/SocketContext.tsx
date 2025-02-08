@@ -9,6 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { authStorage } from "@/core/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/core/hooks/use-auth";
 
 const BANNER_HEIGHT = 40;
 
@@ -30,6 +31,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const insets = useSafeAreaInsets();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { isAuthenticated } = useAuth();
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
 
@@ -45,7 +47,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!isConnected || socket === null) {
+    if ((!isConnected || socket === null) && isAuthenticated) {
       translateY.value = withSpring(0, {
         damping: 12,
         stiffness: 100,

@@ -14,10 +14,12 @@ export const useChatMessages = () => {
   const addMessageToLocalRealm = useCallback(
     (message: ExtendedMessage) => {
       // Check if message with the same localId exists
-      const messageExists = realm.objectForPrimaryKey("Message", message._id);
+      const messageExists = realm
+        .objects("Message")
+        .filtered(`messageId == $0`, message._id);
       console.log("\nMESSAGE EXISTS", messageExists);
 
-      if (!messageExists) {
+      if (!!messageExists) {
         realm.write(() => {
           realm.create("Message", {
             _id: new BSON.ObjectID(),

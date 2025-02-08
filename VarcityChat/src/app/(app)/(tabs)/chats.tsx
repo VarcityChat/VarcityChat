@@ -150,7 +150,7 @@ export default function Chats() {
                       : item.user1.firstname}
                   </Text>
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
-                    {item.lastMessage.content ||
+                    {item?.lastMessage?.content ||
                       (item.status !== "accepted" && "Pending request")}
                   </Text>
                 </View>
