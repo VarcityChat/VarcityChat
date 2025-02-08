@@ -25,8 +25,8 @@ import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import { ExtendedMessage } from "@/api/chats/types";
 import { useAuth } from "@/core/hooks/use-auth";
 import { useRealm } from "@realm/react";
-import { BSON } from "realm";
 import { convertToGiftedChatMessage } from "@/core/utils";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ChatMessage() {
   const { id: conversationId } = useLocalSearchParams();
@@ -109,6 +109,28 @@ export default function ChatMessage() {
     }
   }, [replyMessage]);
 
+  const renderTicks = (message: ExtendedMessage) => {
+    if (message.user._id !== user!._id) return null;
+    if (message.received) {
+      // Double tick (✓✓) - Message Delivered
+      return (
+        <View style={{ flexDirection: "row", marginRight: 4 }}>
+          <Ionicons name="checkmark-done" size={12} color="green" />
+        </View>
+      );
+    } else if (message.sent) {
+      // Single tick (✓) - Message Sent
+      return (
+        <Ionicons
+          name="checkmark"
+          size={12}
+          color="gray"
+          style={{ marginRight: 4 }}
+        />
+      );
+    }
+    return null;
+  };
   return (
     <View className="flex flex-1" style={{ marginBottom: insets.bottom }}>
       {isPending ? (
@@ -137,6 +159,7 @@ export default function ChatMessage() {
                 left: { backgroundColor: colors.grey[50] },
                 right: { backgroundColor: colors.primary[50] },
               }}
+              renderTicks={renderTicks}
             />
           )}
           renderSend={(props) => (
