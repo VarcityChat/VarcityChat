@@ -195,15 +195,7 @@ export default function ChatMessage() {
           )}
           textInputProps={styles.composer}
           renderInputToolbar={(props) => (
-            <InputToolbar
-              {...props}
-              containerStyle={{}}
-              renderActions={() => (
-                <TouchableOpacity className="h-[44px] justify-center items-center left-3">
-                  <EmojiSelectSvg />
-                </TouchableOpacity>
-              )}
-            />
+            <InputToolbar {...props} containerStyle={{ height: 60 }} />
           )}
           renderMessage={(props) => (
             <ChatMessageBox
