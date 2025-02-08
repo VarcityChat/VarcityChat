@@ -1,5 +1,7 @@
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import { ExtendedMessage } from "@/api/chats/types";
+import { IMessage } from "react-native-gifted-chat";
 
 export const trimText = (text: string, maxLength: number = 20) => {
   return text.length > maxLength
@@ -117,4 +119,26 @@ export const uploadToCloudinarySigned = async (
       return null;
     }
   }
+};
+
+export const convertToGiftedChatMessage = (
+  message: ExtendedMessage
+): IMessage => {
+  return {
+    _id: message._id.toString(),
+    text: message.content || "",
+    createdAt: message.createdAt,
+    user: {
+      _id: message.sender,
+    },
+    sent: message.deliveryStatus === "sent",
+    received: message.deliveryStatus === "delivered",
+    pending: message.deliveryStatus === "pending",
+  };
+};
+
+export const convertGiftedMessages = (
+  messages: ExtendedMessage[]
+): IMessage[] => {
+  return messages.map(convertToGiftedChatMessage);
 };

@@ -3,15 +3,20 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./src/*",],
-      "@env": ["./src/core/env.js"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@env": [
+        "./src/core/env.js"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
   ],
   "exclude": [
     "node_modules",
@@ -22,5 +27,5 @@
     "android",
     "ios",
     "lint-staged.config.js"
-  ],
+  ]
 }

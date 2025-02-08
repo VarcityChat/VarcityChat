@@ -11,7 +11,7 @@ export const useChats = () => {
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
   const dispatch = useAppDispatch();
 
-  const updateChatOrder = (newMessage: ExtendedMessage) => {
+  const updateChatOrder = (newMessage: Partial<ExtendedMessage>) => {
     // configure animation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
@@ -30,10 +30,10 @@ export const useChats = () => {
             // add to beginning with update message
             draft.unshift({
               ...chat,
-              lastMessage: newMessage.content as string,
+              lastMessage: { content: newMessage.content },
               lastMessageTimestamp: newMessage.createdAt
-                ? newMessage.createdAt
-                : new Date(),
+                ? newMessage.createdAt.toString()
+                : new Date().toString(),
             });
           }
         }
@@ -78,10 +78,6 @@ export const useActiveChat = (chatId: string) => {
   const chat = useAppSelector(selectChatById(chatId));
   const { user } = useAuth();
 
-  const handleAcceptRequest = async () => {};
-
-  const handleRejectRequest = async () => {};
-
   const activeChatUser = chat
     ? chat.user1._id === user?._id
       ? chat.user2
@@ -91,8 +87,6 @@ export const useActiveChat = (chatId: string) => {
   return {
     chat,
     activeChatUser,
-    handleAcceptRequest,
-    handleRejectRequest,
     isPending: chat?.status === "pending",
   };
 };

@@ -20,26 +20,36 @@ import { useToast } from "@/core/hooks/use-toast";
 import { defaultAvatarUrl } from "../../../../constants/chats";
 import { useSocket } from "@/context/SocketContext";
 import { ExtendedMessage } from "@/api/chats/types";
+import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
 
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { socket } = useSocket();
+  const { addMessageToLocalRealm } = useChatMessages();
   const { chats, isLoading, error, updateChatOrder } = useChats();
   const { showToast } = useToast();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
 
+  const handleNewMessage = (message: ExtendedMessage) => {
+    updateChatOrder(message);
+    addMessageToLocalRealm(message);
+  };
+
   useEffect(() => {
-    socket?.on("new-message", (message: ExtendedMessage) => {
-      console.log("NEW MESSAGE:", message);
-      updateChatOrder(message);
-    });
-    return () => {
-      socket?.off("new-message", updateChatOrder);
-    };
-  }, []);
+    if (socket) {
+      socket.on("new-message", (message: ExtendedMessage) => {
+        console.log("NEW MESSAGE:", message);
+        handleNewMessage(message);
+      });
+
+      return () => {
+        socket.off("new-message", handleNewMessage);
+      };
+    }
+  }, [socket]);
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -140,7 +150,7 @@ export default function Chats() {
                       : item.user1.firstname}
                   </Text>
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
-                    {item.lastMessage ||
+                    {item.lastMessage.content ||
                       (item.status !== "accepted" && "Pending request")}
                   </Text>
                 </View>

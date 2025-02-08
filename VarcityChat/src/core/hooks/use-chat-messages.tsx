@@ -1,119 +1,99 @@
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/store";
-import {
-  addMessage,
-  setLoadingState,
-  updateMessage,
-  upsertMessages,
-} from "../chats/message-slice";
-import { MessagePersistenceManager } from "../services/chat-service";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ExtendedMessage } from "@/api/chats/types";
+import { useChats } from "./use-chats";
 import { useSocket } from "@/context/SocketContext";
+import { useRealm } from "@realm/react";
+import { BSON } from "realm";
+import { useCallback } from "react";
+import { MessageSchema } from "../models/message-model";
 
-export const useChatMessages = (chatId: string) => {
-  const dispatch = useAppDispatch();
-  const messages = useAppSelector(
-    (state) => state.messages.chatMessages[chatId] || []
-  );
-  const loading = useAppSelector(
-    (state) => state.messages.loadingStates[chatId]
-  );
-  const { socket } = useSocket();
+export const useChatMessages = () => {
+  const { updateChatOrder } = useChats();
+  const { socket, isConnected } = useSocket();
+  const realm = useRealm();
 
-  useEffect(() => {
-    loadMessages();
-  }, []);
+  const addMessageToLocalRealm = useCallback(
+    (message: ExtendedMessage) => {
+      // Check if message with the same localId exists
+      const messageExists = realm.objectForPrimaryKey("Message", message._id);
+      console.log("\nMESSAGE EXISTS", messageExists);
 
-  const loadMessages = async () => {
-    dispatch(setLoadingState({ chatId, loading: true }));
-
-    try {
-      // Load from local storage first
-      const localMessages = await MessagePersistenceManager.loadMessages(
-        chatId
-      );
-      if (localMessages.length > 0) {
-        dispatch(upsertMessages(localMessages));
+      if (!messageExists) {
+        realm.write(() => {
+          realm.create("Message", {
+            _id: new BSON.ObjectID(),
+            content: message.content,
+            createdAt: message.createdAt,
+            sender: message.sender,
+            receiver: message.receiver,
+            conversationId: message.conversationId,
+            deliveryStatus: "sent",
+            messageId: message._id,
+          });
+        });
       }
+    },
+    [realm]
+  );
 
-      // Then fetch from server for updates
-      const lastSync = await AsyncStorage.getItem(
-        `${MessagePersistenceManager.STORAGE_PREFIX}${chatId}`
-      );
-      const serverMessages = await fetchMessagesFromServer(chatId, lastSync);
-
-      if (serverMessages.length > 0) {
-        dispatch(upsertMessages(serverMessages));
-        await MessagePersistenceManager.saveMessages(chatId, serverMessages);
-      }
-    } catch (error) {
-      console.error("Error loading messages:", error);
-    } finally {
-      dispatch(setLoadingState({ chatId, loading: false }));
-    }
-  };
-
-  const sendMessage = async (message: ExtendedMessage) => {
-    // optimistic update
-    const optimisticMessage: ExtendedMessage = {
-      ...message,
-      localId: Date.now().toString(),
-      deliveryStatus: "sent" as const,
-    };
-
-    dispatch(addMessage(optimisticMessage));
-    await MessagePersistenceManager.saveMessages(chatId, [optimisticMessage]);
-
-    try {
-      // Send via socket
-      socket?.emit("send_message", message, async (response: any) => {
-        if (response.success) {
-          const updatedMessage = {
-            ...message,
-            _id: response.message._id,
-            deliveryStatus: "sent" as const,
-          };
-          dispatch(updateMessage({ id: message._id, changes: updatedMessage }));
-          MessagePersistenceManager.updateMessage(chatId, updatedMessage).catch(
-            (error) =>
-              console.error(`Failed to update persisted message:`, error)
-          );
+  const updateChatMessage = useCallback(
+    (
+      messageLocalId: BSON.ObjectID,
+      status: "pending" | "sent" | "delivered",
+      messageId: string
+    ) => {
+      realm.write(() => {
+        const message = realm
+          .objects<MessageSchema>("Message")
+          .filtered("_id == $0", messageLocalId)[0];
+        if (message) {
+          message.deliveryStatus = status;
+          message.messageId = messageId;
         }
       });
-    } catch (error) {
-      // Revert optimistic update
-      dispatch(
-        updateMessage({
-          id: optimisticMessage._id,
-          changes: { deliveryStatus: "failed" as const },
-        })
+    },
+    []
+  );
+
+  const sendMessage = async (message: ExtendedMessage, chatId: string) => {
+    // generate a new local id for realm
+    const localId = new BSON.ObjectID();
+    const createdAt = new Date();
+
+    // optimistic update
+    realm.write(() => {
+      realm.create("Message", {
+        ...message,
+        _id: localId,
+        conversationId: chatId,
+        deliveryStatus: "pending",
+        createdAt,
+      });
+    });
+
+    updateChatOrder({
+      conversationId: chatId,
+      content: message.content,
+      createdAt,
+    });
+
+    if (isConnected && socket) {
+      // send the message content and local id to the server
+      socket.emit(
+        "new-message",
+        { ...message, localId },
+        (ack: { success: boolean; messageId: string }) => {
+          console.log("MESSAGE ACKNOWLEDGEMENT:", ack);
+          if (ack.success) {
+            updateChatMessage(localId, "sent", ack.messageId);
+          }
+        }
       );
+    } else {
+      // TODO: queue message if there is no internet connection
+      console.log("QUEUING MESSAGE:", message);
+      // MessageService.queueMessage(newMessage);
     }
   };
 
-  const updateMessageStatus = async (
-    messageId: string,
-    status: "sent" | "delivered" | "read"
-  ) => {
-    dispatch(
-      updateMessage({ id: messageId, changes: { deliveryStatus: status } })
-    );
-
-    // update in local storage
-    // const message = messages.find((m) => m === messageId);
-    // if (message) {
-    //   const updatedMessage = { ...message, deliveryStatus: status };
-    //   await MessagePersistenceManager.updateMessage(chatId, updatedMessage);
-    // }
-  };
-
-  return { messages, loading, sendMessage, updateMessageStatus, loadMessages };
+  return { sendMessage, addMessageToLocalRealm };
 };
-
-async function fetchMessagesFromServer(
-  chatId: string,
-  lastSync: string | null
-): Promise<ExtendedMessage[]> {
-  return Promise.resolve([] as ExtendedMessage[]);
-}

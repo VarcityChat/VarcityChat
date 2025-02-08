@@ -25,12 +25,7 @@ export const messagesApi = api.injectEndpoints({
         url: "/chat/conversations",
         method: "GET",
       }),
-      transformResponse: (response: { list: IChat[] }) =>
-        response.list.sort(
-          (a, b) =>
-            (b.lastMessageTimestamp?.getTime() || 0) -
-            (a.lastMessageTimestamp?.getTime() || 0)
-        ),
+      transformResponse: (response: { list: IChat[] }) => response.list,
       providesTags: ["Chats"],
     }),
 

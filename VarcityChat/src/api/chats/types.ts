@@ -4,9 +4,8 @@ import { EntityId } from "@reduxjs/toolkit";
 // Extend GiftedChat's IMessage with our custom field
 export interface ExtendedMessage extends IMessage {
   _id: string;
-  chatId: string;
   conversationId: string;
-  deliveryStatus: "sent" | "delivered" | "read" | "failed";
+  deliveryStatus: "sent" | "delivered" | "read" | "failed" | "pending";
   localId?: string; // For optimistic updates
   deliveredAt?: number;
   reatAt?: number;
@@ -43,8 +42,8 @@ export interface IChat {
   _id: string;
   user1: IChatUser;
   user2: IChatUser;
-  lastMessage: string;
-  lastMessageTimestamp: Date;
+  lastMessage: Partial<ExtendedMessage>;
+  lastMessageTimestamp: string | Date;
   unreadCountUser1: number;
   unreadCountUser2: number;
   status: "pending" | "rejected" | "accepted";

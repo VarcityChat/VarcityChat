@@ -1,3 +1,4 @@
+import Realm from "realm";
 import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import {
@@ -30,6 +31,7 @@ import {
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { RealmProvider, useRealm } from "@realm/react";
 import { persistor, store, useAppDispatch } from "@/core/store/store";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
@@ -40,6 +42,8 @@ export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
 import { SocketProvider } from "@/context/SocketContext";
+import { MessageSchema } from "@/core/models/message-model";
+import { MessageService } from "@/core/services/chat-service";
 
 export const unstable_settings = {
   initialRouteName: "(auth)",
@@ -85,6 +89,15 @@ function RootLayoutNav() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const realm = useRealm();
+
+  // Initialize realm for the message service
+  useEffect(() => {
+    if (realm) {
+      console.log("\n REALM PATH:", realm.path);
+      MessageService.initialize(realm);
+    }
+  }, [realm]);
 
   useEffect(() => {
     const handleInitialize = async () => {
@@ -120,23 +133,58 @@ function RootLayoutNav() {
 function Providers({ children }: { children: ReactNode }) {
   const theme = useThemeConfig();
 
+  const migration = (oldRealm: Realm, newRealm: Realm) => {
+    if (oldRealm.schemaVersion < 1) {
+      const oldObjects = oldRealm.objects("Message");
+      const newObjects = newRealm.objects("Message");
+
+      for (let i = 0; i < oldObjects.length; i++) {
+        const oldObject = oldObjects[i];
+        const newObject = newObjects[i];
+        newObject.content = oldObject.content;
+        newObject.createdAt = oldObject.createdAt;
+        newObject.senderId = oldObject.senderId;
+        newObject.receiverId = oldObject.receiverId;
+        newObject.conversationId = oldObject.conversationId;
+        newObject.isRead = oldObject.isRead;
+        newObject.isDelivered = oldObject.isDelivered;
+        newObject.isEdited = oldObject.isEdited;
+        newObject.isDeleted = oldObject.isDeleted;
+        newObject.isSeen = oldObject.isSeen;
+        newObject.isSent = oldObject.isSent;
+        newObject.isFailed = oldObject.isFailed;
+        newObject.isPending = oldObject.isPending;
+        newObject.isFailed = oldObject.isFailed;
+        newObject.isPending = oldObject.isPending;
+      }
+    }
+  };
+
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <GestureHandlerRootView
-          style={styles.container}
-          className={theme.dark ? "dark" : undefined}
-        >
-          <ThemeProvider value={theme}>
-            <SocketProvider>
-              <MenuProvider>
-                <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
-              </MenuProvider>
-            </SocketProvider>
-          </ThemeProvider>
-        </GestureHandlerRootView>
-      </PersistGate>
-    </Provider>
+    <RealmProvider
+      schema={[MessageSchema]}
+      schemaVersion={6}
+      onMigration={migration}
+    >
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <GestureHandlerRootView
+            style={styles.container}
+            className={theme.dark ? "dark" : undefined}
+          >
+            <ThemeProvider value={theme}>
+              <SocketProvider>
+                <MenuProvider>
+                  <BottomSheetModalProvider>
+                    {children}
+                  </BottomSheetModalProvider>
+                </MenuProvider>
+              </SocketProvider>
+            </ThemeProvider>
+          </GestureHandlerRootView>
+        </PersistGate>
+      </Provider>
+    </RealmProvider>
   );
 }
 

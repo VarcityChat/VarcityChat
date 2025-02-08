@@ -1,72 +1,108 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ExtendedMessage } from "@/api/chats/types";
+import { Socket } from "socket.io-client";
+import Realm from "realm";
 
-export class MessagePersistenceManager {
-  static readonly STORAGE_PREFIX = "@messages:";
-  static readonly LAST_SYNC_KEY = "@messages:lastSync";
-  static readonly BATCH_SiZE = 50;
+export class MessageService {
+  static realm: Realm | null = null;
+  // static async initialize() {
+  //   this.realm = await Realm.open({
+  //     schema: [MessageSchema],
+  //     schemaVersion: 1,
+  //   } as Realm.Configuration);
+  // }
 
-  static async saveMessages(chatId: string, messages: ExtendedMessage[]) {
-    try {
-      const chunks = this.chunkArray(messages, this.BATCH_SiZE);
-
-      for (let i = 0; i < chunks.length; i++) {
-        const key = `${this.STORAGE_PREFIX}${chatId}:${i}`;
-        await AsyncStorage.setItem(key, JSON.stringify(chunks[i]));
-
-        // Save chunk count
-        await AsyncStorage.setItem(
-          `${this.STORAGE_PREFIX}${chatId}:count`,
-          `${chunks.length}`
-        );
-      }
-    } catch (error) {
-      console.error(`Error saving messages:`, error);
-    }
+  static initialize(realmInstance: Realm) {
+    this.realm = realmInstance;
   }
 
-  static async loadMessages(chatId: string): Promise<ExtendedMessage[]> {
-    try {
-      const countStr = await AsyncStorage.getItem(
-        `${this.STORAGE_PREFIX}${chatId}:count`
+  private static getRealm(): Realm {
+    console.log(this.realm);
+    if (!this.realm) {
+      throw new Error(
+        "Realm not initialized. Call MessageService.initialize() first."
       );
-      if (!countStr) return [];
+    }
+    return this.realm;
+  }
 
-      const count = parseInt(countStr, 10);
-      const messages: ExtendedMessage[] = [];
+  static saveMessage(chatId: string, message: ExtendedMessage) {
+    const realm = this.getRealm();
+    realm.write(() => {
+      realm.create("Message", {
+        ...message,
+        conversationId: chatId,
+        localId: message.localId || Date.now().toString(),
+      });
+    });
+  }
 
-      for (let i = 0; i < count; i++) {
-        const key = `${this.STORAGE_PREFIX}${chatId}:${i}`;
-        const chunk = await AsyncStorage.getItem(key);
-        if (chunk) {
-          messages.push(...JSON.parse(chunk));
-        }
-      }
-      return messages;
-    } catch (error) {
-      console.error(`Error loading messages:`, error);
-      return [];
+  static getMessages(chatId: string): ExtendedMessage[] {
+    const realm = this.getRealm();
+    return Array.from(
+      realm
+        .objects<ExtendedMessage>("Message")
+        .filtered("chatId == $0", chatId)
+        .sorted("createdAt", true)
+    );
+  }
+
+  static updateMessageStatus(
+    messageId: string,
+    status: "sent" | "delivered" | "read"
+  ) {
+    const realm = this.getRealm();
+    const message = realm.objectForPrimaryKey("Message", messageId);
+    if (message) {
+      realm.write(() => {
+        message.deliveryStatus = status;
+      });
     }
   }
 
-  static async updateMessage(chatId: string, message: ExtendedMessage) {
+  static async syncMessages(chatId: string, lastSyncTimestamp: number) {
     try {
-      const messages = await this.loadMessages(chatId);
-      const index = messages.findIndex((m) => m._id === message._id);
-      if (index !== -1) {
-        messages[index] = message;
-        await this.saveMessages(chatId, messages);
-      }
+      // Fetch new messages from server since last sync
+      // this.realm?.write(() => {
+      //   newMessages.forEach(message => {
+      //     this.realm?.write('Message')
+      //   })
+      // })
     } catch (error) {
-      console.error(`Error updating message:`, error);
+      console.error("Sync failed:", error);
     }
+
+    // const messages = this.getMessages(chatId);
+    // const newMessages = messages.filter(
+    //   (message) => message.createdAt.getTime() > lastSyncTimestamp
+    // );
   }
 
-  private static chunkArray<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
+  static queueMessage(message: ExtendedMessage) {
+    const realm = this.getRealm();
+    realm.write(() => {
+      this.realm!.create("Message", {
+        ...message,
+        deliveryStatus: "pending",
+        isQueued: true,
+      });
+    });
+  }
+
+  static async processQueueMessages(socket: Socket) {
+    const realm = this.getRealm();
+    const queuedMessages = realm
+      .objects("Message")
+      .filtered("isQueued == true");
+    for (const message of queuedMessages) {
+      try {
+        // await this.sendMessage(socket, message);
+        realm.write(() => {
+          message.isQueued = false;
+          message.deliveryStatus = "sent";
+        });
+      } catch (error) {
+        console.error("Failed to send queued messages:", error);
+      }
     }
-    return chunks;
   }
 }

@@ -7,7 +7,6 @@ import {
   InputToolbar,
   Send,
 } from "react-native-gifted-chat";
-import { messages as messagesData } from "../../../../constants/message";
 import { TouchableOpacity, View, Text, Image, colors } from "@/ui";
 import { emptyChatImg } from "@/ui/images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,10 +21,21 @@ import { Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import { useActiveChat } from "@/core/hooks/use-chats";
 import { MessageRequest } from "@/components/chats/message-request";
+import { useChatMessages } from "@/core/hooks/use-chat-messages";
+import { ExtendedMessage } from "@/api/chats/types";
+import { useAuth } from "@/core/hooks/use-auth";
+import { useRealm } from "@realm/react";
+import { BSON } from "realm";
+import { convertToGiftedChatMessage } from "@/core/utils";
 
 export default function ChatMessage() {
-  const { id } = useLocalSearchParams();
-  const { chat, activeChatUser, isPending } = useActiveChat(id as string);
+  const { id: conversationId } = useLocalSearchParams();
+  const { user } = useAuth();
+  const { chat, activeChatUser, isPending } = useActiveChat(
+    conversationId as string
+  );
+  const { sendMessage } = useChatMessages();
+  const realm = useRealm();
 
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -35,26 +45,49 @@ export default function ChatMessage() {
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
   useEffect(() => {
-    // setMessages([
-    //   ...messagesData.map((message) => {
-    //     return {
-    //       _id: message._id,
-    //       text: message.text,
-    //       createdAt: new Date(),
-    //       user: {
-    //         _id: message.from,
-    //         name: message.from ? "You" : "Bob",
-    //       },
-    //     };
-    //   }),
-    // ]);
-  }, []);
+    const messages = realm
+      .objects<ExtendedMessage>("Message")
+      .filtered(`conversationId == $0`, conversationId)
+      .sorted("createdAt", true);
 
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
+    console.log("MESSAGES FROM REALM:", messages);
+
+    messages.addListener((messages) => {
+      console.log("NEW MESSAGES FROM LISTENER:", messages);
+      setMessages(
+        messages.map((message) =>
+          convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+        )
+      );
+    });
+
+    setMessages(
+      messages.map((message) =>
+        convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+      )
     );
-  }, []);
+
+    return () => {
+      messages.removeAllListeners();
+    };
+  }, [realm, conversationId]);
+
+  const onSend = useCallback(
+    (messages: IMessage[]) => {
+      const [message] = messages;
+      sendMessage(
+        {
+          conversationId: conversationId as string,
+          content: message.text,
+          sender: user!._id,
+          receiver: activeChatUser!._id,
+        } as unknown as ExtendedMessage,
+        conversationId as string
+      );
+      console.log("MESSAGE TO SEND", messages);
+    },
+    [conversationId, user, activeChatUser, sendMessage]
+  );
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -84,7 +117,7 @@ export default function ChatMessage() {
         <GiftedChat
           messages={messages}
           onSend={(messages: any) => onSend(messages)}
-          user={{ _id: 1 }}
+          user={{ _id: user!._id }}
           onInputTextChanged={setText}
           bottomOffset={insets.bottom}
           renderAvatar={null}
