@@ -1,5 +1,5 @@
 import { ExtendedMessage } from "@/api/chats/types";
-import { BSON, index } from "realm";
+import Realm, { BSON } from "realm";
 
 export class MessageSchema extends Realm.Object<ExtendedMessage> {
   _id!: BSON.ObjectID;
