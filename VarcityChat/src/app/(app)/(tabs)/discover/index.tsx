@@ -6,22 +6,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  colors,
-  List,
-  IS_IOS,
-} from "@/ui";
+import { View, Text, TouchableOpacity, Image, colors, List } from "@/ui";
 import { useRouter } from "expo-router";
-import {
-  Platform,
-  SafeAreaView,
-  StatusBar,
-  useWindowDimensions,
-} from "react-native";
+import { Platform, SafeAreaView, StatusBar } from "react-native";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useCallback, useState } from "react";
@@ -33,16 +20,23 @@ import SearchBar from "@/components/search-bar";
 import NotificationSvg from "@/ui/icons/notification";
 import UniversitySkeleton from "@/components/university/university-skeleton";
 
-const HEADER_HEIGHT =
-  Platform.OS === "ios" ? 110 : 70 + (StatusBar?.currentHeight ?? 0);
 const SCROLL_THRESHOLD = 5; // Minimum scroll distance to trigger header animation
 
 export default function DiscoverScreen() {
   const { colorScheme } = useColorScheme();
-  const { height } = useWindowDimensions();
-  const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
+  const hasNotch = insets.top > 20;
+
+  const HEADER_HEIGHT =
+    Platform.OS === "ios"
+      ? hasNotch
+        ? 110
+        : 70
+      : 70 + (StatusBar?.currentHeight ?? 0);
+
+  const isDark = colorScheme === "dark";
   const router = useRouter();
+
   const [search, setSearch] = useState("");
 
   // API calls
@@ -99,8 +93,6 @@ export default function DiscoverScreen() {
       ),
     };
   });
-
-  console.log(height);
 
   const renderUniversityItem = useCallback(
     ({ item, index }: { item: IUniversity; index: number }) => {
