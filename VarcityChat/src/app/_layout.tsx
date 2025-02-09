@@ -1,12 +1,7 @@
 import Realm from "realm";
 import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
-import {
-  SplashScreen,
-  Stack,
-  useNavigationContainerRef,
-  useRouter,
-} from "expo-router";
+import { SplashScreen, Stack, useRouter } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useThemeConfig } from "@/core/use-theme-config";
@@ -45,14 +40,17 @@ import { SocketProvider } from "@/context/SocketContext";
 import { MessageSchema } from "@/core/models/message-model";
 import { MessageService } from "@/core/services/chat-service";
 
-export const unstable_settings = {
-  initialRouteName: "(auth)",
-};
+// export const unstable_settings = {
+//   initialRouteName: "(auth)",
+// };
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const navigationRef = useNavigationContainerRef();
+  useEffect(() => {
+    SplashScreen.preventAutoHideAsync();
+  }, []);
+
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
     PlusJakartaSans_300Light,
@@ -70,34 +68,21 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+  if (!fontsLoaded) return null;
 
   return (
     <Providers>
-      <RootLayoutNav />
+      <RootLayoutNav fontsLoaded={fontsLoaded} />
       <Toast />
     </Providers>
   );
 }
 
-function RootLayoutNav() {
+function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
-  const realm = useRealm();
-
-  // Initialize realm for the message service
-  useEffect(() => {
-    if (realm) {
-      console.log("\n REALM PATH:", realm.path);
-      MessageService.initialize(realm);
-    }
-  }, [realm]);
 
   useEffect(() => {
     const handleInitialize = async () => {
@@ -116,7 +101,8 @@ function RootLayoutNav() {
   }, []);
 
   useEffect(() => {
-    if (isAuthChecked) {
+    if (isAuthChecked && fontsLoaded) {
+      SplashScreen.hideAsync();
       if (isAuthenticated) {
         router.replace("/(tabs)/discover");
       } else {
@@ -125,7 +111,7 @@ function RootLayoutNav() {
     }
   }, [isAuthenticated, isAuthChecked]);
 
-  if (!isAuthChecked) return null;
+  if (!isAuthChecked || !fontsLoaded) return null;
 
   return <Stack screenOptions={{ headerShown: false }}></Stack>;
 }
