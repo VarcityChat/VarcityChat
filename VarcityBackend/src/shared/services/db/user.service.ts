@@ -26,6 +26,14 @@ class UserService {
       await AuthModel.deleteOne({ _id: user.authId });
     }
   }
+
+  public async updateUser(
+    userId: string,
+    data: Partial<IUserDocument>
+  ): Promise<IUserDocument | null> {
+    await UserModel.updateOne({ _id: userId }, { $set: data });
+    return await UserModel.findById(userId);
+  }
 }
 
 export const userService: UserService = new UserService();

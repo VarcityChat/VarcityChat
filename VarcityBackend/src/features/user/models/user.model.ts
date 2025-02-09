@@ -31,7 +31,8 @@ const userSchema: Schema = new Schema(
     settings: {
       notificationsEnabled: { type: Boolean, default: true },
       activeStatus: { type: Boolean, default: true }
-    }
+    },
+    about: String
   },
   {
     timestamps: true

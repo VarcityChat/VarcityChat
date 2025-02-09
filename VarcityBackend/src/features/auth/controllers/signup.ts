@@ -26,7 +26,8 @@ class SignUp {
       lastname,
       relationshipStatus,
       lookingFor,
-      images
+      images,
+      about
     } = req.body;
 
     const userExists = await authService.getUserByEmail(Helpers.lowerCase(email));
@@ -75,7 +76,8 @@ class SignUp {
       images,
       relationshipStatus,
       lookingFor,
-      expoPushToken: ''
+      expoPushToken: '',
+      about
     } as unknown as IUserDocument;
     const user: IUserDocument = (await userService.createUser(userData)) as IUserDocument;
 

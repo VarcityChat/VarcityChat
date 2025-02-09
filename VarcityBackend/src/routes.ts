@@ -5,6 +5,7 @@ import { Application } from 'express';
 import { authMiddleware } from '@global/middlewares/auth.middleware';
 import { chatRoutes } from '@chat/routes/chatRoutes';
 import { serverAdapter } from '@service/queues/base.queue';
+import { userRoutes } from '@user/routes/userRoutes';
 
 const BASE_PATH = '/api/v1';
 
@@ -15,6 +16,7 @@ export default (app: Application) => {
     app.use(BASE_PATH, uniRoutes.routes());
 
     // Enable route only in development mode
+    app.use(BASE_PATH, authMiddleware.protect, userRoutes.routes());
     app.use(BASE_PATH, authMiddleware.protect, notificationRoutes.routes());
     app.use(BASE_PATH, authMiddleware.protect, chatRoutes.routes());
   };
