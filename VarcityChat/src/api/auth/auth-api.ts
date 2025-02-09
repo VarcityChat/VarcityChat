@@ -99,6 +99,25 @@ export const authApi = api.injectEndpoints({
         } catch (error) {}
       },
     }),
+
+    updateUserStatus: builder.mutation<
+      { updatedUser: Partial<IUser> },
+      Partial<IUser["settings"]>
+    >({
+      query: (body) => ({
+        url: "/user/status",
+        method: "PUT",
+        body,
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            updateUser({ settings: { ...data.updatedUser.settings } } as IUser)
+          );
+        } catch (error) {}
+      },
+    }),
   }),
 });
 
@@ -109,4 +128,5 @@ export const {
   useSignupMutation,
   useLazyUserExistsQuery,
   useUpdateUserMutation,
+  useUpdateUserStatusMutation,
 } = authApi;

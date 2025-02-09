@@ -36,11 +36,15 @@ export default function SettingsItem({
   label,
   hasSwitch = false,
   onPress,
+  onSwitchValueChange,
+  switchValue,
 }: {
   name: iconNames;
   label: string;
   hasSwitch?: boolean;
   onPress?: () => void;
+  onSwitchValueChange?: (value: boolean) => void;
+  switchValue?: boolean;
 }) {
   return (
     <TouchableOpacity
@@ -50,7 +54,9 @@ export default function SettingsItem({
     >
       {svgMap[name]}
       <Text className="flex-1">{label}</Text>
-      {hasSwitch && <Switch />}
+      {hasSwitch && (
+        <Switch onValueChange={onSwitchValueChange} value={switchValue} />
+      )}
     </TouchableOpacity>
   );
 }

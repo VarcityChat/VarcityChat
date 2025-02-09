@@ -4,13 +4,18 @@ import { View, Text, Image, Modal, colors, useModal, Button } from "@/ui";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import LogoutIcon from "@/ui/icons/settings/logout-icon";
 import { useAuth } from "@/core/hooks/use-auth";
 import { defaultAvatarUrl } from "../../../../../constants/chats";
 import { capitalize } from "@/core/utils";
 import { IUniversity } from "@/api/universities/types";
+import { IUser } from "@/types/user";
+import { useDebounce } from "@/core/hooks/use-debounce";
+import { useUpdateUserStatusMutation } from "@/api/auth/auth-api";
+import { useApi } from "@/core/hooks/use-api";
+import { useToast } from "@/core/hooks/use-toast";
 
 const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
   const { colorScheme } = useColorScheme();
@@ -51,8 +56,53 @@ export default function ProfileScreen() {
   const router = useRouter();
   const logoutModal = useModal();
   const { user } = useAuth();
+  const { showToast } = useToast();
+  const { callMutationWithErrorHandler } = useApi();
+  const [updateUserStatus, { isLoading: isUpdatingUserStatus }] =
+    useUpdateUserStatusMutation();
 
-  console.log(user?.gender);
+  const [activeStatus, setActiveStatus] = useState<boolean>(true);
+  const [notificationsEnabled, setNotificationsEnabled] =
+    useState<boolean>(true);
+
+  const debouncedStatusUpdate = useDebounce(
+    async (settings: IUser["settings"]) => {
+      const { isError } = await callMutationWithErrorHandler(() =>
+        updateUserStatus(settings)
+      );
+      if (!isError) {
+        showToast({
+          type: "success",
+          text1: "Success",
+          text2: "Your status has been updated",
+        });
+      }
+    },
+    1000
+  );
+
+  useEffect(() => {
+    setActiveStatus(user?.settings.activeStatus ?? true);
+    setNotificationsEnabled(user?.settings.notificationsEnabled ?? true);
+  }, [user]);
+
+  const handleActiveStatusChange = (value: boolean) => {
+    setActiveStatus(value);
+    // call api to update status using debounce
+    debouncedStatusUpdate({
+      activeStatus: value,
+      notificationsEnabled: notificationsEnabled,
+    });
+  };
+
+  const handleActiveNotificationsChange = (value: boolean) => {
+    setNotificationsEnabled(value);
+    // call api to update status using debounce
+    debouncedStatusUpdate({
+      activeStatus: activeStatus,
+      notificationsEnabled: value,
+    });
+  };
 
   return (
     <SafeAreaView className="flex flex-1">
@@ -88,9 +138,21 @@ export default function ProfileScreen() {
             }}
           />
 
-          <SettingsItem name="activeStatus" label="Active Status" hasSwitch />
+          <SettingsItem
+            name="activeStatus"
+            label="Active Status"
+            hasSwitch
+            switchValue={activeStatus}
+            onSwitchValueChange={handleActiveStatusChange}
+          />
 
-          <SettingsItem name="notifications" label="Notifications" hasSwitch />
+          <SettingsItem
+            name="notifications"
+            label="Notifications"
+            hasSwitch
+            switchValue={notificationsEnabled}
+            onSwitchValueChange={handleActiveNotificationsChange}
+          />
 
           <ThemeSelect />
 
