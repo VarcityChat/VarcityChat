@@ -10,6 +10,7 @@ class UserRoutes {
 
   public routes(): Router {
     this.router.put('/user', updateUser.user);
+    this.router.put('/user/status', updateUser.updateStatus);
     return this.router;
   }
 }

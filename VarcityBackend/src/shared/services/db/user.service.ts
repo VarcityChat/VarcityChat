@@ -27,6 +27,13 @@ class UserService {
     }
   }
 
+  public async updateNotificationSettings(
+    userId: string,
+    settings: Partial<IUserDocument['settings']>
+  ): Promise<void> {
+    await UserModel.updateOne({ _id: userId }, { $set: { settings } });
+  }
+
   public async updateUser(
     userId: string,
     data: Partial<IUserDocument>

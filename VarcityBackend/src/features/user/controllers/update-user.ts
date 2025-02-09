@@ -51,6 +51,20 @@ class Update {
     res.status(HTTP_STATUS.OK).json({ message: 'User updated successfully', updatedUser });
   }
 
+  public async updateStatus(req: Request, res: Response): Promise<void> {
+    const user = await userService.getUserById(req.currentUser!.userId);
+    if (!user) throw new NotFoundError('User not found');
+
+    const body = req.body;
+    user.settings.activeStatus = body.activeStatus;
+    user.settings.notificationsEnabled = body.notificationsEnabled;
+    await userService.updateNotificationSettings(req.currentUser!.userId, body);
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json({ message: 'User status updated successfully', updatedUser: user });
+  }
+
   /**
    * @param
    * @desc defines the endpoint to store expo push token
