@@ -11,6 +11,12 @@ export const useChatMessages = () => {
   const { socket, isConnected } = useSocket();
   const realm = useRealm();
 
+  const deleteAllMessages = useCallback(() => {
+    realm.write(() => {
+      realm.delete(realm.objects("Message"));
+    });
+  }, [realm]);
+
   const addMessageToLocalRealm = useCallback(
     (message: ExtendedMessage) => {
       // Check if message with the same localId exists
@@ -53,49 +59,54 @@ export const useChatMessages = () => {
         }
       });
     },
-    []
+    [realm]
   );
 
-  const sendMessage = async (message: ExtendedMessage, chatId: string) => {
-    // generate a new local id for realm
-    const localId = new BSON.ObjectID();
-    const createdAt = new Date();
+  const sendMessage = useCallback(
+    () => async (message: ExtendedMessage, chatId: string) => {
+      // generate a new local id for realm
+      const localId = new BSON.ObjectID();
+      const createdAt = new Date();
 
-    // optimistic update
-    realm.write(() => {
-      realm.create("Message", {
-        ...message,
-        _id: localId,
+      console.log("\nREACHED HERE BEFORE DELAY:");
+
+      // optimistic update
+      realm.write(() => {
+        realm.create("Message", {
+          ...message,
+          _id: localId,
+          conversationId: chatId,
+          deliveryStatus: "pending",
+          createdAt,
+        });
+      });
+
+      updateChatOrder({
         conversationId: chatId,
-        deliveryStatus: "pending",
+        content: message.content,
         createdAt,
       });
-    });
 
-    updateChatOrder({
-      conversationId: chatId,
-      content: message.content,
-      createdAt,
-    });
-
-    if (isConnected && socket) {
-      // send the message content and local id to the server
-      socket.emit(
-        "new-message",
-        { ...message, localId },
-        (ack: { success: boolean; messageId: string }) => {
-          console.log("MESSAGE ACKNOWLEDGEMENT:", ack);
-          if (ack.success) {
-            updateChatMessage(localId, "sent", ack.messageId);
+      if (isConnected && socket) {
+        // send the message content and local id to the server
+        socket.emit(
+          "new-message",
+          { ...message, localId },
+          (ack: { success: boolean; messageId: string }) => {
+            console.log("MESSAGE ACKNOWLEDGEMENT:", ack);
+            if (ack.success) {
+              updateChatMessage(localId, "sent", ack.messageId);
+            }
           }
-        }
-      );
-    } else {
-      // TODO: queue message if there is no internet connection
-      console.log("QUEUING MESSAGE:", message);
-      // MessageService.queueMessage(newMessage);
-    }
-  };
+        );
+      } else {
+        // TODO: queue message if there is no internet connection
+        console.log("QUEUING MESSAGE:", message);
+        // MessageService.queueMessage(newMessage);
+      }
+    },
+    [realm, socket, isConnected, updateChatOrder]
+  );
 
-  return { sendMessage, addMessageToLocalRealm };
+  return { sendMessage, addMessageToLocalRealm, deleteAllMessages };
 };

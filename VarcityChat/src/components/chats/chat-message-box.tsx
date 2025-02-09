@@ -1,5 +1,5 @@
 import { Animated, StyleSheet } from "react-native";
-import { View, Text, colors } from "@/ui";
+import { View, colors } from "@/ui";
 import {
   IMessage,
   Message,
@@ -8,17 +8,15 @@ import {
   isSameUser,
 } from "react-native-gifted-chat";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  GestureHandlerRootView,
-  Swipeable,
-} from "react-native-gesture-handler";
+import { Swipeable } from "react-native-gesture-handler";
+import { memo } from "react";
 
 type ChatMessageBoxProps = {
   setReplyOnSwipe: (message: IMessage) => void;
   updateRowRef: (ref: any) => void;
 } & MessageProps<IMessage>;
 
-export default function ChatMessageBox({
+function ChatMessageBox({
   setReplyOnSwipe,
   updateRowRef,
   ...props
@@ -105,3 +103,5 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
 });
+
+export default memo(ChatMessageBox);

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Bubble,
   GiftedChat,
@@ -24,15 +24,16 @@ import { MessageRequest } from "@/components/chats/message-request";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import { ExtendedMessage } from "@/api/chats/types";
 import { useAuth } from "@/core/hooks/use-auth";
-import { useRealm } from "@realm/react";
+import { useQuery, useRealm } from "@realm/react";
 import { convertToGiftedChatMessage } from "@/core/utils";
 import { Ionicons } from "@expo/vector-icons";
+import { MessageSchema } from "@/core/models/message-model";
 
-const MESSAGES_PER_PAGE = 50;
-const MESSAGE_ARCHIVE_THRESHOLD = 1000; // Archive messages beyound this count
-const MESSAGE_CLEANUP_DAYS = 10;
+const MemoizedGiftedChat = memo(GiftedChat);
+let renderedCount = 0;
 
 export default function ChatMessage() {
+  const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
   const { chat, activeChatUser, isPending } = useActiveChat(
@@ -40,59 +41,81 @@ export default function ChatMessage() {
   );
   const { sendMessage } = useChatMessages();
   const realm = useRealm();
+  const messagesFromRealm = useQuery(MessageSchema)
+    .filtered(`conversationId == $0`, conversationId)
+    .sorted("createdAt");
 
-  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [text, setText] = useState("");
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
-  const currentPage = useRef(1);
+  const [text, setText] = useState("it is very fast");
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
+  console.log("RENDERED COUNT:", renderedCount++);
+
   useEffect(() => {
-    const messages = realm
-      .objects<ExtendedMessage>("Message")
-      .filtered(`conversationId == $0`, conversationId)
-      .sorted("createdAt", true);
+    let msgs = [];
+    for (let i = 0; i < 10000; i++) {
+      msgs.push({
+        _id: i.toString(),
+        text: "Hello developer",
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: "React Native",
+        },
+      });
+    }
+    console.log("MESSAGES:", msgs.length);
+    setMessages(msgs);
+  }, []);
 
-    console.log("MESSAGES FROM REALM:", messages);
+  // useEffect(() => {
+  //   const messages = realm
+  //     .objects<ExtendedMessage>("Message")
+  //     .filtered(`conversationId == $0`, conversationId)
+  //     .sorted("createdAt", true)
+  //     .slice(0, 30);
 
-    messages.addListener((messages) => {
-      console.log("NEW MESSAGES FROM LISTENER:", messages);
-      setMessages(
-        messages.map((message) =>
-          convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-        )
-      );
-    });
+  //   console.log("MESSAGES FROM REALM:", messages);
 
-    setMessages(
-      messages.map((message) =>
-        convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-      )
-    );
+  //   // messages.addListener((messages) => {
+  //   //   console.log("NEW MESSAGES FROM LISTENER:", messages);
+  //   //   setMessages(
+  //   //     messages.map((message) =>
+  //   //       convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+  //   //     )
+  //   //   );
+  //   // });
 
-    return () => {
-      messages.removeAllListeners();
-    };
-  }, [realm, conversationId]);
+  //   setMessages(
+  //     messages.map((message) =>
+  //       convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+  //     )
+  //   );
+
+  //   return () => {
+  //     // messages.removeAllListeners();
+  //   };
+  // }, [realm, conversationId]);
 
   const onSend = useCallback(
     (messages: IMessage[]) => {
-      const [message] = messages;
-      sendMessage(
-        {
-          conversationId: conversationId as string,
-          content: message.text,
-          sender: user!._id,
-          receiver: activeChatUser!._id,
-        } as unknown as ExtendedMessage,
-        conversationId as string
-      );
-      console.log("MESSAGE TO SEND", messages);
+      console.log("CLICKED BUTTON");
+      console.log(messages);
+      // sendMessage(
+      //   {
+      //     conversationId: conversationId as string,
+      //     content: message.text,
+      //     sender: user!._id,
+      //     receiver: activeChatUser!._id,
+      //   } as unknown as ExtendedMessage,
+      //   conversationId as string
+      // );
+
+      setMessages((prevMessages) => GiftedChat.append(prevMessages, messages));
     },
-    [conversationId, user, activeChatUser, sendMessage]
+    [conversationId]
   );
 
   const updateRowRef = useCallback(
@@ -115,28 +138,29 @@ export default function ChatMessage() {
     }
   }, [replyMessage]);
 
-  const renderTicks = (message: ExtendedMessage) => {
-    if (message.user._id !== user!._id) return null;
-    if (message.received) {
-      // Double tick (✓✓) - Message Delivered
-      return (
-        <View style={{ flexDirection: "row", marginRight: 4 }}>
-          <Ionicons name="checkmark-done" size={12} color="green" />
-        </View>
-      );
-    } else if (message.sent) {
-      // Single tick (✓) - Message Sent
-      return (
-        <Ionicons
-          name="checkmark"
-          size={12}
-          color="gray"
-          style={{ marginRight: 4 }}
-        />
-      );
-    }
-    return null;
-  };
+  // const renderTicks = (message: ExtendedMessage) => {
+  //   if (message.user._id !== user!._id) return null;
+  //   if (message.received) {
+  //     // Double tick (✓✓) - Message Delivered
+  //     return (
+  //       <View style={{ flexDirection: "row", marginRight: 4 }}>
+  //         <Ionicons name="checkmark-done" size={12} color="green" />
+  //       </View>
+  //     );
+  //   } else if (message.sent) {
+  //     // Single tick (✓) - Message Sent
+  //     return (
+  //       <Ionicons
+  //         name="checkmark"
+  //         size={12}
+  //         color="gray"
+  //         style={{ marginRight: 4 }}
+  //       />
+  //     );
+  //   }
+  //   return null;
+  // };
+
   return (
     <View className="flex flex-1" style={{ marginBottom: insets.bottom }}>
       {isPending ? (
@@ -144,44 +168,26 @@ export default function ChatMessage() {
       ) : (
         <GiftedChat
           messages={messages}
+          listViewProps={{
+            windowSize: 7,
+            initialNumToRender: 25,
+            maxToRenderPerBatch: 50,
+            updateCellsBatchingPeriod: 50,
+            removeCliippedSubviews: true,
+          }}
           onSend={(messages: any) => onSend(messages)}
           user={{ _id: user!._id }}
+          renderBubble={(props) => <CustomMessageBubble {...props} />}
           onInputTextChanged={setText}
           bottomOffset={insets.bottom}
           renderAvatar={null}
           maxComposerHeight={100}
-          renderBubble={(props) => (
-            <Bubble
-              {...props}
-              textStyle={{
-                right: {
-                  color: "#000",
-                  fontSize: 14,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                },
-                left: { fontSize: 15 },
-              }}
-              wrapperStyle={{
-                left: { backgroundColor: colors.grey[50] },
-                right: { backgroundColor: colors.primary[50] },
-              }}
-              renderTicks={renderTicks}
-            />
-          )}
+          timeTextStyle={{ right: { color: "green" } }}
           renderSend={(props) => (
-            <View
-              style={{
-                flexDirection: "row",
-                height: 44,
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                paddingHorizontal: 14,
-              }}
-            >
+            <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
               {text.length > 0 && (
                 <Send {...props} containerStyle={{ justifyContent: "center" }}>
-                  <SendSvg />
+                  <SendSvg width={30} height={30} />
                 </Send>
               )}
               {text.length === 0 && (
@@ -200,30 +206,31 @@ export default function ChatMessage() {
             </View>
           )}
           textInputProps={styles.composer}
-          renderInputToolbar={(props) => (
-            <InputToolbar {...props} containerStyle={{ height: 60 }} />
-          )}
-          renderMessage={(props) => (
-            <ChatMessageBox
-              {...props}
-              setReplyOnSwipe={setReplyMessage}
-              updateRowRef={updateRowRef}
-            />
-          )}
-          renderChatFooter={() => (
-            <ReplyMessageBar
-              clearReply={() => setReplyMessage(null)}
-              message={replyMessage}
-            />
-          )}
+          // renderInputToolbar={(props) => (
+          //   <InputToolbar {...props} containerStyle={{ height: 60 }} />
+          // )}
+          // renderMessage={(props) => (
+          //   <ChatMessageBox
+          //     {...props}
+          //     setReplyOnSwipe={setReplyMessage}
+          //     updateRowRef={updateRowRef}
+          //   />
+          // )}
+          // renderChatFooter={() => (
+          //   <ReplyMessageBar
+          //     clearReply={() => setReplyMessage(null)}
+          //     message={replyMessage}
+          //   />
+          // )}
           renderChatEmpty={() => <ChatEmptyComponent />}
+          keyboardShouldPersistTaps="never"
+          inverted
         />
       )}
     </View>
   );
 }
-
-function ChatEmptyComponent() {
+const ChatEmptyComponent = memo(() => {
   return (
     <View
       className="flex flex-1 items-center justify-center"
@@ -233,13 +240,38 @@ function ChatEmptyComponent() {
       <Text className="mt-4 font-sans-medium">Start a Conversation</Text>
     </View>
   );
-}
+});
+
+const CustomMessageBubble = memo((props) => {
+  return (
+    <View shouldRasterizeIOS renderToHardwareTextureAndroid>
+      <Bubble
+        {...props}
+        textStyle={{
+          right: {
+            color: "#000",
+            fontSize: 14,
+            fontFamily: "PlusJakartaSans_400Regular",
+          },
+          left: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular" },
+        }}
+        wrapperStyle={{
+          left: { backgroundColor: colors.grey[50] },
+          right: { backgroundColor: colors.primary[50] },
+        }}
+        // renderTicks={renderTicks}
+      />
+    </View>
+  );
+});
 
 const styles = StyleSheet.create({
   composer: {
     backgroundColor: "#fff",
     paddingHorizontal: 5,
-    fontSize: 15,
-    paddingTop: 8,
+    fontSize: 14,
+    // paddingTop: 2,
+    fontFamily: "PlusJakartaSans_400Regular",
+    // marginVertical: 4,
   },
 });
