@@ -16,7 +16,12 @@ import {
   IS_IOS,
 } from "@/ui";
 import { useRouter } from "expo-router";
-import { Platform, SafeAreaView, StatusBar } from "react-native";
+import {
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  useWindowDimensions,
+} from "react-native";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useCallback, useState } from "react";
@@ -30,10 +35,11 @@ import UniversitySkeleton from "@/components/university/university-skeleton";
 
 const HEADER_HEIGHT =
   Platform.OS === "ios" ? 110 : 70 + (StatusBar?.currentHeight ?? 0);
-const SCROLL_THRESHOLD = 10; // Minimum scroll distance to trigger header animation
+const SCROLL_THRESHOLD = 5; // Minimum scroll distance to trigger header animation
 
 export default function DiscoverScreen() {
   const { colorScheme } = useColorScheme();
+  const { height } = useWindowDimensions();
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -94,6 +100,8 @@ export default function DiscoverScreen() {
     };
   });
 
+  console.log(height);
+
   const renderUniversityItem = useCallback(
     ({ item, index }: { item: IUniversity; index: number }) => {
       return (
@@ -149,10 +157,7 @@ export default function DiscoverScreen() {
           headerAnimatedStyle,
         ]}
       >
-        <View
-          className="flex flex-1 flex-row justify-between items-center px-6"
-          style={{ marginTop: insets.top }}
-        >
+        <View className="flex flex-1 flex-row justify-between items-end px-6 h-full pb-4">
           <Text className="font-sans-semibold text-xl text-primary-600 dark:text-primary-600">
             Varcity Chat
           </Text>
@@ -167,14 +172,12 @@ export default function DiscoverScreen() {
       </Animated.View>
 
       <Animated.ScrollView
-        className="flex flex-1 flex-grow px-6 pt-4"
+        className="flex flex-1 flex-grow px-6"
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        style={{ paddingTop: IS_IOS ? insets.top : HEADER_HEIGHT }}
+        style={{ paddingTop: HEADER_HEIGHT - insets.top + 10 }}
       >
-        <View
-          className={`${Platform.select({ ios: "pt-0", android: "pt-4" })}`}
-        >
+        <View>
           <SearchBar
             placeholder="Discover more people here"
             onChangeText={(text) => setSearch(text)}
