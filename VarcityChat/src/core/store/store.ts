@@ -1,9 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   combineReducers,
   configureStore,
   isRejectedWithValue,
-  Tuple,
 } from "@reduxjs/toolkit";
 import {
   FLUSH,
@@ -55,9 +53,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REGISTER, REHYDRATE, PAUSE, PERSIST, PURGE],
       },
-    })
-      .concat(api.middleware)
-      .concat(rtkQueryErrorLogger as any);
+    }).concat(api.middleware);
   },
   enhancers: (getDefaultEnhancers) => {
     if (__DEV__) {

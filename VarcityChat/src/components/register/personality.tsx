@@ -33,7 +33,6 @@ export default function Personality() {
     LookingFor.FRIENDSHIP | LookingFor.RELATIONSHIP | LookingFor.OTHERS | null
   >(null);
   const [description, setDescription] = useState("");
-  const [hobbies, setHobbies] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const [triggerCheckIfUserExists, { isLoading, isError: userExistsError }] =

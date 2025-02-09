@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Image, View, colors } from "@/ui";
-import { femaleImg } from "@/ui/images";
+import { femaleImg, maleImg } from "@/ui/images";
 import { useColorScheme } from "nativewind";
 import ChatsActive from "@/ui/icons/chats-active";
 import Discover from "@/ui/icons/discover";
@@ -11,6 +11,8 @@ import NewsSvg from "@/ui/icons/news";
 import CallsActive from "@/ui/icons/calls-active";
 import CallsSvg from "@/ui/icons/calls";
 import { Platform } from "react-native";
+import { useAuth } from "@/core/hooks/use-auth";
+import { Gender } from "@/types/user";
 
 export const unstable_settings = {
   initialRouteName: "discover",
@@ -18,6 +20,7 @@ export const unstable_settings = {
 
 const TabNavigation = () => {
   const { colorScheme } = useColorScheme();
+  const { user } = useAuth();
   const isDark = colorScheme === "dark";
 
   return (
@@ -86,7 +89,7 @@ const TabNavigation = () => {
             return (
               <View className="w-[28px] h-[28px] rounded-full overflow-hidden">
                 <Image
-                  source={femaleImg}
+                  source={user?.gender === Gender.MALE ? maleImg : femaleImg}
                   className="object-cover w-full h-full rounded-full"
                 />
               </View>

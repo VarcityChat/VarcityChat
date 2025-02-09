@@ -1,14 +1,23 @@
+import { IUniversity } from "@/api/universities/types";
+
 export interface IUser {
   _id: string;
   email?: string;
   firstname: string;
   lastname: string;
-  gender: keyof typeof Gender;
+  gender: Gender.MALE | Gender.FEMALE;
   images: string[];
-  university: string;
+  university: string | IUniversity;
   course: string;
   mobileNumber?: string;
-  relationshipStatus: keyof typeof RelationshipStatus;
+  relationshipStatus:
+    | RelationshipStatus.SINGLE
+    | RelationshipStatus.DATING
+    | RelationshipStatus.MARRIED;
+  lookingFor:
+    | LookingFor.FRIENDSHIP
+    | LookingFor.RELATIONSHIP
+    | LookingFor.OTHERS;
   about: string;
   hobbies: string[];
   settings: {

@@ -1,4 +1,4 @@
-import { setAuth } from "@/core/auth/auth-slice";
+import { setAuth, updateUser } from "@/core/auth/auth-slice";
 import {
   IForgotPasswordBody,
   IGetSignedUrlResponse,
@@ -10,6 +10,7 @@ import {
   IUserExistsResponse,
 } from "./types";
 import { api } from "../api";
+import { IUser } from "@/types/user";
 
 export const authApi = api.injectEndpoints({
   overrideExisting: true,
@@ -72,6 +73,32 @@ export const authApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Auth"],
     }),
+
+    updateUser: builder.mutation<{ updatedUser: Partial<IUser> }, any>({
+      query: (body) => ({
+        url: "/user",
+        method: "PUT",
+        body,
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          const user = data.updatedUser;
+          dispatch(
+            updateUser({
+              firstname: user?.firstname,
+              lastname: user?.lastname,
+              about: user?.about,
+              images: user?.images,
+              lookingFor: user?.lookingFor,
+              mobileNumber: user?.mobileNumber,
+              relationshipStatus: user?.relationshipStatus,
+              course: user?.course,
+            } as IUser)
+          );
+        } catch (error) {}
+      },
+    }),
   }),
 });
 
@@ -81,4 +108,5 @@ export const {
   useResetPasswordMutation,
   useSignupMutation,
   useLazyUserExistsQuery,
+  useUpdateUserMutation,
 } = authApi;

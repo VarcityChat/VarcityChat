@@ -101,8 +101,8 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
   }, []);
 
   useEffect(() => {
+    SplashScreen.hideAsync();
     if (isAuthChecked && fontsLoaded) {
-      SplashScreen.hideAsync();
       if (isAuthenticated) {
         router.replace("/(tabs)/discover");
       } else {
@@ -158,15 +158,15 @@ function Providers({ children }: { children: ReactNode }) {
             style={styles.container}
             className={theme.dark ? "dark" : undefined}
           >
-            <ThemeProvider value={theme}>
-              <SocketProvider>
+            <SocketProvider>
+              <ThemeProvider value={theme}>
                 <MenuProvider>
                   <BottomSheetModalProvider>
                     {children}
                   </BottomSheetModalProvider>
                 </MenuProvider>
-              </SocketProvider>
-            </ThemeProvider>
+              </ThemeProvider>
+            </SocketProvider>
           </GestureHandlerRootView>
         </PersistGate>
       </Provider>

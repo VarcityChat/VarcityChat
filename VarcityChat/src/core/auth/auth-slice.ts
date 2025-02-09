@@ -44,6 +44,16 @@ const authSlice = createSlice({
         );
       }
     },
+    updateUser: (state, action: PayloadAction<IUser>) => {
+      state.user = { ...state.user, ...action.payload };
+      if (state.user && state.token) {
+        authStorage.storeAuthData(
+          state.token,
+          state.user,
+          state.isAuthenticated
+        );
+      }
+    },
     setSignupData: (state, action: PayloadAction<ISignupBody>) => {
       state.signupData = { ...state.signupData, ...action.payload };
     },
@@ -59,7 +69,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuth, setSignupData, setShowSuccessModal, logout } =
-  authSlice.actions;
+export const {
+  setAuth,
+  updateUser,
+  setSignupData,
+  setShowSuccessModal,
+  logout,
+} = authSlice.actions;
 
 export default authSlice.reducer;

@@ -10,6 +10,7 @@ export const trimText = (text: string, maxLength: number = 20) => {
 };
 
 export const capitalize = (text: string): string => {
+  if (!text) return "";
   if (text.length === 0) return "";
   if (text.length === 1) return text[0].toUpperCase();
   return text[0].toUpperCase() + text.substring(1);
@@ -32,7 +33,7 @@ export const formDataFromImagePicker = (
   return formData;
 };
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 2;
 export const uploadToCloudinary = async (
   cloudinaryConfig: {
     preset: string;
@@ -68,7 +69,7 @@ export const uploadToCloudinary = async (
 
     if (retryCount < MAX_RETRIES) {
       console.log(`Retrying upload (${retryCount + 1}/${MAX_RETRIES})...`);
-      return uploadToCloudinary(cloudinaryConfig, asset, retryCount + 1);
+      return await uploadToCloudinary(cloudinaryConfig, asset, retryCount + 1);
     } else {
       console.warn(`Upload failed after ${MAX_RETRIES} attempts`, asset.uri);
       return null;

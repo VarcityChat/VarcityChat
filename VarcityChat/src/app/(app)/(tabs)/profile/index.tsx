@@ -8,7 +8,9 @@ import { forwardRef, useMemo } from "react";
 import { SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import LogoutIcon from "@/ui/icons/settings/logout-icon";
 import { useAuth } from "@/core/hooks/use-auth";
-const avatar1 = require("../../../../../assets/images/avatars/avatar1.png");
+import { defaultAvatarUrl } from "../../../../../constants/chats";
+import { capitalize } from "@/core/utils";
+import { IUniversity } from "@/api/universities/types";
 
 const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
   const { colorScheme } = useColorScheme();
@@ -48,6 +50,9 @@ const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
 export default function ProfileScreen() {
   const router = useRouter();
   const logoutModal = useModal();
+  const { user } = useAuth();
+
+  console.log(user?.gender);
 
   return (
     <SafeAreaView className="flex flex-1">
@@ -57,13 +62,15 @@ export default function ProfileScreen() {
 
           <View className="w-[80px] h-[80px] rounded-full overflow-hidden mb-2">
             <Image
-              source={avatar1}
+              source={{ uri: user?.images[0] || defaultAvatarUrl }}
               className="w-full h-full object-cover rounded-full"
             />
           </View>
-          <Text className="font-semibold text-lg">Ebuka Varcity</Text>
+          <Text className="font-semibold text-lg">
+            {user?.firstname} {user?.lastname}
+          </Text>
           <Text className="text-sm text-grey-500 dark:text-grey-200">
-            Lead City University
+            {capitalize((user?.university as IUniversity)?.name)}
           </Text>
         </View>
 
