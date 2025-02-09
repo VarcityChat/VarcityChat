@@ -79,6 +79,8 @@ class SignUp {
     } as unknown as IUserDocument;
     const user: IUserDocument = (await userService.createUser(userData)) as IUserDocument;
 
+    user.university = uni;
+
     const jwtPayload = {
       email,
       userId: user._id

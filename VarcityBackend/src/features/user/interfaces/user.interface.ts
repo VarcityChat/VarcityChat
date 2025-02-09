@@ -1,4 +1,5 @@
 import { Document, ObjectId } from 'mongoose';
+import { IUniDocument } from '@uni/interfaces/uni.interface';
 
 export interface IUserDocument extends Document {
   _id: string | ObjectId;
@@ -9,7 +10,7 @@ export interface IUserDocument extends Document {
   lastname: string;
   gender: keyof typeof Gender;
   images: string[];
-  university: string;
+  university: string | IUniDocument;
   course: string;
   mobileNumber?: string;
   relationshipStatus: keyof typeof RelationshipStatus;

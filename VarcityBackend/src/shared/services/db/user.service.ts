@@ -16,7 +16,7 @@ class UserService {
   }
 
   public async getUserByAuthId(authId: string): Promise<IUserDocument | null> {
-    return await UserModel.findOne({ authId });
+    return await UserModel.findOne({ authId }).populate('university');
   }
 
   public async deleteUser(userId: string): Promise<void> {
