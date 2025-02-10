@@ -1,5 +1,5 @@
 import { AuthModel } from '@auth/models/auth.model';
-import { IUserDocument } from '@root/features/user/interfaces/user.interface';
+import { Gender, IUserDocument } from '@root/features/user/interfaces/user.interface';
 import { UserModel } from '@root/features/user/models/user.model';
 
 class UserService {
@@ -13,6 +13,42 @@ class UserService {
 
   public async getUsersByUni(uniId: string, skip: number, limit: number): Promise<IUserDocument[]> {
     return await UserModel.find({ university: uniId }).skip(skip).limit(limit);
+  }
+
+  public async getUsersByUniWithFilter(
+    uniId: string,
+    skip: number,
+    limit: number,
+    filter: 'all' | 'male' | 'female'
+  ): Promise<IUserDocument[]> {
+    if (filter === 'all') {
+      return await UserModel.find({ university: uniId }).skip(skip).limit(limit);
+    } else if (filter == 'male') {
+      return await UserModel.find({ university: uniId, gender: Gender.MALE })
+        .skip(skip)
+        .limit(limit);
+    } else {
+      return await UserModel.find({ university: uniId, gender: Gender.FEMALE })
+        .skip(skip)
+        .limit(limit);
+    }
+  }
+
+  public async countUserInUni(uniId: string): Promise<number> {
+    return await UserModel.countDocuments({ university: uniId });
+  }
+
+  public async countUsersInUniByFilter(
+    uniId: string,
+    filter: 'all' | 'male' | 'female'
+  ): Promise<number> {
+    if (filter === 'all') {
+      return await UserModel.find({ university: uniId }).countDocuments();
+    } else if (filter == 'male') {
+      return await UserModel.find({ university: uniId, gender: Gender.MALE }).countDocuments();
+    } else {
+      return await UserModel.find({ university: uniId, gender: Gender.FEMALE }).countDocuments();
+    }
   }
 
   public async getUserByAuthId(authId: string): Promise<IUserDocument | null> {
