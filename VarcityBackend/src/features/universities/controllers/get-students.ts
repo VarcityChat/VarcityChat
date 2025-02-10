@@ -9,11 +9,6 @@ class Get {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 30;
     const skip = (page - 1) * limit;
 
-    console.log('\nFILTER:', filter);
-
-    // const users: IUserDocument[] = await userService.getUsersByUni(req.params.uniId, skip, limit);
-    // const usersCount: number = await userService.countUserInUni(req.params.uniId);
-
     const [users, usersCount] = await Promise.all([
       userService.getUsersByUniWithFilter(
         req.params.uniId,
