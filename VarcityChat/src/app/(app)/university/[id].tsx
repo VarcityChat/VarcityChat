@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { colors, Text, View } from "@/ui";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Platform,
   SafeAreaView,
@@ -28,6 +28,7 @@ import UserCard from "@/components/university/user-card";
 import StudentsListSkeleton from "@/components/university/students-list-skeleton";
 import SearchBar from "@/components/search-bar";
 import BackButton from "@/components/back-button";
+import BottomSheet from "@gorhom/bottom-sheet";
 import FilterSvg from "@/ui/icons/university/filter-svg";
 
 const LIMIT = 10;
@@ -53,6 +54,9 @@ export default function University() {
       : 70 + (StatusBar?.currentHeight ?? 0);
 
   const page = useRef(1);
+  const filterRef = useRef<"all" | "male" | "female">("all");
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ["35%"], []);
 
   const [students, setStudents] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +127,7 @@ export default function University() {
         currentPage: number;
         totalPages: number;
       }> = await axiosApiClient.get(
-        `/uni/${universityId}/students?page=${page.current}&limit=${LIMIT}`
+        `/uni/${universityId}/students?page=${page.current}&limit=${LIMIT}&filter=${filterRef.current}`
       );
 
       if (response.data) {
@@ -152,6 +156,15 @@ export default function University() {
       loadingVisible && setLoading(false);
       !loadingVisible && setFetching(false);
     }
+  };
+
+  const handleFilterChanges = (newFilter: "all" | "male" | "female") => {
+    setFilter(newFilter);
+    setStudents([]);
+    filterRef.current = newFilter;
+    page.current = 1;
+    fetchStudents(true);
+    bottomSheetRef.current?.close();
   };
 
   const renderItem = useCallback(({ item }: { item: IUser }) => {
@@ -190,6 +203,9 @@ export default function University() {
           <TouchableOpacity
             activeOpacity={0.7}
             className="flex-row items-center justify-center h-[40px] w-[65px] rounded-md bg-white dark:bg-charcoal-950 border border-grey-100"
+            onPress={() => {
+              bottomSheetRef.current?.expand();
+            }}
           >
             <Text className="text-grey-500 mr-1">Filter</Text>
             <FilterSvg color={isDark ? "#fff" : "#6B7280"} />
@@ -223,6 +239,80 @@ export default function University() {
           contentContainerStyle={{ paddingHorizontal: 18 }}
         />
       )}
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        backgroundStyle={{
+          backgroundColor: isDark ? colors.charcoal[950] : colors.white,
+        }}
+        onAnimate={(fromIndex, toIndex) => {
+          setBottomSheetOpen(toIndex !== -1);
+        }}
+      >
+        <View className="flex-1 px-6">
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="font-sans-semibold text-lg">Filter Students</Text>
+            <TouchableOpacity
+              onPress={() => bottomSheetRef.current?.close()}
+              className="p-2"
+            >
+              <Text className="text-red-500 dark:text-red-500">Close</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            className="py-4 border-b border-grey-100 dark:border-grey-800"
+            onPress={() => {
+              handleFilterChanges("all");
+            }}
+          >
+            <Text
+              className={
+                filter === "all" ? "text-primary-500 dark:text-primary-500" : ""
+              }
+            >
+              All Students
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="py-4 border-b border-grey-100 dark:border-grey-800"
+            onPress={() => {
+              handleFilterChanges("male");
+            }}
+          >
+            <Text
+              className={
+                filter === "male"
+                  ? "text-primary-500 dark:text-primary-500"
+                  : ""
+              }
+            >
+              Male
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="py-4 border-b border-grey-100 dark:border-grey-800"
+            onPress={() => {
+              handleFilterChanges("female");
+            }}
+          >
+            <Text
+              className={
+                filter === "female"
+                  ? "text-primary-500 dark:text-primary-500"
+                  : ""
+              }
+            >
+              Female
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
