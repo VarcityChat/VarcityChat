@@ -1,5 +1,7 @@
+import { authStorage } from "@/core/storage";
 import { RootState } from "@/core/store/store";
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
+import axios from "axios";
 
 const BASE_URL =
   "https://c1a4-2c0f-f5c0-b24-161c-8da0-b844-20bb-8b70.ngrok-free.app";
@@ -24,4 +26,16 @@ export const api = createApi({
   baseQuery,
   endpoints: () => ({}),
   tagTypes: ["Universities", "Auth", "Messages", "Chats"],
+});
+
+export const axiosApiClient = axios.create({
+  baseURL: BASE_ENDPOINT,
+});
+
+axiosApiClient.interceptors.request.use(async (config) => {
+  const authData = await authStorage.getAuthData();
+  if (authData) {
+    config.headers["Authorization"] = `Bearer ${authData.token}`;
+  }
+  return config;
 });

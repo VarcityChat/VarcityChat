@@ -24,6 +24,7 @@
     "@realm/react": "^0.11.0",
     "@reduxjs/toolkit": "^2.5.1",
     "@shopify/flash-list": "1.6.4",
+    "axios": "^1.7.9",
     "cross-env": "^7.0.3",
     "expo": "~51.0.39",
     "expo-blur": "~13.0.3",

@@ -24,6 +24,7 @@ export interface IUser {
     notificationsEnabled: boolean;
     activeStatus: boolean;
   };
+  createdAt: string;
 }
 
 export interface IUserImage {
