@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 import { IUser } from "@/types/user";
 import HeartSvg from "@/ui/icons/university/heart-svg";
+import { memo } from "react";
 
 const CARD_HEIGHT = HEIGHT / 3;
 
@@ -10,7 +11,7 @@ interface IUserCardProps {
   user: IUser;
 }
 
-export default function UserCard({ user }: IUserCardProps) {
+function UserCard({ user }: IUserCardProps) {
   const router = useRouter();
 
   return (
@@ -72,3 +73,5 @@ export default function UserCard({ user }: IUserCardProps) {
     </TouchableOpacity>
   );
 }
+
+export default memo(UserCard);
