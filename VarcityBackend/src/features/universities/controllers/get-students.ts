@@ -11,12 +11,17 @@ class Get {
 
     const [users, usersCount] = await Promise.all([
       userService.getUsersByUniWithFilter(
+        req.currentUser!.userId,
         req.params.uniId,
         skip,
         limit,
         filter as 'all' | 'male' | 'female'
       ),
-      userService.countUsersInUniByFilter(req.params.uniId, filter as 'all' | 'male' | 'female')
+      userService.countUsersInUniByFilter(
+        req.currentUser!.userId,
+        req.params.uniId,
+        filter as 'all' | 'male' | 'female'
+      )
     ]);
     res.status(HTTP_STATUS.OK).json({
       message: 'Users',

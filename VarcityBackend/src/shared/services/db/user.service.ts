@@ -16,21 +16,35 @@ class UserService {
   }
 
   public async getUsersByUniWithFilter(
+    currentUserId: string,
     uniId: string,
     skip: number,
     limit: number,
     filter: 'all' | 'male' | 'female'
   ): Promise<IUserDocument[]> {
     if (filter === 'all') {
-      return await UserModel.find({ university: uniId }).skip(skip).limit(limit);
+      return await UserModel.find({ university: uniId, _id: { $ne: currentUserId } })
+        .skip(skip)
+        .limit(limit)
+        .populate('university');
     } else if (filter == 'male') {
-      return await UserModel.find({ university: uniId, gender: Gender.MALE })
+      return await UserModel.find({
+        university: uniId,
+        gender: Gender.MALE,
+        _id: { $ne: currentUserId }
+      })
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .populate('university');
     } else {
-      return await UserModel.find({ university: uniId, gender: Gender.FEMALE })
+      return await UserModel.find({
+        university: uniId,
+        gender: Gender.FEMALE,
+        _id: { $ne: currentUserId }
+      })
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .populate('university');
     }
   }
 
@@ -39,15 +53,27 @@ class UserService {
   }
 
   public async countUsersInUniByFilter(
+    currentUserId: string,
     uniId: string,
     filter: 'all' | 'male' | 'female'
   ): Promise<number> {
     if (filter === 'all') {
-      return await UserModel.find({ university: uniId }).countDocuments();
+      return await UserModel.find({
+        university: uniId,
+        _id: { $ne: currentUserId }
+      }).countDocuments();
     } else if (filter == 'male') {
-      return await UserModel.find({ university: uniId, gender: Gender.MALE }).countDocuments();
+      return await UserModel.find({
+        university: uniId,
+        gender: Gender.MALE,
+        _id: { $ne: currentUserId }
+      }).countDocuments();
     } else {
-      return await UserModel.find({ university: uniId, gender: Gender.FEMALE }).countDocuments();
+      return await UserModel.find({
+        university: uniId,
+        gender: Gender.FEMALE,
+        _id: { $ne: currentUserId }
+      }).countDocuments();
     }
   }
 
