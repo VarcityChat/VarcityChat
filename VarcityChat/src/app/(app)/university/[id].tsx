@@ -31,7 +31,7 @@ import BackButton from "@/components/back-button";
 import BottomSheet from "@gorhom/bottom-sheet";
 import FilterSvg from "@/ui/icons/university/filter-svg";
 
-const LIMIT = 10;
+const LIMIT = 20;
 const SCROLL_THRESHOLD = 10;
 
 const AnimatedList = Animated.createAnimatedComponent(List<IUser>);
