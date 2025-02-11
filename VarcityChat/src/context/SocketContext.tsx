@@ -38,7 +38,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeSocket = async () => {
       const authData = await authStorage.getAuthData();
-      if (authData) {
+      if (authData && authData.token) {
         connect(authData.token);
       }
     };
@@ -75,6 +75,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
+      transports: ["websocket"],
     });
 
     socketInstance.on("connect", () => {

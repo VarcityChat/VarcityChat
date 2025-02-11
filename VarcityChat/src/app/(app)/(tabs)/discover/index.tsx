@@ -19,11 +19,16 @@ import LocationSvg from "@/ui/icons/location";
 import SearchBar from "@/components/search-bar";
 import NotificationSvg from "@/ui/icons/notification";
 import UniversitySkeleton from "@/components/university/university-skeleton";
+import { useSocket } from "@/context/SocketContext";
+import { useAppDispatch } from "@/core/store/store";
+import { api } from "@/api/api";
 
 const SCROLL_THRESHOLD = 5; // Minimum scroll distance to trigger header animation
 
 export default function DiscoverScreen() {
+  const { socket } = useSocket();
   const { colorScheme } = useColorScheme();
+  const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
   const hasNotch = insets.top > 20;
 
@@ -38,6 +43,7 @@ export default function DiscoverScreen() {
   const router = useRouter();
 
   const [search, setSearch] = useState("");
+  const [hasNewNotification, setHasNewNotifcation] = useState(false);
 
   // API calls
   const { data: universities, isLoading } = useGetUniversitiesQuery(null);
@@ -52,6 +58,17 @@ export default function DiscoverScreen() {
     headerVisible.value = withTiming(1, { duration: 300 });
     scrollY.value = 0;
     lastScrollY.value = 0;
+  }, []);
+
+  useEffect(() => {
+    socket?.on("new-notification", () => {
+      dispatch(api.util.invalidateTags(["Notifications"]));
+      setHasNewNotifcation(true);
+    });
+
+    return () => {
+      socket?.off("new-notification");
+    };
   }, []);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -132,6 +149,11 @@ export default function DiscoverScreen() {
     [router, universities]
   );
 
+  const handleNotificationPress = () => {
+    setHasNewNotifcation(false);
+    router.push("/notifications");
+  };
+
   return (
     <SafeAreaView className="flex flex-1">
       <Animated.View
@@ -156,8 +178,11 @@ export default function DiscoverScreen() {
           <TouchableOpacity
             activeOpacity={0.7}
             className="flex items-center justify-center w-[30px] h-[30px] rounded-md bg-grey-50"
-            onPress={() => router.push("/notifications")}
+            onPress={handleNotificationPress}
           >
+            {hasNewNotification && (
+              <View className="absolute top-2 right-2 w-[5px] h-[5px] rounded-full bg-red-500 z-10" />
+            )}
             <NotificationSvg />
           </TouchableOpacity>
         </View>

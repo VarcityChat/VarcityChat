@@ -85,7 +85,7 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    const handleInitialize = async () => {
+    const checkAuth = async () => {
       try {
         const authData = await authStorage.getAuthData();
         if (authData) {
@@ -95,14 +95,16 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
         }
       } finally {
         setIsAuthChecked(true);
+        SplashScreen.hideAsync();
       }
     };
-    handleInitialize();
+
+    checkAuth();
   }, []);
 
   useEffect(() => {
     SplashScreen.hideAsync();
-    if (isAuthChecked && fontsLoaded) {
+    if (isAuthChecked) {
       if (isAuthenticated) {
         router.replace("/(tabs)/discover");
       } else {
@@ -111,9 +113,14 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
     }
   }, [isAuthenticated, isAuthChecked]);
 
-  if (!isAuthChecked || !fontsLoaded) return null;
+  if (!isAuthChecked) return null;
 
-  return <Stack screenOptions={{ headerShown: false }}></Stack>;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(app)" />
+      <Stack.Screen name="(auth)" />
+    </Stack>
+  );
 }
 
 function Providers({ children }: { children: ReactNode }) {
@@ -158,15 +165,11 @@ function Providers({ children }: { children: ReactNode }) {
             style={styles.container}
             className={theme.dark ? "dark" : undefined}
           >
-            <SocketProvider>
-              <ThemeProvider value={theme}>
-                <MenuProvider>
-                  <BottomSheetModalProvider>
-                    {children}
-                  </BottomSheetModalProvider>
-                </MenuProvider>
-              </ThemeProvider>
-            </SocketProvider>
+            <ThemeProvider value={theme}>
+              <MenuProvider>
+                <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+              </MenuProvider>
+            </ThemeProvider>
           </GestureHandlerRootView>
         </PersistGate>
       </Provider>
