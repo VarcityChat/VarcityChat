@@ -1,3 +1,4 @@
+import { INotificationDocument } from '@notification/interfaces/notification.interface';
 import { NotificationModel } from '@notification/models/notification.model';
 import { ExpoPushMessage, Expo } from 'expo-server-sdk';
 
@@ -50,6 +51,13 @@ class NotificationService {
   //   ): Promise<void> {
   //     await this.sendNotification([pushToken], notificationMessage);
   //   }
+
+  public async getUserNotifications(userId: string): Promise<INotificationDocument[]> {
+    return await NotificationModel.find({ to: userId })
+      .limit(200)
+      .sort({ createdAt: -1 })
+      .populate('from');
+  }
 
   public async markAllUserNotificationsAsRead(userId: string): Promise<void> {
     await NotificationModel.updateMany({ to: userId }).set({ read: true });
