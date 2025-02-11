@@ -103,6 +103,21 @@ class UserService {
     await UserModel.updateOne({ _id: userId }, { $set: data });
     return await UserModel.findById(userId);
   }
+
+  public async searchUsers(
+    searchTerm: string,
+    uniId: string,
+    limit: number = 20
+  ): Promise<IUserDocument[]> {
+    const searchRegex = new RegExp(searchTerm, 'i');
+    return await UserModel.find({
+      university: uniId,
+      $or: [{ firstname: searchRegex }, { lastname: searchRegex }]
+    })
+      .limit(limit)
+      .populate('university')
+      .sort({ createdAt: -1 });
+  }
 }
 
 export const userService: UserService = new UserService();

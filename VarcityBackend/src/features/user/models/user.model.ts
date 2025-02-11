@@ -39,5 +39,7 @@ const userSchema: Schema = new Schema(
   }
 );
 
+userSchema.index({ firstname: 'text', lastname: 'text' });
+
 const UserModel: Model<IUserDocument> = model<IUserDocument>('User', userSchema, 'User');
 export { UserModel };

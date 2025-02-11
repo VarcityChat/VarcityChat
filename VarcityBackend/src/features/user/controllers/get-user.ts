@@ -21,6 +21,12 @@ class Get {
     }
     res.status(HTTP_STATUS.OK).json({ message: 'User Profile', user });
   }
+
+  public async search(req: Request, res: Response): Promise<void> {
+    const { q, uniId } = req.query;
+    const users: IUserDocument[] = await userService.searchUsers(q as string, uniId as string);
+    res.status(HTTP_STATUS.OK).json({ message: 'Users', users });
+  }
 }
 
 export const getUser: Get = new Get();

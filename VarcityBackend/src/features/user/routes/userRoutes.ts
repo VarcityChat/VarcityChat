@@ -13,6 +13,7 @@ class UserRoutes {
     this.router.put('/user', updateUser.user);
     this.router.put('/user/status', updateUser.updateStatus);
 
+    this.router.get('/users/search', getUser.search);
     this.router.get('/user/:userId', getUser.byId);
 
     return this.router;
