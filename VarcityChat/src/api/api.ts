@@ -25,7 +25,14 @@ export const api = createApi({
   reducerPath: "clientApi",
   baseQuery,
   endpoints: () => ({}),
-  tagTypes: ["Universities", "Auth", "Messages", "Chats", "Students"],
+  tagTypes: [
+    "Universities",
+    "Auth",
+    "Messages",
+    "Chats",
+    "Students",
+    "Notifications",
+  ],
 });
 
 export const axiosApiClient = axios.create({
