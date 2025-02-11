@@ -19,5 +19,12 @@ export function useDebounce<T extends (...args: any[]) => void>(
     [callback, delay]
   );
 
-  return debouncedCallback;
+  const cancel = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  return [debouncedCallback, cancel] as const;
 }

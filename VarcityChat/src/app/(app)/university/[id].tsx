@@ -221,7 +221,12 @@ export default function University() {
             <View style={{ paddingTop: HEADER_HEIGHT - insets.top }}>
               <SearchBar
                 placeholder="Search for people here"
-                onTouchStart={() => router.push("/university/search")}
+                onTouchStart={() =>
+                  router.push({
+                    pathname: "/university/search",
+                    params: { id: universityId },
+                  })
+                }
                 showSoftInputOnFocus={false}
               />
             </View>

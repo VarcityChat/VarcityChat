@@ -65,7 +65,7 @@ export default function ProfileScreen() {
   const [notificationsEnabled, setNotificationsEnabled] =
     useState<boolean>(true);
 
-  const debouncedStatusUpdate = useDebounce(
+  const [debouncedStatusUpdate, cancelDebouncedStatusUpdate] = useDebounce(
     async (settings: IUser["settings"]) => {
       const { isError } = await callMutationWithErrorHandler(() =>
         updateUserStatus(settings)
