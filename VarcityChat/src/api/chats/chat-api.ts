@@ -29,6 +29,15 @@ export const messagesApi = api.injectEndpoints({
       providesTags: ["Chats"],
     }),
 
+    initializeConversation: builder.mutation<{}, string>({
+      query: (targetUserId) => ({
+        url: "/chat/open",
+        method: "POST",
+        body: { targetUserId },
+      }),
+      invalidatesTags: ["Chats"],
+    }),
+
     acceptChatRequest: builder.mutation<IUpdateChatRequest, string>({
       query: (chatId) => ({
         url: `/chat/accept`,
@@ -54,6 +63,7 @@ export const {
   useGetMessagesQuery,
   useAcceptChatRequestMutation,
   useRejectChatRequestMutation,
+  useInitializeConversationMutation,
 } = messagesApi;
 
 export default messagesApi;

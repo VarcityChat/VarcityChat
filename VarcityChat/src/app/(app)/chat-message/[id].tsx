@@ -163,7 +163,7 @@ export default function ChatMessage() {
 
   return (
     <View className="flex flex-1" style={{ marginBottom: insets.bottom }}>
-      {isPending ? (
+      {isPending && chat?.user1._id !== user?._id ? (
         <MessageRequest chat={chat!} />
       ) : (
         <GiftedChat

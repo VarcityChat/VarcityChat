@@ -17,7 +17,12 @@ function UserCard({ user }: IUserCardProps) {
   return (
     <TouchableOpacity
       className={`relative flex flex-1 mb-8 bg-grey-50 rounded-lg dark:bg-grey-800 overflow-hidden`}
-      onPress={() => router.push("/users/1")}
+      onPress={() =>
+        router.push({
+          pathname: "/users/[id]",
+          params: { id: user._id, user: JSON.stringify(user) },
+        })
+      }
       activeOpacity={0.7}
       style={{ height: CARD_HEIGHT }}
     >
@@ -46,19 +51,20 @@ function UserCard({ user }: IUserCardProps) {
         className="absolute bottom-0 left-0 right-0 flex-row z-10 w-full h-[26%] bg-green-200 px-4 items-center"
       >
         <View className="flex-1">
-          {/* <View className="flex-row gap-2 mb-1">
-            {user.hobbies.slice(0, 3).map((hobby, index) => (
-              <Text className="text-sm text-grey-50" key={`hobby-${index}`}>
-                {hobby}
-              </Text>
-            ))}
-            {user.hobbies.length > 3 && (
-              <Text className="text-sm text-grey-50">
-                +{user.hobbies.length - 3} more
-              </Text>
-            )}
-          </View> */}
-
+          {user?.hobbies && user?.hobbies?.length && (
+            <View className="flex-row gap-2 mb-1">
+              {user.hobbies.slice(0, 3).map((hobby, index) => (
+                <Text className="text-sm text-grey-50" key={`hobby-${index}`}>
+                  {hobby}
+                </Text>
+              ))}
+              {user.hobbies.length > 3 && (
+                <Text className="text-sm text-grey-50">
+                  +{user.hobbies.length - 3} more
+                </Text>
+              )}
+            </View>
+          )}
           <Text className="font-semibold text-white text-lg">
             {user.firstname} {user.lastname}
           </Text>
