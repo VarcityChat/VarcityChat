@@ -25,10 +25,14 @@ class Add {
       targetUserId
     );
 
-    await notificationService.saveNotificationToDb(targetUserId, {
-      body: `${targetUser.firstname}: sent you a new message request`,
-      title: 'New Message Request'
-    });
+    await notificationService.saveNotificationToDb(
+      targetUserId,
+      {
+        body: `${targetUser.firstname}: sent you a new message request`,
+        title: 'New Message Request'
+      },
+      `${req.currentUser!.userId}`
+    );
 
     ioInstance.to(targetUserId).emit('new-message-request', {
       conversationId: conversation._id,
