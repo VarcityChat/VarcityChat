@@ -75,6 +75,7 @@ export default function Header({
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingTop: HEADER_HEIGHT + insets.top }}
+        pointerEvents={"box-none"}
       >
         {/* Content Goes Here */}
         {children}

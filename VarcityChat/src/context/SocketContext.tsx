@@ -80,8 +80,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     socketInstance.on("connect", () => {
       console.log("CONNECTED TO SERVER");
-      setSocket(socketInstance);
       setIsConnected(true);
+      setSocket(socketInstance);
     });
 
     socketInstance.on("connect_error", (error) => {

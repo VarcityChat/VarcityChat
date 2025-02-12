@@ -43,13 +43,17 @@ export default function NotificationsScreen() {
 
   const renderItem = ({ item }: { item: INotification }) => (
     <View className="flex-row items-center py-5 border-b border-gray-200 dark:border-gray-600">
-      {item?.from && (
+      {!!item?.from && (item?.from as IUser)?.images.length > 0 && (
         <Image
           source={{ uri: (item.from as IUser)?.images[0] }}
           className="w-12 h-12 rounded-full"
         />
       )}
-      <View className={`flex-1 ${item.from && "ml-3"}`}>
+      <View
+        className={`flex-1 ${
+          item.from && (item?.from as IUser)?.images.length > 0 && "ml-3"
+        }`}
+      >
         <Text className="font-sans-bold text-base">{item.title}</Text>
         <Text className="text-gray-500 dark:text-gray-300 text-sm mt-1">
           {item.message}

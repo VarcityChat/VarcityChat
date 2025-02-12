@@ -19,6 +19,7 @@ import { api } from "@/api/api";
 import { reduxStorage } from "../storage";
 import authSlice from "../auth/auth-slice";
 import messagesSlice from "../chats/message-slice";
+import notificationsSlice from "../notifications/notification-slice";
 
 const persistConfig = {
   key: "root",
@@ -41,6 +42,7 @@ export const rtkQueryErrorLogger =
 const reducer = combineReducers({
   auth: authSlice,
   messages: messagesSlice,
+  notifications: notificationsSlice,
   [api.reducerPath]: api.reducer,
 });
 

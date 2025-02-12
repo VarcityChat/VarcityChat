@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Image, View, colors } from "@/ui";
 import { femaleImg, maleImg } from "@/ui/images";
@@ -10,9 +11,13 @@ import NewsActive from "@/ui/icons/news-active";
 import NewsSvg from "@/ui/icons/news";
 import CallsActive from "@/ui/icons/calls-active";
 import CallsSvg from "@/ui/icons/calls";
+import { api } from "@/api/api";
 import { Platform } from "react-native";
 import { useAuth } from "@/core/hooks/use-auth";
 import { Gender } from "@/types/user";
+import { useSocket } from "@/context/SocketContext";
+import { setHasNotification } from "@/core/notifications/notification-slice";
+import { useAppDispatch } from "@/core/store/store";
 
 export const unstable_settings = {
   initialRouteName: "discover",
@@ -22,6 +27,23 @@ const TabNavigation = () => {
   const { colorScheme } = useColorScheme();
   const { user } = useAuth();
   const isDark = colorScheme === "dark";
+  const { socket, isConnected } = useSocket();
+  const dispatch = useAppDispatch();
+
+  const handleNewNotification = (data: any) => {
+    dispatch(api.util.invalidateTags(["Notifications"]));
+    dispatch(setHasNotification(true));
+  };
+
+  useEffect(() => {
+    if (socket) {
+      socket?.on("new-notification", handleNewNotification);
+
+      return () => {
+        socket?.off("new-notification", handleNewNotification);
+      };
+    }
+  }, [socket]);
 
   return (
     <Tabs
