@@ -28,13 +28,21 @@ class Add {
     await notificationService.saveNotificationToDb(
       targetUserId,
       {
-        body: `${targetUser.firstname}: sent you a new message request`,
+        body: `${currentAuthUser?.firstname}: sent you a new message request`,
         title: 'New Message Request'
       },
       `${req.currentUser!.userId}`
     );
 
     ioInstance.to(targetUserId).emit('new-message-request', {
+      conversationId: conversation._id,
+      targetUserId,
+      targetUser,
+      fromUser: currentAuthUser
+    });
+
+    console.log('\nIO Instance:', ioInstance);
+    ioInstance.to(targetUserId).emit('new-notification', {
       conversationId: conversation._id,
       targetUserId,
       targetUser,
