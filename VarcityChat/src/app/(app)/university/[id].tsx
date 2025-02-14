@@ -167,9 +167,9 @@ export default function University() {
     bottomSheetRef.current?.close();
   };
 
-  const renderItem = useCallback(({ item }: { item: IUser }) => {
+  const renderItem = ({ item }: { item: IUser }) => {
     return <UserCard user={item} />;
-  }, []);
+  };
 
   return (
     <SafeAreaView className="flex flex-1">
