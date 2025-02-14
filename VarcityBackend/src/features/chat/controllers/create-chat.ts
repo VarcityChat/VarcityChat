@@ -41,7 +41,6 @@ class Add {
       fromUser: currentAuthUser
     });
 
-    console.log('\nIO Instance:', ioInstance);
     ioInstance.to(targetUserId).emit('new-notification', {
       conversationId: conversation._id,
       targetUserId,
