@@ -36,9 +36,7 @@ import Toast from "react-native-toast-message";
 export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
-import { SocketProvider } from "@/context/SocketContext";
 import { MessageSchema } from "@/core/models/message-model";
-import { MessageService } from "@/core/services/chat-service";
 
 // export const unstable_settings = {
 //   initialRouteName: "(auth)",
@@ -83,6 +81,8 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const realm = useRealm();
+  console.log(realm.path);
 
   useEffect(() => {
     const checkAuth = async () => {

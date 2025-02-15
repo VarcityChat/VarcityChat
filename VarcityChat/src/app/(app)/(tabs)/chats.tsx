@@ -40,10 +40,7 @@ export default function Chats() {
 
   useEffect(() => {
     if (socket) {
-      socket.on("new-message", (message: ExtendedMessage) => {
-        console.log("NEW MESSAGE:", message);
-        handleNewMessage(message);
-      });
+      socket.on("new-message", handleNewMessage);
 
       return () => {
         socket.off("new-message", handleNewMessage);

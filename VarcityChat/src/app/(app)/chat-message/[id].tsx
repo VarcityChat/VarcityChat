@@ -1,4 +1,9 @@
-import { StyleSheet } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Bubble,
@@ -31,44 +36,49 @@ import { MessageSchema } from "@/core/models/message-model";
 
 const MemoizedGiftedChat = memo(GiftedChat);
 let renderedCount = 0;
+const MESSAGES_PER_PAGE = 60;
 
 export default function ChatMessage() {
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
+  const realm = useRealm();
+
   const { chat, activeChatUser, isPending } = useActiveChat(
     conversationId as string
   );
+  const [page, setPage] = useState(1);
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [text, setText] = useState("");
+
   const { sendMessage } = useChatMessages();
-  const realm = useRealm();
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
-    .sorted("createdAt");
-
-  const [messages, setMessages] = useState<IMessage[]>([]);
-  const [text, setText] = useState("it is very fast");
+    .sorted("createdAt", true)
+    .slice((page - 1) * MESSAGES_PER_PAGE, page * MESSAGES_PER_PAGE);
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
   console.log("RENDERED COUNT:", renderedCount++);
 
-  useEffect(() => {
-    let msgs = [];
-    for (let i = 0; i < 10000; i++) {
-      msgs.push({
-        _id: i.toString(),
-        text: "Hello developer",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-        },
-      });
-    }
-    console.log("MESSAGES:", msgs.length);
-    setMessages(msgs);
-  }, []);
+  // GENERATE 10,000 MESSAGES
+  // useEffect(() => {
+  //   let msgs = [];
+  //   for (let i = 0; i < 10000; i++) {
+  //     msgs.push({
+  //       _id: i.toString(),
+  //       text: "Hello developer",
+  //       createdAt: new Date(),
+  //       user: {
+  //         _id: 2,
+  //         name: "React Native",
+  //       },
+  //     });
+  //   }
+  //   console.log("MESSAGES:", msgs.length);
+  //   setMessages(msgs);
+  // }, []);
 
   // useEffect(() => {
   //   const messages = realm
@@ -103,20 +113,26 @@ export default function ChatMessage() {
     (messages: IMessage[]) => {
       console.log("CLICKED BUTTON");
       console.log(messages);
-      // sendMessage(
-      //   {
-      //     conversationId: conversationId as string,
-      //     content: message.text,
-      //     sender: user!._id,
-      //     receiver: activeChatUser!._id,
-      //   } as unknown as ExtendedMessage,
-      //   conversationId as string
-      // );
+      const message = messages[0];
+      sendMessage(
+        {
+          conversationId: conversationId as string,
+          content: message.text,
+          sender: user!._id,
+          receiver: activeChatUser!._id,
+        } as unknown as ExtendedMessage,
+        conversationId as string
+      );
 
-      setMessages((prevMessages) => GiftedChat.append(prevMessages, messages));
+      // setMessages((prevMessages) => GiftedChat.append(prevMessages, messages));
     },
     [conversationId]
   );
+
+  const loadEarlier = useCallback(() => {
+    console.log("FETCHING EARLIER MESSAGES:");
+    setPage((prev) => prev + 1);
+  }, [page]);
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -162,70 +178,91 @@ export default function ChatMessage() {
   // };
 
   return (
-    <View className="flex flex-1" style={{ marginBottom: insets.bottom }}>
+    <View
+      className="flex flex-1"
+      style={{
+        paddingBottom: insets.bottom,
+      }}
+    >
       {isPending && chat?.user1._id !== user?._id ? (
         <MessageRequest chat={chat!} />
       ) : (
-        <GiftedChat
-          messages={messages}
-          listViewProps={{
-            windowSize: 7,
-            initialNumToRender: 25,
-            maxToRenderPerBatch: 50,
-            updateCellsBatchingPeriod: 50,
-            removeCliippedSubviews: true,
-          }}
-          onSend={(messages: any) => onSend(messages)}
-          user={{ _id: user!._id }}
-          renderBubble={(props) => <CustomMessageBubble {...props} />}
-          onInputTextChanged={setText}
-          bottomOffset={insets.bottom}
-          renderAvatar={null}
-          maxComposerHeight={100}
-          timeTextStyle={{ right: { color: "green" } }}
-          renderSend={(props) => (
-            <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
-              {text.length > 0 && (
-                <Send {...props} containerStyle={{ justifyContent: "center" }}>
-                  <SendSvg width={30} height={30} />
-                </Send>
-              )}
-              {text.length === 0 && (
-                <>
-                  <TouchableOpacity>
-                    <MicrophoneSvg />
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <AttachmentSvg />
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <PictureSvg />
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
+        <>
+          <GiftedChat
+            messages={messagesFromRealm.map((message) =>
+              convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+            )}
+            listViewProps={{
+              windowSize: 7,
+              initialNumToRender: 25,
+              maxToRenderPerBatch: 50,
+              updateCellsBatchingPeriod: 50,
+              removeCliippedSubviews: true,
+            }}
+            onSend={(messages: any) => onSend(messages)}
+            user={{ _id: user!._id }}
+            renderBubble={(props) => <CustomMessageBubble {...props} />}
+            onInputTextChanged={setText}
+            // bottomOffset={insets.bottom}
+            renderAvatar={null}
+            maxComposerHeight={100}
+            timeTextStyle={{ right: { color: "green" } }}
+            renderSend={(props) => (
+              <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
+                {text.length > 0 && (
+                  <Send
+                    {...props}
+                    containerStyle={{ justifyContent: "center" }}
+                  >
+                    <SendSvg width={30} height={30} />
+                  </Send>
+                )}
+                {text.length === 0 && (
+                  <>
+                    <TouchableOpacity>
+                      <MicrophoneSvg />
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <AttachmentSvg />
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <PictureSvg />
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            )}
+            textInputProps={styles.composer}
+            scrollToBottom={true}
+            infiniteScroll
+            loadEarlier
+            onLoadEarlier={loadEarlier}
+            // renderLoadingEarlier=
+            // renderInputToolbar={(props) => (
+            //   <InputToolbar {...props} containerStyle={{ height: 60 }} />
+            // )}
+            // renderMessage={(props) => (
+            //   <ChatMessageBox
+            //     {...props}
+            //     setReplyOnSwipe={setReplyMessage}
+            //     updateRowRef={updateRowRef}
+            //   />
+            // )}
+            // renderChatFooter={() => (
+            //   <ReplyMessageBar
+            //     clearReply={() => setReplyMessage(null)}
+            //     message={replyMessage}
+            //   />
+            // )}
+            renderChatEmpty={() => <ChatEmptyComponent />}
+            keyboardShouldPersistTaps="never"
+            inverted
+          />
+
+          {Platform.OS === "android" && (
+            <KeyboardAvoidingView behavior="padding" />
           )}
-          textInputProps={styles.composer}
-          // renderInputToolbar={(props) => (
-          //   <InputToolbar {...props} containerStyle={{ height: 60 }} />
-          // )}
-          // renderMessage={(props) => (
-          //   <ChatMessageBox
-          //     {...props}
-          //     setReplyOnSwipe={setReplyMessage}
-          //     updateRowRef={updateRowRef}
-          //   />
-          // )}
-          // renderChatFooter={() => (
-          //   <ReplyMessageBar
-          //     clearReply={() => setReplyMessage(null)}
-          //     message={replyMessage}
-          //   />
-          // )}
-          renderChatEmpty={() => <ChatEmptyComponent />}
-          keyboardShouldPersistTaps="never"
-          inverted
-        />
+        </>
       )}
     </View>
   );

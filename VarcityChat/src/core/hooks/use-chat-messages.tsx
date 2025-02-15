@@ -25,7 +25,7 @@ export const useChatMessages = () => {
         .filtered(`messageId == $0`, message._id);
       console.log("\nMESSAGE EXISTS", messageExists);
 
-      if (!!messageExists) {
+      if (!messageExists.length) {
         realm.write(() => {
           realm.create("Message", {
             _id: new BSON.ObjectID(),
@@ -63,12 +63,10 @@ export const useChatMessages = () => {
   );
 
   const sendMessage = useCallback(
-    () => async (message: ExtendedMessage, chatId: string) => {
+    async (message: ExtendedMessage, chatId: string) => {
       // generate a new local id for realm
       const localId = new BSON.ObjectID();
       const createdAt = new Date();
-
-      console.log("\nREACHED HERE BEFORE DELAY:");
 
       // optimistic update
       realm.write(() => {
