@@ -10,6 +10,8 @@ import Animated, {
 import { authStorage } from "@/core/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/core/hooks/use-auth";
+import { useChatMessages } from "@/core/hooks/use-chat-messages";
+import { useQueue } from "@/core/hooks/use-queue";
 
 const BANNER_HEIGHT = 40;
 
@@ -32,6 +34,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const { isAuthenticated } = useAuth();
+  const { processQueuedMessages } = useQueue();
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
 
@@ -82,6 +85,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("CONNECTED TO SERVER");
       setIsConnected(true);
       setSocket(socketInstance);
+
+      // Process queued messages
+      processQueuedMessages(socketInstance);
     });
 
     socketInstance.on("connect_error", (error) => {

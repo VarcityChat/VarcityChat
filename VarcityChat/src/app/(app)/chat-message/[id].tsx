@@ -39,7 +39,7 @@ import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
 
 let renderedCount = 0;
-const MESSAGES_PER_PAGE = 25;
+const MESSAGES_PER_PAGE = 60;
 
 export default function ChatMessage() {
   const insets = useSafeAreaInsets();

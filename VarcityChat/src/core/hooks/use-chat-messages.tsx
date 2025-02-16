@@ -23,7 +23,6 @@ export const useChatMessages = () => {
       const messageExists = realm
         .objects("Message")
         .filtered(`messageId == $0`, message._id);
-      console.log("\nMESSAGE EXISTS", messageExists);
 
       if (!messageExists.length) {
         realm.write(() => {
@@ -76,6 +75,7 @@ export const useChatMessages = () => {
           conversationId: chatId,
           deliveryStatus: "pending",
           createdAt,
+          isQueued: !isConnected,
         });
       });
 
@@ -106,5 +106,9 @@ export const useChatMessages = () => {
     [realm, socket, isConnected, updateChatOrder]
   );
 
-  return { sendMessage, addMessageToLocalRealm, deleteAllMessages };
+  return {
+    sendMessage,
+    addMessageToLocalRealm,
+    deleteAllMessages,
+  };
 };
