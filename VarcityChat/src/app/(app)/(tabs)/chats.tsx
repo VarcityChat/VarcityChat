@@ -150,11 +150,11 @@ export default function Chats() {
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
                     {item.status !== "accepted"
                       ? "Pending request"
-                      : trimText(`${item?.lastMessage?.content}`, 30)}
+                      : trimText(`${item?.lastMessage?.content}`, 45)}
                   </Text>
                 </View>
 
-                <View className="flex items-end justify-end">
+                <View className="flex items-end justify-end min-w-[50px] ml-3">
                   <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
                     {/* {item?.lastMessageTimestamp?.toString()} */}2 minutes
                     ago
