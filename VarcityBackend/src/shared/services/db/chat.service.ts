@@ -16,7 +16,11 @@ class ChatService {
     };
     let conversation: IConversationDocument | null = await ConversationModel.findOne(query);
     if (!conversation) {
-      conversation = await ConversationModel.create({ user1: currentUserId, user2: targetUserId });
+      conversation = await ConversationModel.create({
+        user1: currentUserId,
+        user2: targetUserId,
+        lastMessageTimestamp: new Date()
+      });
     }
     return conversation;
   }
