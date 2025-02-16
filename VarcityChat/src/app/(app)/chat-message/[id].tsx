@@ -1,5 +1,12 @@
 import { Platform, SafeAreaView, StyleSheet } from "react-native";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Bubble,
   GiftedChat,
@@ -43,6 +50,7 @@ export default function ChatMessage() {
     conversationId as string
   );
   const [page, setPage] = useState(1);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
   // const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");
 
@@ -50,8 +58,7 @@ export default function ChatMessage() {
 
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
-    .sorted("createdAt", true)
-    .slice(0, page * MESSAGES_PER_PAGE);
+    .sorted("createdAt", true);
 
   console.log("CURRENT PAGE:", page);
 
@@ -100,10 +107,18 @@ export default function ChatMessage() {
     [conversationId]
   );
 
+  useEffect(() => {
+    if ((page + 1) * MESSAGES_PER_PAGE <= messagesFromRealm.length) {
+      setHasMoreMessages(true);
+    }
+  }, []);
+
   const loadEarlier = useCallback(() => {
-    console.log("FETCHING EARLIER MESSAGES:");
+    if ((page + 1) * MESSAGES_PER_PAGE >= messagesFromRealm.length) {
+      setHasMoreMessages(false);
+    }
     setPage((prev) => prev + 1);
-  }, [page]);
+  }, [page, messagesFromRealm.length]);
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -163,9 +178,13 @@ export default function ChatMessage() {
         >
           <GiftedChat
             messageContainerRef={messageContainerRef}
-            messages={messagesFromRealm.map((message) =>
-              convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-            )}
+            messages={messagesFromRealm
+              .slice(0, page * MESSAGES_PER_PAGE)
+              .map((message) =>
+                convertToGiftedChatMessage(
+                  message as unknown as ExtendedMessage
+                )
+              )}
             listViewProps={{
               windowSize: 7,
               initialNumToRender: 25,
@@ -184,7 +203,7 @@ export default function ChatMessage() {
             textInputProps={styles.composer}
             scrollToBottom={true}
             infiniteScroll
-            loadEarlier
+            loadEarlier={hasMoreMessages}
             onLoadEarlier={loadEarlier}
             // renderInputToolbar={(props) => (
             //   <InputToolbar {...props} containerStyle={{ height: 60 }} />
