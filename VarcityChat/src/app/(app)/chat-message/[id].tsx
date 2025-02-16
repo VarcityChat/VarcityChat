@@ -8,6 +8,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Bubble,
   GiftedChat,
+  GiftedChatProps,
   IMessage,
   InputToolbar,
   Send,
@@ -22,7 +23,7 @@ import SendSvg from "@/ui/icons/chat/send-svg";
 import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
-import { Swipeable } from "react-native-gesture-handler";
+import { FlatList, Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import { useActiveChat } from "@/core/hooks/use-chats";
 import { MessageRequest } from "@/components/chats/message-request";
@@ -42,7 +43,7 @@ export default function ChatMessage() {
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
-  const realm = useRealm();
+  const messageContainerRef = useRef<FlatList>(null);
   const { chat, activeChatUser, isPending } = useActiveChat(
     conversationId as string
   );
@@ -84,39 +85,16 @@ export default function ChatMessage() {
   //   setMessages(msgs);
   // }, []);
 
-  // useEffect(() => {
-  //   const messages = realm
-  //     .objects<ExtendedMessage>("Message")
-  //     .filtered(`conversationId == $0`, conversationId)
-  //     .sorted("createdAt", true)
-  //     .slice(0, 30);
-
-  //   console.log("MESSAGES FROM REALM:", messages);
-
-  //   // messages.addListener((messages) => {
-  //   //   console.log("NEW MESSAGES FROM LISTENER:", messages);
-  //   //   setMessages(
-  //   //     messages.map((message) =>
-  //   //       convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-  //   //     )
-  //   //   );
-  //   // });
-
-  //   setMessages(
-  //     messages.map((message) =>
-  //       convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-  //     )
-  //   );
-
-  //   return () => {
-  //     // messages.removeAllListeners();
-  //   };
-  // }, [realm, conversationId]);
-
   const onSend = useCallback(
     (messages: IMessage[]) => {
       console.log("CLICKED BUTTON");
       console.log(messages);
+      // Scroll message list to bottom when a new message is sent
+      messageContainerRef?.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+      });
+
       const message = messages[0];
       sendMessage(
         {
@@ -127,8 +105,6 @@ export default function ChatMessage() {
         } as unknown as ExtendedMessage,
         conversationId as string
       );
-
-      // setMessages((prevMessages) => GiftedChat.append(prevMessages, messages));
     },
     [conversationId]
   );
@@ -170,6 +146,7 @@ export default function ChatMessage() {
       ) : (
         <>
           <GiftedChat
+            messageContainerRef={messageContainerRef}
             messages={messagesFromRealm.map((message) =>
               convertToGiftedChatMessage(message as unknown as ExtendedMessage)
             )}
