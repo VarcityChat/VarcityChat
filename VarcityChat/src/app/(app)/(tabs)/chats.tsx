@@ -22,6 +22,7 @@ import { useSocket } from "@/context/SocketContext";
 import { ExtendedMessage } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
+import { trimText } from "@/core/utils";
 
 export default function Chats() {
   const router = useRouter();
@@ -147,8 +148,9 @@ export default function Chats() {
                       : item.user1.firstname}
                   </Text>
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
-                    {item?.lastMessage?.content ||
-                      (item.status !== "accepted" && "Pending request")}
+                    {item.status !== "accepted"
+                      ? "Pending request"
+                      : trimText(`${item?.lastMessage?.content}`, 30)}
                   </Text>
                 </View>
 

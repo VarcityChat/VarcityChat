@@ -1,3 +1,4 @@
+import "react-native-get-random-values";
 import Realm from "realm";
 import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -31,12 +32,12 @@ import { persistor, store, useAppDispatch } from "@/core/store/store";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
 import { setAuth } from "@/core/auth/auth-slice";
+import { MessageSchema } from "@/core/models/message-model";
 import Toast from "react-native-toast-message";
 
 export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
-import { MessageSchema } from "@/core/models/message-model";
 
 // export const unstable_settings = {
 //   initialRouteName: "(auth)",
@@ -130,26 +131,6 @@ function Providers({ children }: { children: ReactNode }) {
     if (oldRealm.schemaVersion < 1) {
       const oldObjects = oldRealm.objects("Message");
       const newObjects = newRealm.objects("Message");
-
-      for (let i = 0; i < oldObjects.length; i++) {
-        const oldObject = oldObjects[i];
-        const newObject = newObjects[i];
-        newObject.content = oldObject.content;
-        newObject.createdAt = oldObject.createdAt;
-        newObject.senderId = oldObject.senderId;
-        newObject.receiverId = oldObject.receiverId;
-        newObject.conversationId = oldObject.conversationId;
-        newObject.isRead = oldObject.isRead;
-        newObject.isDelivered = oldObject.isDelivered;
-        newObject.isEdited = oldObject.isEdited;
-        newObject.isDeleted = oldObject.isDeleted;
-        newObject.isSeen = oldObject.isSeen;
-        newObject.isSent = oldObject.isSent;
-        newObject.isFailed = oldObject.isFailed;
-        newObject.isPending = oldObject.isPending;
-        newObject.isFailed = oldObject.isFailed;
-        newObject.isPending = oldObject.isPending;
-      }
     }
   };
 

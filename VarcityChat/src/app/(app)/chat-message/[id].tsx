@@ -36,26 +36,30 @@ import { MessageSchema } from "@/core/models/message-model";
 
 const MemoizedGiftedChat = memo(GiftedChat);
 let renderedCount = 0;
-const MESSAGES_PER_PAGE = 60;
+const MESSAGES_PER_PAGE = 25;
 
 export default function ChatMessage() {
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
   const realm = useRealm();
-
   const { chat, activeChatUser, isPending } = useActiveChat(
     conversationId as string
   );
   const [page, setPage] = useState(1);
-  const [messages, setMessages] = useState<IMessage[]>([]);
+  // const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");
 
   const { sendMessage } = useChatMessages();
+
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
     .sorted("createdAt", true)
-    .slice((page - 1) * MESSAGES_PER_PAGE, page * MESSAGES_PER_PAGE);
+    .slice(0, page * MESSAGES_PER_PAGE);
+
+  console.log("CURRENT PAGE:", page);
+
+  // .slice((page - 1) * MESSAGES_PER_PAGE, page * MESSAGES_PER_PAGE);
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
@@ -154,29 +158,6 @@ export default function ChatMessage() {
     }
   }, [replyMessage]);
 
-  // const renderTicks = (message: ExtendedMessage) => {
-  //   if (message.user._id !== user!._id) return null;
-  //   if (message.received) {
-  //     // Double tick (✓✓) - Message Delivered
-  //     return (
-  //       <View style={{ flexDirection: "row", marginRight: 4 }}>
-  //         <Ionicons name="checkmark-done" size={12} color="green" />
-  //       </View>
-  //     );
-  //   } else if (message.sent) {
-  //     // Single tick (✓) - Message Sent
-  //     return (
-  //       <Ionicons
-  //         name="checkmark"
-  //         size={12}
-  //         color="gray"
-  //         style={{ marginRight: 4 }}
-  //       />
-  //     );
-  //   }
-  //   return null;
-  // };
-
   return (
     <View
       className="flex flex-1"
@@ -256,7 +237,6 @@ export default function ChatMessage() {
             // )}
             renderChatEmpty={() => <ChatEmptyComponent />}
             keyboardShouldPersistTaps="never"
-            inverted
           />
 
           {Platform.OS === "android" && (
@@ -301,6 +281,29 @@ const CustomMessageBubble = memo((props) => {
     </View>
   );
 });
+
+// const renderTicks = (message: ExtendedMessage) => {
+//   if (message.user._id !== user!._id) return null;
+//   if (message.received) {
+//     // Double tick (✓✓) - Message Delivered
+//     return (
+//       <View style={{ flexDirection: "row", marginRight: 4 }}>
+//         <Ionicons name="checkmark-done" size={12} color="green" />
+//       </View>
+//     );
+//   } else if (message.sent) {
+//     // Single tick (✓) - Message Sent
+//     return (
+//       <Ionicons
+//         name="checkmark"
+//         size={12}
+//         color="gray"
+//         style={{ marginRight: 4 }}
+//       />
+//     );
+//   }
+//   return null;
+// };
 
 const styles = StyleSheet.create({
   composer: {
