@@ -1,10 +1,4 @@
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { Platform, SafeAreaView, StyleSheet } from "react-native";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Bubble,
@@ -31,14 +25,11 @@ import { MessageRequest } from "@/components/chats/message-request";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import { ExtendedMessage } from "@/api/chats/types";
 import { useAuth } from "@/core/hooks/use-auth";
-import { useQuery, useRealm } from "@realm/react";
+import { useQuery } from "@realm/react";
 import { convertToGiftedChatMessage } from "@/core/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { MessageSchema } from "@/core/models/message-model";
-import {
-  AvoidSoftInput,
-  AvoidSoftInputView,
-} from "react-native-avoid-softinput";
+import { AvoidSoftInputView } from "react-native-avoid-softinput";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 25;
@@ -85,13 +76,6 @@ export default function ChatMessage() {
   //   }
   //   console.log("MESSAGES:", msgs.length);
   //   setMessages(msgs);
-  // }, []);
-
-  // useEffect(() => {
-  //   AvoidSoftInput.setAvoidOffset(10);
-  //   AvoidSoftInput.setHideAnimationDelay(0);
-  //   AvoidSoftInput.setShowAnimationDelay(0);
-  //   AvoidSoftInput.setEnabled(true);
   // }, []);
 
   const onSend = useCallback(
