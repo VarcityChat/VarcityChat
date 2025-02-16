@@ -1,4 +1,5 @@
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -8,10 +9,10 @@ import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Bubble,
   GiftedChat,
-  GiftedChatProps,
   IMessage,
   InputToolbar,
   Send,
+  SendProps,
 } from "react-native-gifted-chat";
 import { TouchableOpacity, View, Text, Image, colors } from "@/ui";
 import { emptyChatImg } from "@/ui/images";
@@ -34,8 +35,11 @@ import { useQuery, useRealm } from "@realm/react";
 import { convertToGiftedChatMessage } from "@/core/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { MessageSchema } from "@/core/models/message-model";
+import {
+  AvoidSoftInput,
+  AvoidSoftInputView,
+} from "react-native-avoid-softinput";
 
-const MemoizedGiftedChat = memo(GiftedChat);
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 25;
 
@@ -60,8 +64,6 @@ export default function ChatMessage() {
 
   console.log("CURRENT PAGE:", page);
 
-  // .slice((page - 1) * MESSAGES_PER_PAGE, page * MESSAGES_PER_PAGE);
-
   const swipeableRef = useRef<Swipeable | null>(null);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
@@ -85,10 +87,15 @@ export default function ChatMessage() {
   //   setMessages(msgs);
   // }, []);
 
+  // useEffect(() => {
+  //   AvoidSoftInput.setAvoidOffset(10);
+  //   AvoidSoftInput.setHideAnimationDelay(0);
+  //   AvoidSoftInput.setShowAnimationDelay(0);
+  //   AvoidSoftInput.setEnabled(true);
+  // }, []);
+
   const onSend = useCallback(
     (messages: IMessage[]) => {
-      console.log("CLICKED BUTTON");
-      console.log(messages);
       // Scroll message list to bottom when a new message is sent
       messageContainerRef?.current?.scrollToOffset({
         offset: 0,
@@ -134,17 +141,42 @@ export default function ChatMessage() {
     }
   }, [replyMessage]);
 
+  const renderSend = (sendProps: SendProps<IMessage>) => {
+    return (
+      <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
+        {text.length > 0 && (
+          <Send {...sendProps} containerStyle={{ justifyContent: "center" }}>
+            <SendSvg width={30} height={30} />
+          </Send>
+        )}
+        {text.length === 0 && (
+          <>
+            <TouchableOpacity>
+              <MicrophoneSvg />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <AttachmentSvg />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <PictureSvg />
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    );
+  };
+
   return (
-    <View
-      className="flex flex-1"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
-    >
+    <SafeAreaView className="flex flex-1">
       {isPending && chat?.user1._id !== user?._id ? (
         <MessageRequest chat={chat!} />
       ) : (
-        <>
+        <AvoidSoftInputView
+          avoidOffset={10}
+          hideAnimationDelay={50}
+          hideAnimationDuration={200}
+          style={styles.softInputStyles}
+        >
           <GiftedChat
             messageContainerRef={messageContainerRef}
             messages={messagesFromRealm.map((message) =>
@@ -161,41 +193,15 @@ export default function ChatMessage() {
             user={{ _id: user!._id }}
             renderBubble={(props) => <CustomMessageBubble {...props} />}
             onInputTextChanged={setText}
-            // bottomOffset={insets.bottom}
             renderAvatar={null}
             maxComposerHeight={100}
             timeTextStyle={{ right: { color: "green" } }}
-            renderSend={(props) => (
-              <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
-                {text.length > 0 && (
-                  <Send
-                    {...props}
-                    containerStyle={{ justifyContent: "center" }}
-                  >
-                    <SendSvg width={30} height={30} />
-                  </Send>
-                )}
-                {text.length === 0 && (
-                  <>
-                    <TouchableOpacity>
-                      <MicrophoneSvg />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
-                      <AttachmentSvg />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
-                      <PictureSvg />
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
-            )}
+            renderSend={renderSend}
             textInputProps={styles.composer}
             scrollToBottom={true}
             infiniteScroll
             loadEarlier
             onLoadEarlier={loadEarlier}
-            // renderLoadingEarlier=
             // renderInputToolbar={(props) => (
             //   <InputToolbar {...props} containerStyle={{ height: 60 }} />
             // )}
@@ -214,14 +220,11 @@ export default function ChatMessage() {
             // )}
             renderChatEmpty={() => <ChatEmptyComponent />}
             keyboardShouldPersistTaps="never"
+            isKeyboardInternallyHandled={false}
           />
-
-          {Platform.OS === "android" && (
-            <KeyboardAvoidingView behavior="padding" />
-          )}
-        </>
+        </AvoidSoftInputView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 const ChatEmptyComponent = memo(() => {
@@ -290,5 +293,8 @@ const styles = StyleSheet.create({
     // paddingTop: 2,
     fontFamily: "PlusJakartaSans_400Regular",
     // marginVertical: 4,
+  },
+  softInputStyles: {
+    flex: 1,
   },
 });
