@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import SearchBar from "@/components/search-bar";
 import { Image, View, Text, TouchableOpacity } from "@/ui";
 import { useRouter } from "expo-router";
-import { Platform, SafeAreaView } from "react-native";
+import { Platform, SafeAreaView, RefreshControl } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -22,14 +22,14 @@ import { useSocket } from "@/context/SocketContext";
 import { ExtendedMessage } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
-import { trimText } from "@/core/utils";
+import { formatChatLastMessage } from "@/core/utils";
 
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { socket } = useSocket();
   const { addMessageToLocalRealm } = useChatMessages();
-  const { chats, isLoading, error, updateChatOrder } = useChats();
+  const { chats, isLoading, error, updateChatOrder, loadChats } = useChats();
   const { showToast } = useToast();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
@@ -48,6 +48,11 @@ export default function Chats() {
       };
     }
   }, [socket]);
+
+  // useEffect(() => {
+  //   console.log("DELETEING ALL MESSAGES");
+  //   deleteAllMessages();
+  // }, []);
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -119,6 +124,12 @@ export default function Chats() {
           ItemSeparatorComponent={() => (
             <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-800" />
           )}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={() => loadChats()}
+            />
+          }
           renderItem={({ item, index }) => (
             <Animated.View
               entering={FadeIn.delay(index * 150)}
@@ -150,7 +161,7 @@ export default function Chats() {
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
                     {item.status !== "accepted"
                       ? "Pending request"
-                      : trimText(`${item?.lastMessage?.content}`, 45)}
+                      : formatChatLastMessage(`${item?.lastMessage?.content}`)}
                   </Text>
                 </View>
 

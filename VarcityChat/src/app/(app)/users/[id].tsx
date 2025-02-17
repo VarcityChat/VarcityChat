@@ -33,7 +33,7 @@ export default function User() {
   const insets = useSafeAreaInsets();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollY = useSharedValue(0);
-  const { chats } = useChats();
+  const { chats, loadChats } = useChats();
   const { callMutationWithErrorHandler } = useApi();
   const [initializeConversation, { isLoading: isInitializingChat }] =
     useInitializeConversationMutation();
@@ -65,8 +65,10 @@ export default function User() {
   });
 
   const handleOpenChat = async () => {
-    if (!chats) return;
+    // Refetch the chats before navigating...
+    await loadChats();
 
+    if (!chats?.length) return;
     const conversationIndex = chats.findIndex(
       (chat) =>
         chat.user1._id === userData._id || chat.user2._id === userData._id

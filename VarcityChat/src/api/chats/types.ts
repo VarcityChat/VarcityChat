@@ -14,6 +14,8 @@ export interface ExtendedMessage extends IMessage {
   receiver: string;
   content?: string;
   mediaUrl?: string[];
+  localSequence: number;
+  sequence: number;
   mediaType?: "audio" | "video" | "image";
   reply?: {
     messageId: string;
@@ -51,4 +53,11 @@ export interface IChat {
 
 export interface IUpdateChatRequest {
   conversationId: string;
+}
+
+export interface IChatAck {
+  success: boolean;
+  messageId: string;
+  messageSequence: number;
+  messageCreatedAt: Date;
 }

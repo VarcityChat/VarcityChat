@@ -37,6 +37,7 @@ import { convertToGiftedChatMessage } from "@/core/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
+import { useSocket } from "@/context/SocketContext";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -46,6 +47,8 @@ export default function ChatMessage() {
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
   const messageContainerRef = useRef<FlatList>(null);
+  const { isConnected } = useSocket();
+
   const { chat, activeChatUser, isPending } = useActiveChat(
     conversationId as string
   );
@@ -54,11 +57,14 @@ export default function ChatMessage() {
   // const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");
 
-  const { sendMessage } = useChatMessages();
+  const { sendMessage, syncMessagesFromBackend } = useChatMessages();
 
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
-    .sorted("createdAt", true);
+    .sorted([
+      ["localSequence", true],
+      ["serverSequence", true],
+    ]);
 
   console.log("CURRENT PAGE:", page);
 
@@ -66,6 +72,12 @@ export default function ChatMessage() {
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
   console.log("RENDERED COUNT:", renderedCount++);
+
+  useEffect(() => {
+    if (isConnected) {
+      syncMessagesFromBackend(conversationId as string);
+    }
+  }, [conversationId, isConnected]);
 
   // GENERATE 10,000 MESSAGES
   // useEffect(() => {
@@ -169,11 +181,13 @@ export default function ChatMessage() {
     <SafeAreaView className="flex flex-1">
       {isPending && chat?.user1._id !== user?._id ? (
         <MessageRequest chat={chat!} />
-      ) : (
+      ) : Platform.OS === "ios" ? (
         <AvoidSoftInputView
           avoidOffset={10}
           hideAnimationDelay={50}
           hideAnimationDuration={200}
+          showAnimationDelay={50}
+          showAnimationDuration={200}
           style={styles.softInputStyles}
         >
           <GiftedChat
@@ -226,6 +240,37 @@ export default function ChatMessage() {
             isKeyboardInternallyHandled={false}
           />
         </AvoidSoftInputView>
+      ) : (
+        <GiftedChat
+          messageContainerRef={messageContainerRef}
+          messages={messagesFromRealm
+            .slice(0, page * MESSAGES_PER_PAGE)
+            .map((message) =>
+              convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+            )}
+          listViewProps={{
+            windowSize: 7,
+            initialNumToRender: 25,
+            maxToRenderPerBatch: 50,
+            updateCellsBatchingPeriod: 50,
+            removeCliippedSubviews: true,
+          }}
+          onSend={(messages: any) => onSend(messages)}
+          user={{ _id: user!._id }}
+          renderBubble={(props) => <CustomMessageBubble {...props} />}
+          onInputTextChanged={setText}
+          renderAvatar={null}
+          maxComposerHeight={100}
+          timeTextStyle={{ right: { color: "green" } }}
+          renderSend={renderSend}
+          textInputProps={styles.composer}
+          scrollToBottom={true}
+          infiniteScroll
+          loadEarlier={hasMoreMessages}
+          onLoadEarlier={loadEarlier}
+          renderChatEmpty={() => <ChatEmptyComponent />}
+          keyboardShouldPersistTaps="never"
+        />
       )}
     </SafeAreaView>
   );

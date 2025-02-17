@@ -10,6 +10,11 @@ export const trimText = (text: string, maxLength: number = 20) => {
     : text.slice(0, maxLength);
 };
 
+export const formatChatLastMessage = (text: string) => {
+  if (text.length === 0) return "Send a message 👋";
+  return trimText(text, 45);
+};
+
 export const capitalize = (text: string): string => {
   if (!text) return "";
   if (typeof text !== "string") return "";

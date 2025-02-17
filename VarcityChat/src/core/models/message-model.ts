@@ -10,7 +10,9 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
   sender!: string;
   receiver!: string;
   isQueued!: boolean;
-  messageId?: string;
+  localSequence?: number;
+  serverId?: string;
+  serverSequence?: number;
   isArchived?: boolean;
   lastSyncTimestamp?: Date;
 
@@ -21,12 +23,14 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
       _id: "objectId",
       conversationId: { type: "string", indexed: true },
       content: "string",
-      createdAt: { type: "date", indexed: true },
+      createdAt: { type: "date" },
       deliveryStatus: { type: "string", default: "pending" },
       sender: "string",
       receiver: "string",
       isQueued: { type: "bool", default: false },
-      messageId: { type: "string", optional: true, indexed: true },
+      localSequence: { type: "int", optional: true, indexed: true },
+      serverSequence: { type: "int", optional: true, indexed: true },
+      serverId: { type: "string", optional: true, indexed: true },
       isArchived: { type: "bool", default: false },
       lastSyncTimestamp: { type: "date", optional: true },
     },

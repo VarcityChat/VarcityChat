@@ -137,7 +137,7 @@ function Providers({ children }: { children: ReactNode }) {
   return (
     <RealmProvider
       schema={[MessageSchema]}
-      schemaVersion={7}
+      schemaVersion={9}
       onMigration={migration}
     >
       <Provider store={store}>
