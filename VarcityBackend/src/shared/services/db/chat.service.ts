@@ -93,7 +93,8 @@ class ChatService {
   public async getNextSequence(conversationId: string): Promise<number> {
     const result = await ConversationModel.findOneAndUpdate(
       { _id: conversationId },
-      { $inc: { messageSequence: 1 } }
+      { $inc: { messageSequence: 1 } },
+      { returnDocument: 'after' }
     );
     return result?.messageSequence || 0;
   }
@@ -114,6 +115,30 @@ class ChatService {
       .sort({ createdAt: 1 })
       .skip(skip)
       .limit(200);
+    return messages;
+  }
+
+  public async getMessagesSinceSequence(
+    conversationId: string,
+    sequence: number,
+    skip: number = 0
+  ): Promise<IMessageDocument[]> {
+    const messages = await MessageModel.find({ conversationId, sequence: { $gt: sequence } })
+      .sort({ sequence: 1 })
+      .skip(skip)
+      .limit(500);
+    return messages;
+  }
+
+  public async getMessagesSince(
+    conversationId: string,
+    date: Date,
+    skip: number = 0
+  ): Promise<IMessageDocument[]> {
+    const messages = await MessageModel.find({ conversationId, createdAt: { $gte: date } })
+      .sort({ sequence: 1 })
+      .skip(skip)
+      .limit(500);
     return messages;
   }
 }

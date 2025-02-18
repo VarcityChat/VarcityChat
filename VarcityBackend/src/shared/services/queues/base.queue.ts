@@ -35,6 +35,9 @@ export abstract class BaseQueue {
         this.log.info(`Job ${jobId} is completed`)
       );
       this.queue.on('global:stalled', (jobId: string) => this.log.info(`Job ${jobId} is stalled`));
+      this.queue.on('error', (err) => {
+        this.log.error(`Queue ${queueName} error:`, err);
+      });
     } catch (error) {
       this.log.error(`Error occurred in ${queueName}Queue: `, error);
       process.exit(1);
@@ -42,7 +45,13 @@ export abstract class BaseQueue {
   }
 
   protected addJob(name: string, data: IBaseJobData): void {
-    this.queue.add(name, data, { attempts: 3, backoff: { type: 'fixed', delay: 5000 } });
+    this.queue.add(name, data, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+      timeout: 5000
+    });
   }
 
   protected processJob(

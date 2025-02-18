@@ -28,9 +28,14 @@ export class ChatHandler {
   }
 
   handle(): void {
+    /**
+     * Handle Incoming Message Event
+     *
+     */
     this.socket.on('new-message', async (message: IMessageData, callback) => {
       console.log('\nMESSAGE COMING IN:', message);
 
+      // validate the message to ensure it contains required field (especially localID and conversationID)
       const error = await this.validateChatMessage(message);
       if (error) {
         log.error('Validation Error:', error.details);
@@ -42,7 +47,7 @@ export class ChatHandler {
         return;
       }
 
-      // Check if the conversation hasn't been accepted by the other user
+      // don't continue processing if conversation hasn't been accepted by the receiver
       if (message.conversationStatus === CONVERSATION_STATUS.pending) {
         const conversation: IConversationDocument | null = await chatService.getConversationById(
           `${message.conversationId}`
@@ -52,11 +57,14 @@ export class ChatHandler {
         }
       }
 
+      // create server timestamp and objectId for the message
+      const createdAt = new Date();
       const messageObjectID = new ObjectId();
       const sequence = await chatService.getNextSequence(`${message.conversationId}`);
-      message.sequence = sequence;
-      message.createdAt = new Date();
+      message['sequence'] = sequence;
+      message['createdAt'] = createdAt;
 
+      // update the unread users account in a queue
       conversationQueue.addConversationJob(ConversationJobs.updateConversationForNewMessage, {
         value: {
           sender: message.sender,
@@ -65,6 +73,8 @@ export class ChatHandler {
           lastMessage: `${messageObjectID}`
         }
       });
+
+      // add the message to db in a queue
       chatQueue.addChatJob(ChatJobs.addChatMessageToDB, {
         value: { ...message, _id: messageObjectID }
       });
@@ -72,11 +82,18 @@ export class ChatHandler {
       // TODO: send notification to user using queue
       console.log('SENDING MESSAGE TO RECEIVER:', message.receiver);
 
+      // emit event to the receiver with acknowledgment of (success: true) to the message sender
       this.socket
         .to(`${message.receiver}`)
         .emit('new-message', { _id: messageObjectID, ...message });
       if (callback) {
-        callback({ success: true, messageId: messageObjectID });
+        callback({
+          success: true,
+          serverId: messageObjectID,
+          localId: message.localId,
+          serverSequence: message.sequence,
+          messageCreatedAt: createdAt
+        });
       }
     });
 

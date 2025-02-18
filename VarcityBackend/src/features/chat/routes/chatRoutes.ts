@@ -14,6 +14,8 @@ class ChatRoutes {
     // Get all conversations for the authenticated user
     this.router.get('/chat/conversations', getChats.conversationList);
     this.router.get('/chat/:conversationId/messages', getChats.messages);
+    this.router.get('/chat/:conversationId/messages/sequence', getChats.messagesBySequence);
+    this.router.get('/chat/:conversationId/messages/since', getChats.messagesSince);
 
     // Open a chat with a user
     this.router.post('/chat/open', createChat.conversation);

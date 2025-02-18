@@ -32,8 +32,10 @@ export interface IMessageDocument extends Document {
   };
   readAt?: Date;
   createdAt: Date;
+  updatedAt: Date;
   localId: string;
   sequence: number;
+  localSequence: number;
 }
 
 export interface IMessageData {
@@ -58,6 +60,7 @@ export interface IMessageData {
   createdAt?: Date;
   localId: string;
   sequence: number;
+  localSequence: number;
 }
 
 export interface ISenderReceiver {

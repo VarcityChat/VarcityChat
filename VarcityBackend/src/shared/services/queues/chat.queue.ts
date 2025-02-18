@@ -13,8 +13,12 @@ export enum ConversationJobs {
 
 class ChatQueue extends BaseQueue {
   constructor() {
-    super('Chat');
-    this.processJob(ChatJobs.addChatMessageToDB, 10, chatWorker.addChatMessageToDB);
+    super('ChatMessages');
+    this.processJob(
+      ChatJobs.addChatMessageToDB,
+      10,
+      chatWorker.addChatMessageToDB.bind(chatWorker)
+    );
   }
 
   public addChatJob(name: string, data: IMessageJob): void {
@@ -24,7 +28,7 @@ class ChatQueue extends BaseQueue {
 
 class ConversationQueue extends BaseQueue {
   constructor() {
-    super('Chat');
+    super('Conversations');
     this.processJob(
       ConversationJobs.increaseUnreadCount,
       10,
