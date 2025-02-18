@@ -23,7 +23,6 @@ import { ExtendedMessage, IUpdateChatRequest } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
 import { formatChatLastMessage } from "@/core/utils";
-import { api } from "@/api/api";
 import { useAppDispatch } from "@/core/store/store";
 
 export default function Chats() {
@@ -190,6 +189,8 @@ export default function Chats() {
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
                     {item.status == "pending"
                       ? "Pending request"
+                      : item.status === "rejected"
+                      ? "Rejected request"
                       : formatChatLastMessage(item?.lastMessage?.content)}
                   </Text>
                 </View>
