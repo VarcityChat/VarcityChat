@@ -23,7 +23,6 @@ import { ExtendedMessage, IUpdateChatRequest } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
 import { formatChatLastMessage } from "@/core/utils";
-import { useAppDispatch } from "@/core/store/store";
 
 export default function Chats() {
   const router = useRouter();
