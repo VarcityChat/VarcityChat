@@ -28,7 +28,6 @@ import { useAppDispatch } from "@/core/store/store";
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const dispatch = useAppDispatch();
   const { socket } = useSocket();
   const { addMessageToLocalRealm } = useChatMessages();
   const {
