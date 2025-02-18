@@ -106,7 +106,7 @@ class ChatService {
       $or: [{ user1: userId }, { user2: userId }]
     })
       .populate('user1 user2 lastMessage')
-      .sort({ createdAt: -1, lastMessageTimestamp: -1 });
+      .sort({ lastMessageTimestamp: -1, createdAt: -1 });
     return conversations;
   }
 

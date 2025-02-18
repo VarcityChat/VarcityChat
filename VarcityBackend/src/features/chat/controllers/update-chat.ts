@@ -32,8 +32,13 @@ class Update {
     const currentUser = await userService.getUserById(`${req.currentUser.userId}`);
 
     await chatService.acceptConversationRequest(conversationId);
+
+    /**
+     * Send notifications to the user who initialized the conversation
+     * (user1) is always the user who initialized the conversation
+     */
     await notificationService.saveNotificationToDb(
-      conversation.user2.toString(),
+      conversation.user1.toString(),
       {
         body: `${currentUser?.firstname}: accepted your message request`,
         title: 'Message Request Accepted'
@@ -41,7 +46,11 @@ class Update {
       `${req.currentUser?.userId}`
     );
 
-    ioInstance.to(conversation.user2.toString()).emit('new-notification', {
+    ioInstance.to(conversation.user1.toString()).emit('new-notification', {
+      conversationId
+    });
+
+    ioInstance.to(conversation.user1.toString()).emit('accepted-conversation-request', {
       conversationId
     });
 
@@ -65,8 +74,13 @@ class Update {
     const currentUser = await userService.getUserById(`${req.currentUser.userId}`);
 
     await chatService.rejectConversationRequest(conversationId);
+
+    /**
+     * Send notifications to the user who initialized the conversation
+     * (user1) is always the user who initialized the conversation
+     */
     await notificationService.saveNotificationToDb(
-      conversation.user2.toString(),
+      conversation.user1.toString(),
       {
         body: `${currentUser?.firstname}: rejected your message request`,
         title: 'Message Request Rejected'
@@ -74,7 +88,11 @@ class Update {
       `${req.currentUser?.userId}`
     );
 
-    ioInstance.to(conversation.user2.toString()).emit('new-notification', {
+    ioInstance.to(conversation.user1.toString()).emit('new-notification', {
+      conversationId
+    });
+
+    ioInstance.to(conversation.user1.toString()).emit('rejected-conversation-request', {
       conversationId
     });
 
