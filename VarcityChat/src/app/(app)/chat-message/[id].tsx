@@ -54,12 +54,11 @@ export default function ChatMessage() {
   const { isConnected } = useSocket();
   const messageContainerRef = useRef<FlatList>(null);
 
-  const { chat, activeChatUser, isPending } = useActiveChat(
+  const { chat, activeChatUser, isPending, isRejected } = useActiveChat(
     conversationId as string
   );
   const [page, setPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
-  // const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");
 
   const { sendMessage, syncMessagesFromBackend, isSyncing } = useChatMessages();
@@ -188,6 +187,8 @@ export default function ChatMessage() {
   return (
     <SafeAreaView className="flex flex-1">
       {isPending && chat?.user1._id !== user?._id ? (
+        <MessageRequest chat={chat!} />
+      ) : isRejected ? (
         <MessageRequest chat={chat!} />
       ) : Platform.OS === "ios" ? (
         <AvoidSoftInputView

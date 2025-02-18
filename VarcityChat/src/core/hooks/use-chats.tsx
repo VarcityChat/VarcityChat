@@ -90,5 +90,6 @@ export const useActiveChat = (chatId: string) => {
     chat,
     activeChatUser,
     isPending: chat?.status === "pending",
+    isRejected: chat?.status === "rejected",
   };
 };

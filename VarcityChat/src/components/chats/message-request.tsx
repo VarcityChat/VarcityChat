@@ -43,16 +43,19 @@ export const MessageRequest = ({ chat }: { chat: IChat }) => {
         {activeChatUser?.firstname} wants to start a conversation
       </Text>
       <View className="flex-row gap-4">
-        <TouchableOpacity
-          className="bg-grey-100 dark:bg-grey-500 px-6 py-3 rounded-full"
-          onPress={handleRejectRequest}
-        >
-          {isRejecting ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Text className="text-white">Decline</Text>
-          )}
-        </TouchableOpacity>
+        {chat.status !== "rejected" && (
+          <TouchableOpacity
+            className="bg-grey-100 dark:bg-grey-500 px-6 py-3 rounded-full"
+            onPress={handleRejectRequest}
+          >
+            {isRejecting ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-white">Decline</Text>
+            )}
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           className="bg-primary-500 px-6 py-3 rounded-full"
           onPress={handleAcceptRequest}
