@@ -57,10 +57,6 @@ export const useChatMessages = () => {
           serverMessages.sort((a, b) => a.sequence - b.sequence);
 
           for (const message of serverMessages) {
-            /**
-             * if there was a lastSyncTimestamp, use it to find the local message
-             * if not, create a new message
-             **/
             const localMessage = realm.objectForPrimaryKey<MessageSchema>(
               "Message",
               new BSON.ObjectId(message.localId)
