@@ -57,7 +57,8 @@ export interface IUpdateChatRequest {
 
 export interface IChatAck {
   success: boolean;
-  messageId: string;
-  messageSequence: number;
+  serverId: string;
+  localId: string;
+  serverSequence: number;
   messageCreatedAt: Date;
 }

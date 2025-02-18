@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CallsActive from "@/ui/icons/calls-active";
 import ChatUserSvg from "@/ui/icons/user/chat-user-svg";
 import { HEADER_HEIGHT } from "@/components/header";
-import React from "react";
+import React, { useEffect } from "react";
 import { IUser } from "@/types/user";
 import { capitalize, trimText } from "@/core/utils";
 import { IUniversity } from "@/api/universities/types";
@@ -64,18 +64,21 @@ export default function User() {
     };
   });
 
-  const handleOpenChat = async () => {
-    // Refetch the chats before navigating...
-    await loadChats();
+  // Refresh the chats when the user is on this page
+  useEffect(() => {
+    loadChats();
+  }, []);
 
-    if (!chats?.length) return;
-    const conversationIndex = chats.findIndex(
-      (chat) =>
-        chat.user1._id === userData._id || chat.user2._id === userData._id
-    );
-    if (conversationIndex > -1) {
-      router.push(`/(app)/chat-message/${chats[conversationIndex]._id}`);
-      return;
+  const handleOpenChat = async () => {
+    if (chats?.length) {
+      const conversationIndex = chats.findIndex(
+        (chat) =>
+          chat.user1._id === userData._id || chat.user2._id === userData._id
+      );
+      if (conversationIndex > -1) {
+        router.push(`/(app)/chat-message/${chats[conversationIndex]._id}`);
+        return;
+      }
     }
 
     // create conversation request
@@ -95,6 +98,7 @@ export default function User() {
       }, 200);
     }
   };
+
   if (!userData) return null;
 
   return (

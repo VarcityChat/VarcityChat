@@ -1,4 +1,9 @@
-import { Platform, SafeAreaView, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
 import React, {
   memo,
   useCallback,
@@ -46,8 +51,8 @@ export default function ChatMessage() {
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
-  const messageContainerRef = useRef<FlatList>(null);
   const { isConnected } = useSocket();
+  const messageContainerRef = useRef<FlatList>(null);
 
   const { chat, activeChatUser, isPending } = useActiveChat(
     conversationId as string
@@ -57,7 +62,7 @@ export default function ChatMessage() {
   // const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState("");
 
-  const { sendMessage, syncMessagesFromBackend } = useChatMessages();
+  const { sendMessage, syncMessagesFromBackend, isSyncing } = useChatMessages();
 
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
@@ -66,7 +71,7 @@ export default function ChatMessage() {
       ["serverSequence", true],
     ]);
 
-  console.log("CURRENT PAGE:", page);
+  // console.log("CURRENT PAGE:", page);
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
@@ -120,10 +125,13 @@ export default function ChatMessage() {
   );
 
   useEffect(() => {
-    if ((page + 1) * MESSAGES_PER_PAGE <= messagesFromRealm.length) {
+    if (
+      (page + 1) * MESSAGES_PER_PAGE <= messagesFromRealm.length &&
+      !hasMoreMessages
+    ) {
       setHasMoreMessages(true);
     }
-  }, []);
+  }, [messagesFromRealm.length, page, hasMoreMessages]);
 
   const loadEarlier = useCallback(() => {
     if ((page + 1) * MESSAGES_PER_PAGE >= messagesFromRealm.length) {
@@ -268,9 +276,13 @@ export default function ChatMessage() {
           infiniteScroll
           loadEarlier={hasMoreMessages}
           onLoadEarlier={loadEarlier}
-          renderChatEmpty={() => <ChatEmptyComponent />}
+          renderChatEmpty={() => (isSyncing ? null : <ChatEmptyComponent />)}
           keyboardShouldPersistTaps="never"
         />
+      )}
+
+      {isSyncing && messagesFromRealm.length == 0 && (
+        <SyncingMessagesComponent />
       )}
     </SafeAreaView>
   );
@@ -306,6 +318,17 @@ const CustomMessageBubble = memo((props) => {
         }}
         // renderTicks={renderTicks}
       />
+    </View>
+  );
+});
+
+const SyncingMessagesComponent = memo(() => {
+  return (
+    <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 z-10">
+      <View className="flex flex-1 items-center justify-center">
+        <Text className="text-white mb-4 -mt-20">Syncing messages...</Text>
+        <ActivityIndicator color="white" size="small" />
+      </View>
     </View>
   );
 });

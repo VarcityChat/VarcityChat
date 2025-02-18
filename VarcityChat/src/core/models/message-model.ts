@@ -5,7 +5,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
   _id!: BSON.ObjectID;
   conversationId!: string;
   content!: string;
-  createdAt!: Date;
+  createdAt?: Date;
   deliveryStatus!: "pending" | "sent" | "delivered" | "read";
   sender!: string;
   receiver!: string;
@@ -23,7 +23,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
       _id: "objectId",
       conversationId: { type: "string", indexed: true },
       content: "string",
-      createdAt: { type: "date" },
+      createdAt: "date?",
       deliveryStatus: { type: "string", default: "pending" },
       sender: "string",
       receiver: "string",

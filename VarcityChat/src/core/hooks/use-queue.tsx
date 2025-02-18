@@ -11,16 +11,14 @@ export const useQueue = () => {
     async (socket: Socket | null) => {
       const queuedMessages = realm
         .objects<MessageSchema>("Message")
-        .filtered("isQueued == true")
-        .sorted("createdAt");
+        .filtered("isQueued == true");
 
-      console.log("\nPROCESSING QUEUED MESSAGES:", queuedMessages.length);
-      queuedMessages.forEach((message) => console.log(message.content));
-
+      // group the queued messages by conversation
       const conversationIds = [
         ...new Set(queuedMessages.map((m) => m.conversationId)),
       ];
 
+      // send the queued messages by conversation
       for (const conversation of conversationIds) {
         const messages = queuedMessages
           .filtered("conversationId = $0", conversation)
@@ -37,13 +35,13 @@ export const useQueue = () => {
               localId: message._id,
             },
             (ack: IChatAck) => {
+              // if acknowledged from server, set the local sequence to the server sequence
               if (ack.success) {
                 realm.write(() => {
                   message.isQueued = false;
                   message.deliveryStatus = "sent";
-                  message.serverId = ack.messageId;
-                  message.serverSequence = Number(ack.messageSequence);
-                  message.lastSyncTimestamp = new Date();
+                  message.serverId = ack.serverId;
+                  message.localSequence = Number(ack.serverSequence);
                 });
               }
             }
