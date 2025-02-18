@@ -20,6 +20,7 @@ export const messagesApi = api.injectEndpoints({
       }),
       providesTags: ["Messages"],
     }),
+
     getChats: builder.query<IChat[], void>({
       query: () => ({
         url: "/chat/conversations",

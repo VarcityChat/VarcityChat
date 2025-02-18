@@ -281,9 +281,9 @@ export default function ChatMessage() {
         />
       )}
 
-      {isSyncing && messagesFromRealm.length == 0 && (
-        <SyncingMessagesComponent />
-      )}
+      {isSyncing &&
+        messagesFromRealm.length == 0 &&
+        chat?.status !== "pending" && <SyncingMessagesComponent />}
     </SafeAreaView>
   );
 }

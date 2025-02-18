@@ -19,40 +19,69 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { useToast } from "@/core/hooks/use-toast";
 import { defaultAvatarUrl } from "../../../../constants/chats";
 import { useSocket } from "@/context/SocketContext";
-import { ExtendedMessage } from "@/api/chats/types";
+import { ExtendedMessage, IUpdateChatRequest } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
 import { formatChatLastMessage } from "@/core/utils";
+import { api } from "@/api/api";
+import { useAppDispatch } from "@/core/store/store";
 
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch();
   const { socket } = useSocket();
   const { addMessageToLocalRealm } = useChatMessages();
-  const { chats, isLoading, error, updateChatOrder, loadChats } = useChats();
+  const {
+    chats,
+    isLoading,
+    error,
+    updateChatOrder,
+    updateChatStatus,
+    loadChats,
+  } = useChats();
   const { showToast } = useToast();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
 
   const handleNewMessage = (message: ExtendedMessage) => {
-    updateChatOrder(message);
     addMessageToLocalRealm(message);
+    updateChatOrder(message);
+  };
+
+  const handleNewMessageRequest = () => {
+    loadChats();
+  };
+
+  const handleMessageRequestAccepted = (data: IUpdateChatRequest) => {
+    updateChatStatus(data.conversationId, "accepted");
+  };
+
+  const handleMessageRequestRejected = (data: IUpdateChatRequest) => {
+    updateChatStatus(data.conversationId, "rejected");
   };
 
   useEffect(() => {
     if (socket) {
       socket.on("new-message", handleNewMessage);
+      socket.on("new-message-request", handleNewMessageRequest);
+      socket.on("accepted-conversation-request", handleMessageRequestAccepted);
+      socket.on("rejected-conversation-request", handleMessageRequestRejected);
 
       return () => {
         socket.off("new-message", handleNewMessage);
+        socket.off("new-message-request", handleNewMessageRequest);
+        socket.off(
+          "accepted-conversation-request",
+          handleMessageRequestAccepted
+        );
+        socket.off(
+          "rejected-conversation-request",
+          handleMessageRequestRejected
+        );
       };
     }
   }, [socket]);
-
-  // useEffect(() => {
-  //   console.log("DELETEING ALL MESSAGES");
-  //   deleteAllMessages();
-  // }, []);
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -159,9 +188,9 @@ export default function Chats() {
                       : item.user1.firstname}
                   </Text>
                   <Text className="text-grey-400 text-sm mt-1 dark:text-grey-400 font-sans-medium">
-                    {item.status !== "accepted"
+                    {item.status == "pending"
                       ? "Pending request"
-                      : formatChatLastMessage(`${item?.lastMessage?.content}`)}
+                      : formatChatLastMessage(item?.lastMessage?.content)}
                   </Text>
                 </View>
 

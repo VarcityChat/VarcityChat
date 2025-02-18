@@ -10,7 +10,8 @@ export const trimText = (text: string, maxLength: number = 20) => {
     : text.slice(0, maxLength);
 };
 
-export const formatChatLastMessage = (text: string) => {
+export const formatChatLastMessage = (text: any) => {
+  if (typeof text !== "string") return "Send a message 👋";
   if (text.length === 0) return "Send a message 👋";
   return trimText(text, 45);
 };

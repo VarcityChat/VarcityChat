@@ -12,12 +12,13 @@ interface SerializedError {
 const isFetchBaseQueryError = (error: unknown): error is FetchBaseQueryError =>
   typeof error === "object" && error !== null && "status" in error;
 
-const isSerializedError = (error: unknown): error is SerializedError => {
+const isSerializedError = (error: any): error is SerializedError => {
   return (
     typeof error === "object" &&
     error !== null &&
-    "data" in error &&
-    "message" in (error as SerializedError)?.data
+    error["data"] &&
+    typeof error["data"] === "object" &&
+    "message" in error["data"]
   );
 };
 

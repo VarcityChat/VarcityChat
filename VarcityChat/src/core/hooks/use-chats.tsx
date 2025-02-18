@@ -7,6 +7,7 @@ import { ExtendedMessage, IChat } from "@/api/chats/types";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { useAuth } from "./use-auth";
 
+// Hooks for the chats screen
 export const useChats = () => {
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
   const dispatch = useAppDispatch();
@@ -43,16 +44,16 @@ export const useChats = () => {
 
   const updateChatStatus = (
     chatId: string,
-    status: "accepted" | "rejected"
+    status: "accepted" | "rejected" | "pending"
   ) => {
     dispatch(
       messagesApi.util.updateQueryData(
         "getChats",
         undefined as any,
         (draft: IChat[]) => {
-          const chatIndex = draft.findIndex((chat) => chat._id === chatId);
-          if (chatIndex > -1) {
-            draft[chatIndex].status = status;
+          const chat = draft.find((chat) => chat._id === chatId);
+          if (chat) {
+            chat.status = status;
           }
         }
       )
@@ -74,6 +75,7 @@ export const useChats = () => {
   };
 };
 
+// Hook for handling active chat
 export const useActiveChat = (chatId: string) => {
   const chat = useAppSelector(selectChatById(chatId));
   const { user } = useAuth();
