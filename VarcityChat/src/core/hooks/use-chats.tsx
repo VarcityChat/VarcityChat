@@ -60,8 +60,8 @@ export const useChats = () => {
     );
   };
 
+  // Trigger refetch of chats
   const loadChats = async () => {
-    // Trigger refetch of chats
     await refetch();
   };
 
@@ -77,18 +77,24 @@ export const useChats = () => {
 
 // Hook for handling active chat
 export const useActiveChat = (chatId: string) => {
-  const chat = useAppSelector(selectChatById(chatId));
+  let chat = useAppSelector(selectChatById(chatId));
   const { user } = useAuth();
 
-  const activeChatUser = chat
+  let activeChatReceiver = chat
     ? chat.user1._id === user?._id
       ? chat.user2
       : chat.user1
     : null;
 
+  const resetActiveChat = () => {
+    chat = null;
+    activeChatReceiver = null;
+  };
+
   return {
     chat,
-    activeChatUser,
+    activeChatReceiver,
+    resetActiveChat,
     isPending: chat?.status === "pending",
     isRejected: chat?.status === "rejected",
   };

@@ -9,7 +9,7 @@ import {
 import { useApi } from "@/core/hooks/use-api";
 
 export const MessageRequest = ({ chat }: { chat: IChat }) => {
-  const { activeChatUser } = useActiveChat(chat._id);
+  const { activeChatReceiver } = useActiveChat(chat._id);
   const { updateChatStatus } = useChats();
   const { callMutationWithErrorHandler } = useApi();
 
@@ -40,7 +40,7 @@ export const MessageRequest = ({ chat }: { chat: IChat }) => {
     <View className="flex-1 justify-end items-center p-4">
       <Text className="text-lg font-sans-bold mb-2">Message Request</Text>
       <Text className="text-center text-grey-500 mb-4">
-        {activeChatUser?.firstname} wants to start a conversation
+        {activeChatReceiver?.firstname} wants to start a conversation
       </Text>
       <View className="flex-row gap-4">
         {chat.status !== "rejected" && (

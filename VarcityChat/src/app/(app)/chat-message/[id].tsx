@@ -54,9 +54,8 @@ export default function ChatMessage() {
   const { isConnected } = useSocket();
   const messageContainerRef = useRef<FlatList>(null);
 
-  const { chat, activeChatUser, isPending, isRejected } = useActiveChat(
-    conversationId as string
-  );
+  const { chat, activeChatReceiver, isPending, isRejected, resetActiveChat } =
+    useActiveChat(conversationId as string);
   const [page, setPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [text, setText] = useState("");
@@ -83,23 +82,12 @@ export default function ChatMessage() {
     }
   }, [conversationId, isConnected]);
 
-  // GENERATE 10,000 MESSAGES
-  // useEffect(() => {
-  //   let msgs = [];
-  //   for (let i = 0; i < 10000; i++) {
-  //     msgs.push({
-  //       _id: i.toString(),
-  //       text: "Hello developer",
-  //       createdAt: new Date(),
-  //       user: {
-  //         _id: 2,
-  //         name: "React Native",
-  //       },
-  //     });
-  //   }
-  //   console.log("MESSAGES:", msgs.length);
-  //   setMessages(msgs);
-  // }, []);
+  useEffect(() => {
+    return () => {
+      // reset the active chat to null when leaving
+      resetActiveChat();
+    };
+  }, []);
 
   const onSend = useCallback(
     (messages: IMessage[]) => {
@@ -115,7 +103,7 @@ export default function ChatMessage() {
           conversationId: conversationId as string,
           content: message.text,
           sender: user!._id,
-          receiver: activeChatUser!._id,
+          receiver: activeChatReceiver!._id,
         } as unknown as ExtendedMessage,
         conversationId as string
       );
@@ -188,7 +176,7 @@ export default function ChatMessage() {
     <SafeAreaView className="flex flex-1">
       {isPending && chat?.user1._id !== user?._id ? (
         <MessageRequest chat={chat!} />
-      ) : isRejected ? (
+      ) : isRejected && chat?.user1._id !== user?._id ? (
         <MessageRequest chat={chat!} />
       ) : Platform.OS === "ios" ? (
         <AvoidSoftInputView

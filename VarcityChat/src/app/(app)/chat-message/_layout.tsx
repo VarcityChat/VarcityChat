@@ -9,7 +9,7 @@ import { defaultAvatarUrl } from "../../../../constants/chats";
 export default function ChatMessageLayout() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { activeChatUser } = useActiveChat(id as string);
+  const { activeChatReceiver } = useActiveChat(id as string);
 
   return (
     <Stack>
@@ -56,13 +56,14 @@ export default function ChatMessageLayout() {
               >
                 <Image
                   source={{
-                    uri: activeChatUser?.images[0] || defaultAvatarUrl,
+                    uri: activeChatReceiver?.images[0] || defaultAvatarUrl,
                   }}
                   style={{ width: 40, height: 40, borderRadius: 50 }}
                 />
                 <View>
                   <Text className="font-sans-semibold">
-                    {activeChatUser?.firstname} {activeChatUser?.lastname}
+                    {activeChatReceiver?.firstname}{" "}
+                    {activeChatReceiver?.lastname}
                   </Text>
                   <Text className="text-sm text-grey-500 font-sans-regular">
                     Active 5 mins ago
