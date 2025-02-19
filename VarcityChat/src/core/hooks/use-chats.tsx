@@ -9,8 +9,10 @@ import { useAuth } from "./use-auth";
 
 // Hooks for the chats screen
 export const useChats = () => {
+  const { user } = useAuth();
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
   const dispatch = useAppDispatch();
+  const activeChat = useAppSelector((state) => state.chats.activeChat);
 
   const updateChatOrder = (newMessage: Partial<ExtendedMessage>) => {
     // configure animation
@@ -60,6 +62,43 @@ export const useChats = () => {
     );
   };
 
+  const updateChatCount = (
+    chatId: string,
+    count: number,
+    reset: boolean = false
+  ) => {
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getChats",
+        undefined as any,
+        (draft: IChat[]) => {
+          const chat = draft.find((c) => c._id === chatId);
+          if (chat) {
+            if (chat.user1._id === user?._id) {
+              chat.unreadCountUser1 = reset ? 0 : chat.unreadCountUser1 + count;
+            } else {
+              chat.unreadCountUser2 = reset ? 0 : chat.unreadCountUser2 + count;
+            }
+          }
+        }
+      )
+    );
+  };
+
+  const updateUnreadChatCount = (conversationId: string) => {
+    if (!activeChat) {
+      updateChatCount(conversationId, 1);
+      return;
+    }
+
+    if (activeChat && activeChat.chat._id !== conversationId) {
+      updateChatCount(conversationId, 1);
+      return;
+    }
+
+    updateChatCount(conversationId, 0, true);
+  };
+
   // Trigger refetch of chats
   const loadChats = async () => {
     await refetch();
@@ -71,6 +110,8 @@ export const useChats = () => {
     loadChats,
     updateChatOrder,
     updateChatStatus,
+    updateUnreadChatCount,
+    updateChatCount,
     error,
   };
 };
@@ -86,15 +127,9 @@ export const useActiveChat = (chatId: string) => {
       : chat.user1
     : null;
 
-  const resetActiveChat = () => {
-    chat = null;
-    activeChatReceiver = null;
-  };
-
   return {
     chat,
     activeChatReceiver,
-    resetActiveChat,
     isPending: chat?.status === "pending",
     isRejected: chat?.status === "rejected",
   };

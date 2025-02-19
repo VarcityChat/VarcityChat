@@ -1,7 +1,5 @@
-import { useEffect } from "react";
-import SearchBar from "@/components/search-bar";
 import { Image, View, Text, TouchableOpacity } from "@/ui";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Platform, SafeAreaView, RefreshControl } from "react-native";
 import Animated, {
   useSharedValue,
@@ -12,7 +10,7 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { HEADER_HEIGHT } from "@/components/header";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useChats } from "@/core/hooks/use-chats";
 import { useAuth } from "@/core/hooks/use-auth";
@@ -21,12 +19,16 @@ import { defaultAvatarUrl } from "../../../../constants/chats";
 import { useSocket } from "@/context/SocketContext";
 import { ExtendedMessage, IUpdateChatRequest } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
-import ChatsSkeleton from "@/components/chats/chats-skeleton";
 import { formatChatLastMessage } from "@/core/utils";
+import { useAppDispatch, useAppSelector } from "@/core/store/store";
+import { resetActiveChat } from "@/core/chats/chats-slice";
+import SearchBar from "@/components/search-bar";
+import ChatsSkeleton from "@/components/chats/chats-skeleton";
 
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch();
   const { socket } = useSocket();
   const { addMessageToLocalRealm } = useChatMessages();
   const {
@@ -35,6 +37,7 @@ export default function Chats() {
     error,
     updateChatOrder,
     updateChatStatus,
+    updateUnreadChatCount,
     loadChats,
   } = useChats();
   const { showToast } = useToast();
@@ -44,6 +47,16 @@ export default function Chats() {
   const handleNewMessage = (message: ExtendedMessage) => {
     addMessageToLocalRealm(message);
     updateChatOrder(message);
+    updateUnreadChatCount(message.conversationId);
+    // if (
+    //   !activeChat ||
+    //   (activeChat &&
+    //     activeChat.chat.status === "accepted" &&
+    //     activeChat.chat._id !== message.conversationId)
+    // ) {
+    //   // user is not currently in chat, increase chat unread count
+    //   updateChatCount(message.conversationId, 1);
+    // }
   };
 
   const handleNewMessageRequest = () => {
@@ -199,18 +212,18 @@ export default function Chats() {
                     ago
                   </Text>
 
-                  {item.user1._id == user?._id && item.unreadCountUser2 > 0 ? (
+                  {item.user1._id == user?._id && item.unreadCountUser1 > 0 ? (
                     <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
                       <Text className="text-white dark:text-white font-sans-thin text-sm">
-                        {item.unreadCountUser2}
+                        {item.unreadCountUser1}
                       </Text>
                     </View>
                   ) : null}
 
-                  {item.user2._id === user?._id && item.unreadCountUser1 > 0 ? (
+                  {item.user2._id === user?._id && item.unreadCountUser2 > 0 ? (
                     <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
                       <Text className="text-white dark:text-white font-sans-thin text-sm">
-                        {item.unreadCountUser1}
+                        {item.unreadCountUser2}
                       </Text>
                     </View>
                   ) : null}

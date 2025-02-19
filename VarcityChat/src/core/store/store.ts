@@ -20,12 +20,13 @@ import { reduxStorage } from "../storage";
 import authSlice from "../auth/auth-slice";
 import messagesSlice from "../chats/message-slice";
 import notificationsSlice from "../notifications/notification-slice";
+import chatsSlice from "../chats/chats-slice";
 
 const persistConfig = {
   key: "root",
   version: 1,
   storage: reduxStorage,
-  blacklist: ["auth", "clientApi", "messages", "_persist"],
+  blacklist: ["auth", "clientApi", "messages", "chats", "_persist"],
 };
 
 export const rtkQueryErrorLogger =
@@ -42,6 +43,7 @@ export const rtkQueryErrorLogger =
 const reducer = combineReducers({
   auth: authSlice,
   messages: messagesSlice,
+  chats: chatsSlice,
   notifications: notificationsSlice,
   [api.reducerPath]: api.reducer,
 });
