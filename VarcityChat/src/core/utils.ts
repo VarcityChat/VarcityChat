@@ -24,6 +24,48 @@ export const capitalize = (text: string): string => {
   return text[0].toUpperCase() + text.substring(1);
 };
 
+export const formatLastMessageTime = (timestamp: Date | string | undefined) => {
+  if (!timestamp) return "";
+
+  const messageDate = new Date(timestamp);
+  if (isNaN(messageDate.getTime())) return "";
+
+  const now = new Date();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  // if Message is from today, return time
+  if (messageDate >= today) {
+    return messageDate.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      // hour12: true,
+    });
+  }
+
+  // if Message is from yesterday
+  if (messageDate >= yesterday && messageDate < today) {
+    return "Yesterday";
+  }
+
+  // if Message is from this week
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  if (messageDate >= weekStart) {
+    return messageDate.toLocaleDateString("en-US", { weekday: "long" });
+  }
+
+  // If Message is older than a week
+  return messageDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 export const formDataFromImagePicker = (
   assets: ImagePicker.ImagePickerAsset[]
 ) => {

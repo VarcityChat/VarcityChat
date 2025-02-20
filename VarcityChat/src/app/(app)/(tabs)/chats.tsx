@@ -19,7 +19,7 @@ import { defaultAvatarUrl } from "../../../../constants/chats";
 import { useSocket } from "@/context/SocketContext";
 import { ExtendedMessage, IUpdateChatRequest } from "@/api/chats/types";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
-import { formatChatLastMessage } from "@/core/utils";
+import { formatChatLastMessage, formatLastMessageTime } from "@/core/utils";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { resetActiveChat } from "@/core/chats/chats-slice";
 import SearchBar from "@/components/search-bar";
@@ -199,8 +199,7 @@ export default function Chats() {
 
                 <View className="flex items-end justify-end min-w-[50px] ml-3">
                   <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
-                    {/* {item?.lastMessageTimestamp?.toString()} */}2 minutes
-                    ago
+                    {formatLastMessageTime(item?.lastMessageTimestamp)}
                   </Text>
 
                   {item.user1._id == user?._id && item.unreadCountUser1 > 0 ? (
