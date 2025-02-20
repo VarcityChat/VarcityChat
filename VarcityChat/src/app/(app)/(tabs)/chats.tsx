@@ -24,6 +24,7 @@ import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { resetActiveChat } from "@/core/chats/chats-slice";
 import SearchBar from "@/components/search-bar";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
+import { twMerge } from "tailwind-merge";
 
 export default function Chats() {
   const router = useRouter();
@@ -198,7 +199,21 @@ export default function Chats() {
                 </View>
 
                 <View className="flex items-end justify-end min-w-[50px] ml-3">
-                  <Text className="text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular">
+                  <Text
+                    className={twMerge(
+                      `text-sm text-grey-300 mb-2 dark:text-grey-400 font-sans-regular ${
+                        item.user1._id == user?._id &&
+                        item.unreadCountUser1 > 0 &&
+                        "text-primary-500 dark:text-primary-500"
+                      }
+                      ${
+                        item.user2._id == user?._id &&
+                        item.unreadCountUser2 > 0 &&
+                        "text-primary-500 dark:text-primary-500"
+                      }
+                      `
+                    )}
+                  >
                     {formatLastMessageTime(item?.lastMessageTimestamp)}
                   </Text>
 
