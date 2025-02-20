@@ -18,19 +18,13 @@ import {
   GiftedChatProps,
   IMessage,
   InputToolbar,
+  RenderMessageTextProps,
   Send,
   SendProps,
 } from "react-native-gifted-chat";
 import { TouchableOpacity, View, Text, Image, colors } from "@/ui";
 import { emptyChatImg } from "@/ui/images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MicrophoneSvg from "@/ui/icons/chat/microphone-svg";
-import AttachmentSvg from "@/ui/icons/chat/attachment-svg";
-import PictureSvg from "@/ui/icons/chat/picture-svg";
-import SendSvg from "@/ui/icons/chat/send-svg";
-import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
-import ChatMessageBox from "@/components/chats/chat-message-box";
-import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useActiveChat } from "@/core/hooks/use-chats";
@@ -42,12 +36,19 @@ import { useQuery } from "@realm/react";
 import { useSocket } from "@/context/SocketContext";
 import { useChats } from "@/core/hooks/use-chats";
 import { convertToGiftedChatMessage } from "@/core/utils";
-import { Ionicons } from "@expo/vector-icons";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch } from "@/core/store/store";
 import { setActiveChat, resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
+import MicrophoneSvg from "@/ui/icons/chat/microphone-svg";
+import AttachmentSvg from "@/ui/icons/chat/attachment-svg";
+import PictureSvg from "@/ui/icons/chat/picture-svg";
+import SendSvg from "@/ui/icons/chat/send-svg";
+import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
+import ChatMessageBox from "@/components/chats/chat-message-box";
+import ReplyMessageBar from "@/components/chats/reply-message-bar";
+import CustomMessageBubble from "@/components/chats/bubble";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -223,7 +224,7 @@ export default function ChatMessage() {
         isTyping: isOtherUserTyping,
         renderAvatar: null,
         maxComposeHeight: 100,
-        timeTextStyle: { right: { color: "green" } },
+        timeTextStyle: { right: { color: "gray" }, left: { color: "grey" } },
         renderSend: renderSend,
         textInputProps: styles.composer,
         scrollToBottom: true,
@@ -301,29 +302,6 @@ const ChatEmptyComponent = memo(() => {
   );
 });
 
-const CustomMessageBubble = memo((props) => {
-  return (
-    <View shouldRasterizeIOS renderToHardwareTextureAndroid>
-      <Bubble
-        {...props}
-        textStyle={{
-          right: {
-            color: "#000",
-            fontSize: 14,
-            fontFamily: "PlusJakartaSans_400Regular",
-          },
-          left: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular" },
-        }}
-        wrapperStyle={{
-          left: { backgroundColor: colors.grey[50] },
-          right: { backgroundColor: colors.primary[50] },
-        }}
-        // renderTicks={renderTicks}
-      />
-    </View>
-  );
-});
-
 const SyncingMessagesComponent = memo(() => {
   return (
     <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 z-10">
@@ -334,29 +312,6 @@ const SyncingMessagesComponent = memo(() => {
     </View>
   );
 });
-
-// const renderTicks = (message: ExtendedMessage) => {
-//   if (message.user._id !== user!._id) return null;
-//   if (message.received) {
-//     // Double tick (✓✓) - Message Delivered
-//     return (
-//       <View style={{ flexDirection: "row", marginRight: 4 }}>
-//         <Ionicons name="checkmark-done" size={12} color="green" />
-//       </View>
-//     );
-//   } else if (message.sent) {
-//     // Single tick (✓) - Message Sent
-//     return (
-//       <Ionicons
-//         name="checkmark"
-//         size={12}
-//         color="gray"
-//         style={{ marginRight: 4 }}
-//       />
-//     );
-//   }
-//   return null;
-// };
 
 const styles = StyleSheet.create({
   composer: {
