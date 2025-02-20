@@ -10,7 +10,6 @@ import Animated, {
 import { authStorage } from "@/core/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/core/hooks/use-auth";
-import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import { useQueue } from "@/core/hooks/use-queue";
 
 const BANNER_HEIGHT = 40;
@@ -86,6 +85,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setIsConnected(true);
       setSocket(socketInstance);
 
+      // Refresh the chats screen
+
       // Process queued messages
       processQueuedMessages(socketInstance);
     });
@@ -94,7 +95,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("ERROR CONNECTING TO SERVER", error);
     });
 
-    socketInstance.on("disconnect", () => setIsConnected(false));
+    socketInstance.on("disconnect", () => {
+      setIsConnected(false);
+      setSocket(null);
+    });
   };
 
   const disconnect = () => {

@@ -48,15 +48,6 @@ export default function Chats() {
     addMessageToLocalRealm(message);
     updateChatOrder(message);
     updateUnreadChatCount(message.conversationId);
-    // if (
-    //   !activeChat ||
-    //   (activeChat &&
-    //     activeChat.chat.status === "accepted" &&
-    //     activeChat.chat._id !== message.conversationId)
-    // ) {
-    //   // user is not currently in chat, increase chat unread count
-    //   updateChatCount(message.conversationId, 1);
-    // }
   };
 
   const handleNewMessageRequest = () => {

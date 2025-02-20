@@ -4,7 +4,7 @@ import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import axios from "axios";
 
 const BASE_URL =
-  "https://2daa-2c0f-f5c0-b0c-1458-d983-9058-26f3-f731.ngrok-free.app";
+  "https://05e2-2c0f-f5c0-b0a-3e0b-cd31-9f5f-c42b-8492.ngrok-free.app";
 export const BASE_ENDPOINT = `${BASE_URL}/api/v1`;
 export const BASE_SOCKET_ENDPOINT = BASE_URL;
 
