@@ -1,11 +1,5 @@
-import {
-  ActivityIndicator,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { Platform, SafeAreaView, StyleSheet } from "react-native";
 import React, {
-  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -22,7 +16,6 @@ import {
   SendProps,
 } from "react-native-gifted-chat";
 import { TouchableOpacity, View, Text, Image } from "@/ui";
-import { emptyChatImg } from "@/ui/images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
@@ -48,6 +41,8 @@ import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import CustomMessageBubble from "@/components/chats/bubble";
+import ChatEmptyComponent from "@/components/chats/chat-empty";
+import SyncingMessagesComponent from "@/components/chats/sync-messages";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -289,28 +284,6 @@ export default function ChatMessage() {
     </SafeAreaView>
   );
 }
-const ChatEmptyComponent = memo(() => {
-  return (
-    <View
-      className="flex flex-1 items-center justify-center"
-      style={{ transform: [{ rotateX: "180deg" }] }}
-    >
-      <Image source={emptyChatImg} className="w-[50px] h-[50px]" />
-      <Text className="mt-4 font-sans-medium">Start a Conversation</Text>
-    </View>
-  );
-});
-
-const SyncingMessagesComponent = memo(() => {
-  return (
-    <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 z-10">
-      <View className="flex flex-1 items-center justify-center">
-        <Text className="text-white mb-4 -mt-20">Syncing messages...</Text>
-        <ActivityIndicator color="white" size="small" />
-      </View>
-    </View>
-  );
-});
 
 const styles = StyleSheet.create({
   composer: {
