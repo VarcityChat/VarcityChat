@@ -47,6 +47,7 @@ import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch } from "@/core/store/store";
 import { setActiveChat, resetActiveChat } from "@/core/chats/chats-slice";
+import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -62,6 +63,11 @@ export default function ChatMessage() {
   );
   const { updateChatCount } = useChats();
   const { sendMessage, syncMessagesFromBackend, isSyncing } = useChatMessages();
+  const { isOtherUserTyping, handleTyping, stopTyping } = useTypingStatus({
+    conversationId: `${conversationId}`,
+    userId: user!._id,
+    receiverId: activeChatReceiver!._id,
+  });
 
   const messageContainerRef = useRef<FlatList>(null);
   const swipeableRef = useRef<Swipeable | null>(null);
@@ -88,7 +94,7 @@ export default function ChatMessage() {
   }, [conversationId, isConnected]);
 
   useEffect(() => {
-    if (chat) {
+    if (chat?._id) {
       dispatch(
         setActiveChat({
           chat,
@@ -109,7 +115,7 @@ export default function ChatMessage() {
     return () => {
       dispatch(resetActiveChat());
     };
-  }, [conversationId, user, socket, chat]);
+  }, [conversationId, user, socket, chat?._id, activeChatReceiver?._id]);
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
@@ -117,27 +123,6 @@ export default function ChatMessage() {
       swipeableRef.current = null;
     }
   }, [replyMessage]);
-
-  const onSend = useCallback(
-    (messages: IMessage[]) => {
-      messageContainerRef?.current?.scrollToOffset({
-        offset: 0,
-        animated: true,
-      });
-
-      const message = messages[0];
-      sendMessage(
-        {
-          conversationId: conversationId as string,
-          content: message.text,
-          sender: user!._id,
-          receiver: activeChatReceiver!._id,
-        } as unknown as ExtendedMessage,
-        conversationId as string
-      );
-    },
-    [conversationId]
-  );
 
   useEffect(() => {
     if (
@@ -154,6 +139,25 @@ export default function ChatMessage() {
     }
     setPage((prev) => prev + 1);
   }, [page, messagesFromRealm.length]);
+
+  const onSend = (messages: IMessage[]) => {
+    stopTyping();
+    messageContainerRef?.current?.scrollToOffset({
+      offset: 0,
+      animated: true,
+    });
+
+    const message = messages[0];
+    sendMessage(
+      {
+        conversationId: conversationId as string,
+        content: message.text,
+        sender: user!._id,
+        receiver: activeChatReceiver!._id,
+      } as unknown as ExtendedMessage,
+      conversationId as string
+    );
+  };
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -193,36 +197,51 @@ export default function ChatMessage() {
     );
   };
 
-  const chatProps = {
-    messageContainerRef,
-    messages: messagesFromRealm
-      .slice(0, page * MESSAGES_PER_PAGE)
-      .map((message) =>
-        convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-      ),
-    listViewProps: {
-      windowSize: 7,
-      initialNumToRender: 25,
-      maxToRenderPerBatch: 50,
-      updateCellsBatchingPeriod: 50,
-      removeCliippedSubviews: true,
-    },
-    onSend: (messages: any) => onSend(messages),
-    user: { _id: user!._id },
-    renderBubble: (props) => <CustomMessageBubble {...props} />,
-    onInputTextChanged: setText,
-    renderAvatar: null,
-    maxComposeHeight: 100,
-    timeTextStyle: { right: { color: "green" } },
-    renderSend: renderSend,
-    textInputProps: styles.composer,
-    scrollToBottom: true,
-    infiniteScroll: true,
-    loadEarlier: hasMoreMessages,
-    onLoadEarlier: loadEarlier,
-    renderChatEmpty: () => (isSyncing ? null : <ChatEmptyComponent />),
-    keyboardShouldPersistTaps: "never",
-  } as GiftedChatProps;
+  const chatProps = useMemo(
+    () =>
+      ({
+        messageContainerRef,
+        messages: messagesFromRealm
+          .slice(0, page * MESSAGES_PER_PAGE)
+          .map((message) =>
+            convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+          ),
+        listViewProps: {
+          windowSize: 7,
+          initialNumToRender: 25,
+          maxToRenderPerBatch: 50,
+          updateCellsBatchingPeriod: 50,
+          removeCliippedSubviews: true,
+        },
+        onSend: (messages: any) => onSend(messages),
+        user: { _id: user!._id },
+        renderBubble: (props) => <CustomMessageBubble {...props} />,
+        onInputTextChanged: (text) => {
+          setText(text);
+          handleTyping(text);
+        },
+        isTyping: isOtherUserTyping,
+        renderAvatar: null,
+        maxComposeHeight: 100,
+        timeTextStyle: { right: { color: "green" } },
+        renderSend: renderSend,
+        textInputProps: styles.composer,
+        scrollToBottom: true,
+        infiniteScroll: true,
+        loadEarlier: hasMoreMessages,
+        onLoadEarlier: loadEarlier,
+        renderChatEmpty: () => (isSyncing ? null : <ChatEmptyComponent />),
+        keyboardShouldPersistTaps: "never",
+      } as GiftedChatProps),
+    [
+      messagesFromRealm,
+      page,
+      text,
+      hasMoreMessages,
+      isOtherUserTyping,
+      isSyncing,
+    ]
+  );
 
   return (
     <SafeAreaView className="flex flex-1">
