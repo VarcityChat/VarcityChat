@@ -45,6 +45,12 @@ export default function Chats() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
 
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(resetActiveChat());
+    }, [])
+  );
+
   const handleNewMessage = (message: ExtendedMessage) => {
     addMessageToLocalRealm(message);
     updateChatOrder(message);
