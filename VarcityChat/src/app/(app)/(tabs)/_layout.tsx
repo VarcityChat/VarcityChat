@@ -18,6 +18,7 @@ import { Gender } from "@/types/user";
 import { useSocket } from "@/context/SocketContext";
 import { setHasNotification } from "@/core/notifications/notification-slice";
 import { useAppDispatch } from "@/core/store/store";
+import { useChats } from "@/core/hooks/use-chats";
 
 export const unstable_settings = {
   initialRouteName: "discover",
@@ -26,8 +27,9 @@ export const unstable_settings = {
 const TabNavigation = () => {
   const { colorScheme } = useColorScheme();
   const { user } = useAuth();
+  const { totalUnreadCount } = useChats();
   const isDark = colorScheme === "dark";
-  const { socket, isConnected } = useSocket();
+  const { socket } = useSocket();
   const dispatch = useAppDispatch();
 
   const handleNewNotification = (data: any) => {
@@ -76,7 +78,7 @@ const TabNavigation = () => {
           title: "Chats",
           tabBarIcon: ({ focused }) =>
             focused ? <ChatsActive /> : <ChatsSvg />,
-          tabBarBadge: 4,
+          tabBarBadge: totalUnreadCount > 0 ? totalUnreadCount : undefined,
           tabBarBadgeStyle: {
             fontSize: 8,
             minWidth: 18,

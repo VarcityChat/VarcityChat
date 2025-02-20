@@ -6,6 +6,7 @@ import messagesApi, {
 import { ExtendedMessage, IChat } from "@/api/chats/types";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { useAuth } from "./use-auth";
+import { useMemo } from "react";
 
 // Hooks for the chats screen
 export const useChats = () => {
@@ -13,6 +14,17 @@ export const useChats = () => {
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
   const dispatch = useAppDispatch();
   const activeChat = useAppSelector((state) => state.chats.activeChat);
+
+  const totalUnreadCount = useMemo(() => {
+    return (
+      chats?.reduce((acc, chat) => {
+        if (chat.user1._id === user?._id) {
+          return acc + chat.unreadCountUser1;
+        }
+        return acc + chat.unreadCountUser2;
+      }, 0) || 0
+    );
+  }, [chats, user]);
 
   const updateChatOrder = (newMessage: Partial<ExtendedMessage>) => {
     // configure animation
@@ -113,6 +125,7 @@ export const useChats = () => {
     updateUnreadChatCount,
     updateChatCount,
     error,
+    totalUnreadCount,
   };
 };
 
