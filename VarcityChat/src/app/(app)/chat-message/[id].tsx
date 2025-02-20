@@ -13,7 +13,6 @@ import React, {
   useState,
 } from "react";
 import {
-  Bubble,
   GiftedChat,
   GiftedChatProps,
   IMessage,
@@ -22,11 +21,11 @@ import {
   Send,
   SendProps,
 } from "react-native-gifted-chat";
-import { TouchableOpacity, View, Text, Image, colors } from "@/ui";
+import { TouchableOpacity, View, Text, Image } from "@/ui";
 import { emptyChatImg } from "@/ui/images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useActiveChat } from "@/core/hooks/use-chats";
 import { MessageRequest } from "@/components/chats/message-request";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
