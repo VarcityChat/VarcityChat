@@ -2,6 +2,7 @@
 import {
   CONVERSATION_STATUS,
   IConversationDocument,
+  IMarkConversationAsRead,
   IMessageData
 } from '@chat/interfaces/chat.interface';
 import { UserSocket } from './user';
@@ -99,7 +100,26 @@ export class ChatHandler {
 
     this.socket.on('typing', (data) => {});
 
-    this.socket.on('message-read', (data) => {});
+    this.socket.on('mark-conversation-as-read', async (data: IMarkConversationAsRead) => {
+      const { conversationId, userId, user1Id, user2Id } = data;
+      // userId: id of the current authenticated user
+      // user1Id: id of the conversation user1
+      // user2Id: id of the conversation user2
+      if (
+        !conversationId ||
+        !userId ||
+        !user1Id ||
+        !user2Id ||
+        (userId !== user1Id && userId !== user2Id)
+      ) {
+        return;
+      }
+
+      await chatService.markConversationAsReadForUser(
+        `${conversationId}`,
+        userId === user1Id ? 'user1' : 'user2'
+      );
+    });
   }
 
   validateChatMessage(message: IMessageData): Promise<Joi.ValidationError | undefined> {

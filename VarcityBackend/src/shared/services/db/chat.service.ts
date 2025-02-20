@@ -86,6 +86,25 @@ class ChatService {
     }
   }
 
+  public async markConversationAsReadForUser(
+    conversationId: string,
+    user: 'user1' | 'user2'
+  ): Promise<void> {
+    if (user === 'user1') {
+      await ConversationModel.findByIdAndUpdate(conversationId, {
+        $set: {
+          unreadCountUser1: 0
+        }
+      });
+    } else {
+      await ConversationModel.findByIdAndUpdate(conversationId, {
+        $set: {
+          unreadCountUser2: 0
+        }
+      });
+    }
+  }
+
   public async addMessageToDB(message: IMessageData): Promise<void> {
     await MessageModel.create(message);
   }

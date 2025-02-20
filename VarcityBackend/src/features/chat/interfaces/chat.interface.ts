@@ -75,6 +75,13 @@ export interface IUpdateConversation {
   lastMessage: string;
 }
 
+export interface IMarkConversationAsRead {
+  conversationId: string | ObjectId;
+  userId: string | ObjectId;
+  user1Id: string | ObjectId;
+  user2Id: string | ObjectId;
+}
+
 export interface IMessageJob {
   value: string | IMessageData | IMessageDocument;
 }
