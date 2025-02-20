@@ -25,6 +25,7 @@ import { resetActiveChat } from "@/core/chats/chats-slice";
 import SearchBar from "@/components/search-bar";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
 import { twMerge } from "tailwind-merge";
+import { useSelectedTheme } from "@/core/hooks/use-selected-theme";
 
 export default function Chats() {
   const router = useRouter();
@@ -41,13 +42,16 @@ export default function Chats() {
     updateUnreadChatCount,
     loadChats,
   } = useChats();
+  const activeChat = useAppSelector((state) => state.chats.activeChat);
   const { showToast } = useToast();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
 
   useFocusEffect(
     useCallback(() => {
-      dispatch(resetActiveChat());
+      if (activeChat) {
+        dispatch(resetActiveChat());
+      }
     }, [])
   );
 

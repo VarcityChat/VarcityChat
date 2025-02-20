@@ -94,7 +94,7 @@ export default function ChatMessage() {
   }, [conversationId, isConnected]);
 
   useEffect(() => {
-    if (chat?._id) {
+    if (chat) {
       dispatch(
         setActiveChat({
           chat,
@@ -113,9 +113,9 @@ export default function ChatMessage() {
     updateChatCount(conversationId as string, 0, true);
 
     return () => {
-      dispatch(resetActiveChat());
+      if (chat) dispatch(resetActiveChat());
     };
-  }, [conversationId, user, socket, chat?._id, activeChatReceiver?._id]);
+  }, [conversationId, user, socket, chat]);
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
