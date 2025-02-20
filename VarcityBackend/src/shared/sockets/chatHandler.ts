@@ -3,7 +3,8 @@ import {
   CONVERSATION_STATUS,
   IConversationDocument,
   IMarkConversationAsRead,
-  IMessageData
+  IMessageData,
+  ITyping
 } from '@chat/interfaces/chat.interface';
 import { UserSocket } from './user';
 import {
@@ -98,7 +99,13 @@ export class ChatHandler {
       }
     });
 
-    this.socket.on('typing', (data) => {});
+    this.socket.on('typing', (data: ITyping) => {
+      this.socket.to(`${data.receiverId}`).emit('typing', data);
+    });
+
+    this.socket.on('stop-typing', (data: ITyping) => {
+      this.socket.to(`${data.receiverId}`).emit('stop-typing', data);
+    });
 
     this.socket.on('mark-conversation-as-read', async (data: IMarkConversationAsRead) => {
       const { conversationId, userId, user1Id, user2Id } = data;

@@ -82,6 +82,12 @@ export interface IMarkConversationAsRead {
   user2Id: string | ObjectId;
 }
 
+export interface ITyping {
+  conversationId: string;
+  userId: string;
+  receiverId: string;
+}
+
 export interface IMessageJob {
   value: string | IMessageData | IMessageDocument;
 }
