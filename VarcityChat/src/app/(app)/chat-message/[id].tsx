@@ -15,7 +15,7 @@ import {
   Send,
   SendProps,
 } from "react-native-gifted-chat";
-import { TouchableOpacity, View, Text, Image } from "@/ui";
+import { TouchableOpacity, View } from "@/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
@@ -290,9 +290,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 5,
     fontSize: 14,
-    // paddingTop: 2,
     fontFamily: "PlusJakartaSans_400Regular",
-    // marginVertical: 4,
   },
   softInputStyles: {
     flex: 1,
