@@ -8,7 +8,7 @@ export interface ExtendedMessage extends IMessage {
   deliveryStatus: "sent" | "delivered" | "read" | "failed" | "pending";
   localId?: string; // For optimistic updates
   deliveredAt?: number;
-  reatAt?: number;
+  readAt?: number;
   createdAt: Date;
   sender: string;
   receiver: string;

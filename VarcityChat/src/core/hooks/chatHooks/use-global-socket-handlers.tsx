@@ -4,11 +4,13 @@ import { useChatMessages } from "../use-chat-messages";
 import { ExtendedMessage, IChat, IUpdateChatRequest } from "@/api/chats/types";
 import { useChats } from "../use-chats";
 import { useAppSelector } from "@/core/store/store";
+import { useAuth } from "../use-auth";
 
 export const useGlobalSocketHandlers = (
   socket: Socket | null,
   isConnected: boolean
 ) => {
+  const { user } = useAuth();
   const { addMessageToLocalRealm, markUserMessagesInChatAsRead } =
     useChatMessages();
   const {
@@ -33,6 +35,16 @@ export const useGlobalSocketHandlers = (
     addMessageToLocalRealm(message);
     updateChatOrder(message);
     updateUnreadChatCount(message.conversationId, activeChatRef.current);
+
+    // if user is in chat, mark message as read for user2
+    if (activeChatRef.current?._id === message.conversationId) {
+      socket?.emit("mark-conversation-as-read", {
+        conversationId: message.conversationId,
+        userId: user?._id,
+        user1Id: activeChatRef.current!.user1._id,
+        user2Id: activeChatRef.current!.user2._id,
+      });
+    }
   };
 
   // Refresh chats screen on new conversation request

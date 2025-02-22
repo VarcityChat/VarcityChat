@@ -59,7 +59,7 @@ export const useChatMessages = () => {
                 localMessage.serverSequence = Number(message.sequence);
                 localMessage.localSequence = Number(message.sequence);
                 localMessage.lastSyncTimestamp = new Date(message.createdAt);
-                localMessage.deliveryStatus = message?.reatAt
+                localMessage.deliveryStatus = message?.readAt
                   ? "delivered"
                   : "sent";
               });
