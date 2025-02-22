@@ -80,8 +80,9 @@ const TabNavigation = () => {
             focused ? <ChatsActive /> : <ChatsSvg />,
           tabBarBadge: totalUnreadCount > 0 ? totalUnreadCount : undefined,
           tabBarBadgeStyle: {
-            fontSize: 8,
+            fontSize: 10,
             minWidth: 18,
+            maxWidth: 26,
             height: 18,
             alignItems: "center",
             justifyContent: "center",
