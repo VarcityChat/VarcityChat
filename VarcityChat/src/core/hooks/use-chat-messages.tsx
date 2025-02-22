@@ -1,16 +1,17 @@
 import { ExtendedMessage, IChatAck } from "@/api/chats/types";
 import { useChats } from "./use-chats";
-import { useSocket } from "@/context/SocketContext";
+import { useSocket } from "@/context/useSocketContext";
 import { useRealm } from "@realm/react";
 import { BSON } from "realm";
 import { useCallback, useState } from "react";
 import { MessageSchema } from "../models/message-model";
 import { axiosApiClient } from "@/api/api";
-import { RealmObject } from "realm/dist/public-types/namespace";
+import { useAuth } from "./use-auth";
 
 export const useChatMessages = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const { updateChatOrder } = useChats();
+  const { user } = useAuth();
   const { socket, isConnected } = useSocket();
   const realm = useRealm();
 
@@ -22,12 +23,6 @@ export const useChatMessages = () => {
 
   const syncMessagesFromBackend = useCallback(
     async (conversationId: string) => {
-      // const lastServerMessageTimestamp =
-      //   realm
-      //     .objects<MessageSchema>("Message")
-      //     .filtered("conversationId = $0", conversationId)
-      //     .max("lastSyncTimestamp") ?? 0;
-
       const lastMessageServerSequence =
         realm
           .objects<MessageSchema>("Message")
@@ -37,9 +32,6 @@ export const useChatMessages = () => {
       // Get messages from server since last sync
       try {
         setIsSyncing(true);
-        // const lastMessageDate = new Date(lastServerMessageTimestamp);
-
-        // const apiUrl = `/chat/${conversationId}/messages/since?date=${lastMessageDate}`;
         const apiUrl = `/chat/${conversationId}/messages/sequence?sequence=${lastMessageServerSequence}`;
 
         const response = await axiosApiClient.get<{
@@ -67,7 +59,9 @@ export const useChatMessages = () => {
                 localMessage.serverSequence = Number(message.sequence);
                 localMessage.localSequence = Number(message.sequence);
                 localMessage.lastSyncTimestamp = new Date(message.createdAt);
-                localMessage.deliveryStatus = "sent";
+                localMessage.deliveryStatus = message?.reatAt
+                  ? "delivered"
+                  : "sent";
               });
             } else {
               realm.write(() => {
@@ -119,6 +113,26 @@ export const useChatMessages = () => {
           });
         });
       }
+    },
+    [realm]
+  );
+
+  const markUserMessagesInChatAsRead = useCallback(
+    (conversationId: string) => {
+      const unreadMessagesInConversation = realm
+        .objects<MessageSchema>("Message")
+        .filtered(
+          "conversationId = $0 && deliveryStatus = $1 && sender = $2",
+          conversationId,
+          "sent",
+          user?._id || ""
+        );
+
+      unreadMessagesInConversation.forEach((message) => {
+        realm.write(() => {
+          message.deliveryStatus = "delivered";
+        });
+      });
     },
     [realm]
   );
@@ -208,6 +222,7 @@ export const useChatMessages = () => {
   return {
     sendMessage,
     addMessageToLocalRealm,
+    markUserMessagesInChatAsRead,
     deleteAllMessages,
     syncMessagesFromBackend,
     isSyncing,

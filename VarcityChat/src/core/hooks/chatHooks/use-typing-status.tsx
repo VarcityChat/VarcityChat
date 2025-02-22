@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSocket } from "@/context/SocketContext";
+import { useSocket } from "@/context/useSocketContext";
 import { ITyping } from "@/types/chat";
 
 const TYPING_TIMEOUT = 2000; // 2 seconds

@@ -10,42 +10,28 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { HEADER_HEIGHT } from "@/components/header";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useChats } from "@/core/hooks/use-chats";
 import { useAuth } from "@/core/hooks/use-auth";
 import { useToast } from "@/core/hooks/use-toast";
 import { defaultAvatarUrl } from "../../../../constants/chats";
-import { useSocket } from "@/context/SocketContext";
-import { ExtendedMessage, IUpdateChatRequest } from "@/api/chats/types";
-import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import { formatChatLastMessage, formatLastMessageTime } from "@/core/utils";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
-import { resetActiveChat } from "@/core/chats/chats-slice";
+import { setActiveChat, resetActiveChat } from "@/core/chats/chats-slice";
+import { twMerge } from "tailwind-merge";
 import SearchBar from "@/components/search-bar";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
-import { twMerge } from "tailwind-merge";
-import { useSelectedTheme } from "@/core/hooks/use-selected-theme";
 
 export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dispatch = useAppDispatch();
-  const { socket } = useSocket();
-  const { addMessageToLocalRealm } = useChatMessages();
-  const {
-    chats,
-    isLoading,
-    error,
-    updateChatOrder,
-    updateChatStatus,
-    updateUnreadChatCount,
-    loadChats,
-  } = useChats();
-  const activeChat = useAppSelector((state) => state.chats.activeChat);
-  const { showToast } = useToast();
   const { user } = useAuth();
+  const { chats, isLoading, error, loadChats } = useChats();
+  const { showToast } = useToast();
   const [search, setSearch] = useState("");
+  const activeChat = useAppSelector((state) => state.chats.activeChat);
 
   useFocusEffect(
     useCallback(() => {
@@ -54,46 +40,6 @@ export default function Chats() {
       }
     }, [])
   );
-
-  const handleNewMessage = (message: ExtendedMessage) => {
-    addMessageToLocalRealm(message);
-    updateChatOrder(message);
-    updateUnreadChatCount(message.conversationId);
-  };
-
-  const handleNewMessageRequest = () => {
-    loadChats();
-  };
-
-  const handleMessageRequestAccepted = (data: IUpdateChatRequest) => {
-    updateChatStatus(data.conversationId, "accepted");
-  };
-
-  const handleMessageRequestRejected = (data: IUpdateChatRequest) => {
-    updateChatStatus(data.conversationId, "rejected");
-  };
-
-  useEffect(() => {
-    if (socket) {
-      socket.on("new-message", handleNewMessage);
-      socket.on("new-message-request", handleNewMessageRequest);
-      socket.on("accepted-conversation-request", handleMessageRequestAccepted);
-      socket.on("rejected-conversation-request", handleMessageRequestRejected);
-
-      return () => {
-        socket.off("new-message", handleNewMessage);
-        socket.off("new-message-request", handleNewMessageRequest);
-        socket.off(
-          "accepted-conversation-request",
-          handleMessageRequestAccepted
-        );
-        socket.off(
-          "rejected-conversation-request",
-          handleMessageRequestRejected
-        );
-      };
-    }
-  }, [socket]);
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -112,6 +58,25 @@ export default function Chats() {
   if (error) {
     showToast({ type: "error", text1: "Error", text2: `${error}` });
   }
+
+  const handleOpenConversation = (conversationId: string) => {
+    const chat = chats?.find((chat) => chat._id === conversationId);
+    const chatReceiver = chat
+      ? chat.user1._id === user?._id
+        ? chat.user2
+        : chat.user1
+      : null;
+
+    if (!chatReceiver || !chat) return;
+
+    dispatch(
+      setActiveChat({
+        chat,
+        receiver: chatReceiver,
+      })
+    );
+    router.push(`/chat-message/${conversationId}`);
+  };
 
   return (
     <SafeAreaView className="flex flex-1">
@@ -179,7 +144,9 @@ export default function Chats() {
               <TouchableOpacity
                 activeOpacity={0.7}
                 className="w-full flex-row items-center bg-red"
-                onPress={() => router.push(`/chat-message/${item._id}`)}
+                onPress={() => {
+                  handleOpenConversation(`${item._id}`);
+                }}
               >
                 <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
                   <Image

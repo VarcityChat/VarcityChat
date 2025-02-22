@@ -1,10 +1,10 @@
-import { IChat } from "@/api/chats/types";
+import { IChat, IChatUser } from "@/api/chats/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SliceState {
   activeChat: {
     chat: IChat;
-    receiverId: string;
+    receiver: IChatUser;
   } | null;
 }
 
@@ -20,15 +20,15 @@ const chatSlice = createSlice({
       state,
       action: PayloadAction<{
         chat: IChat;
-        receiverId: string;
+        receiver: IChatUser;
       }>
     ) => {
-      const { chat, receiverId } = action.payload;
-      state.activeChat = { chat: { ...chat }, receiverId };
+      state.activeChat = action.payload;
     },
 
     resetActiveChat: (state) => {
       state.activeChat = null;
+      console.log("ACTIVE CHAT FROM STATE:", state.activeChat);
     },
   },
 });

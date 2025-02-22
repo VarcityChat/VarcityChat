@@ -24,12 +24,12 @@ import { useChatMessages } from "@/core/hooks/use-chat-messages";
 import { ExtendedMessage } from "@/api/chats/types";
 import { useAuth } from "@/core/hooks/use-auth";
 import { useQuery } from "@realm/react";
-import { useSocket } from "@/context/SocketContext";
+import { useSocket } from "@/context/useSocketContext";
 import { useChats } from "@/core/hooks/use-chats";
 import { convertToGiftedChatMessage } from "@/core/utils";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
-import { useAppDispatch } from "@/core/store/store";
+import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { setActiveChat, resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
 import { ChatInput } from "@/components/chats/chat-input";
@@ -49,15 +49,15 @@ export default function ChatMessage() {
   const { id: conversationId } = useLocalSearchParams();
   const { user } = useAuth();
   const { isConnected, socket } = useSocket();
-  const { chat, activeChatReceiver, isPending, isRejected } = useActiveChat(
-    `${conversationId}`
-  );
+  const activeChat = useAppSelector((state) => state.chats.activeChat);
+  const isConversationPending = activeChat?.chat.status === "pending";
+  const isConversationRejected = activeChat?.chat.status === "rejected";
   const { updateChatCount } = useChats();
   const { sendMessage, syncMessagesFromBackend, isSyncing } = useChatMessages();
   const { isOtherUserTyping, handleTyping, stopTyping } = useTypingStatus({
     conversationId: `${conversationId}`,
     userId: user!._id,
-    receiverId: activeChatReceiver!._id,
+    receiverId: `${activeChat?.receiver!._id}`,
   });
 
   const messageContainerRef = useRef<FlatList>(null);
@@ -85,28 +85,21 @@ export default function ChatMessage() {
   }, [conversationId, isConnected]);
 
   useEffect(() => {
-    if (chat) {
-      dispatch(
-        setActiveChat({
-          chat,
-          receiverId: `${activeChatReceiver?._id}`,
-        })
-      );
-    }
+    return () => {
+      dispatch(resetActiveChat());
+    };
+  }, []);
 
+  useEffect(() => {
     // update conversation unread count for current authenticated user
     socket?.emit("mark-conversation-as-read", {
       conversationId: conversationId as string,
       userId: user?._id,
-      user1Id: chat?.user1._id,
-      user2Id: chat?.user2._id,
+      user1Id: activeChat!.chat?.user1._id,
+      user2Id: activeChat!.chat?.user2._id,
     });
     updateChatCount(conversationId as string, 0, true);
-
-    return () => {
-      if (chat) dispatch(resetActiveChat());
-    };
-  }, [conversationId, user, socket, chat]);
+  }, [conversationId, user, socket]);
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
@@ -144,7 +137,7 @@ export default function ChatMessage() {
         conversationId: conversationId as string,
         content: message.text,
         sender: user!._id,
-        receiver: activeChatReceiver!._id,
+        receiver: activeChat!.receiver!._id,
       } as unknown as ExtendedMessage,
       conversationId as string
     );
@@ -213,10 +206,11 @@ export default function ChatMessage() {
 
   return (
     <SafeAreaView className="flex flex-1">
-      {isPending && chat?.user1._id !== user?._id ? (
-        <MessageRequest chat={chat!} />
-      ) : isRejected && chat?.user1._id !== user?._id ? (
-        <MessageRequest chat={chat!} />
+      {isConversationPending && activeChat.chat?.user1._id !== user?._id ? (
+        <MessageRequest chat={activeChat.chat!} />
+      ) : isConversationRejected &&
+        activeChat!.chat?.user1._id !== user?._id ? (
+        <MessageRequest chat={activeChat.chat!} />
       ) : Platform.OS === "ios" ? (
         <AvoidSoftInputView
           avoidOffset={10}
@@ -251,9 +245,9 @@ export default function ChatMessage() {
         <GiftedChat {...chatProps} />
       )}
 
-      {isSyncing &&
-        messagesFromRealm.length == 0 &&
-        chat?.status !== "pending" && <SyncingMessagesComponent />}
+      {isSyncing && messagesFromRealm.length == 0 && !isConversationPending && (
+        <SyncingMessagesComponent />
+      )}
     </SafeAreaView>
   );
 }

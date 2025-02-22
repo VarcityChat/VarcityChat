@@ -15,7 +15,7 @@ import { api } from "@/api/api";
 import { Platform } from "react-native";
 import { useAuth } from "@/core/hooks/use-auth";
 import { Gender } from "@/types/user";
-import { useSocket } from "@/context/SocketContext";
+import { useSocket } from "@/context/useSocketContext";
 import { setHasNotification } from "@/core/notifications/notification-slice";
 import { useAppDispatch } from "@/core/store/store";
 import { useChats } from "@/core/hooks/use-chats";

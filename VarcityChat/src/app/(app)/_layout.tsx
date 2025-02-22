@@ -1,4 +1,4 @@
-import { SocketProvider } from "@/context/SocketContext";
+import { SocketProvider } from "@/context/SocketProvider";
 import { Stack } from "expo-router";
 
 export default function HomeLayout() {

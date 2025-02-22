@@ -13,7 +13,6 @@ export const useChats = () => {
   const { user } = useAuth();
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
   const dispatch = useAppDispatch();
-  const activeChat = useAppSelector((state) => state.chats.activeChat);
 
   const totalUnreadCount = useMemo(() => {
     return (
@@ -97,13 +96,15 @@ export const useChats = () => {
     );
   };
 
-  const updateUnreadChatCount = (conversationId: string) => {
+  const updateUnreadChatCount = (
+    conversationId: string,
+    activeChat: IChat | undefined | null
+  ) => {
     if (!activeChat) {
       updateChatCount(conversationId, 1);
       return;
     }
-
-    if (activeChat && activeChat.chat._id !== conversationId) {
+    if (activeChat && activeChat._id !== conversationId) {
       updateChatCount(conversationId, 1);
       return;
     }
