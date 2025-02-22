@@ -26,7 +26,7 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage: reduxStorage,
-  blacklist: ["auth", "clientApi", "messages", "chats", "_persist"],
+  blacklist: ["auth", "clientApi", "messages", "_persist"],
 };
 
 export const rtkQueryErrorLogger =
