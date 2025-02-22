@@ -12,7 +12,6 @@ import {
   IMessage,
   InputToolbar,
   RenderMessageTextProps,
-  Send,
   SendProps,
 } from "react-native-gifted-chat";
 import { TouchableOpacity, View } from "@/ui";
@@ -33,16 +32,13 @@ import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch } from "@/core/store/store";
 import { setActiveChat, resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
-import MicrophoneSvg from "@/ui/icons/chat/microphone-svg";
-import AttachmentSvg from "@/ui/icons/chat/attachment-svg";
-import PictureSvg from "@/ui/icons/chat/picture-svg";
-import SendSvg from "@/ui/icons/chat/send-svg";
+import { ChatInput } from "@/components/chats/chat-input";
 import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import CustomMessageBubble from "@/components/chats/bubble";
 import ChatEmptyComponent from "@/components/chats/chat-empty";
-import SyncingMessagesComponent from "@/components/chats/sync-messages";
+import SyncingMessagesComponent from "@/components/chats/sync-messages-loader";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -167,31 +163,6 @@ export default function ChatMessage() {
     [replyMessage]
   );
 
-  const renderSend = (sendProps: SendProps<IMessage>) => {
-    return (
-      <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
-        {text.length > 0 && (
-          <Send {...sendProps} containerStyle={{ justifyContent: "center" }}>
-            <SendSvg width={30} height={30} />
-          </Send>
-        )}
-        {text.length === 0 && (
-          <>
-            <TouchableOpacity>
-              <MicrophoneSvg />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <AttachmentSvg />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <PictureSvg />
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
-    );
-  };
-
   const chatProps = useMemo(
     () =>
       ({
@@ -219,7 +190,9 @@ export default function ChatMessage() {
         renderAvatar: null,
         maxComposeHeight: 100,
         timeTextStyle: { right: { color: "gray" }, left: { color: "grey" } },
-        renderSend: renderSend,
+        renderSend: (props: SendProps<IMessage>) => (
+          <ChatInput text={text} sendProps={props} />
+        ),
         textInputProps: styles.composer,
         scrollToBottom: true,
         infiniteScroll: true,
