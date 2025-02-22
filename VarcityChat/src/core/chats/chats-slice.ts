@@ -28,7 +28,6 @@ const chatSlice = createSlice({
 
     resetActiveChat: (state) => {
       state.activeChat = null;
-      console.log("ACTIVE CHAT FROM STATE:", state.activeChat);
     },
   },
 });
