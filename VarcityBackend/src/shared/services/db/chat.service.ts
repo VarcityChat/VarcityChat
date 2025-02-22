@@ -88,7 +88,9 @@ class ChatService {
 
   public async markConversationAsReadForUser(
     conversationId: string,
-    user: 'user1' | 'user2'
+    user: 'user1' | 'user2',
+    user1Id: string,
+    user2Id: string
   ): Promise<void> {
     if (user === 'user1') {
       await ConversationModel.findByIdAndUpdate(conversationId, {
@@ -96,12 +98,24 @@ class ChatService {
           unreadCountUser1: 0
         }
       });
+
+      // user1, then user2 should see that user1 has read his messages
+      await MessageModel.updateMany(
+        { conversationId, receiver: user2Id, readAt: { $exists: false } },
+        { $set: { readAt: new Date() } }
+      );
     } else {
       await ConversationModel.findByIdAndUpdate(conversationId, {
         $set: {
           unreadCountUser2: 0
         }
       });
+
+      // user2, then user1 should see that user2 has read his messages
+      await MessageModel.updateMany(
+        { conversationId, receiver: user1Id, readAt: { $exists: false } },
+        { $set: { readAt: new Date() } }
+      );
     }
   }
 

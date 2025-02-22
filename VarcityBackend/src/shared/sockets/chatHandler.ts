@@ -122,10 +122,18 @@ export class ChatHandler {
         return;
       }
 
+      const receiverId = userId === user1Id ? user2Id : user1Id;
+
       await chatService.markConversationAsReadForUser(
         `${conversationId}`,
-        userId === user1Id ? 'user1' : 'user2'
+        userId === user1Id ? 'user1' : 'user2',
+        `${user1Id}`,
+        `${user2Id}`
       );
+
+      this.socket.to(`${receiverId}`).emit('user-read-messages', {
+        conversationId
+      });
     });
   }
 
