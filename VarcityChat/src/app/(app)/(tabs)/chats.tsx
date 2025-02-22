@@ -18,7 +18,7 @@ import { useToast } from "@/core/hooks/use-toast";
 import { defaultAvatarUrl } from "../../../../constants/chats";
 import { formatChatLastMessage, formatLastMessageTime } from "@/core/utils";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
-import { setActiveChat, resetActiveChat } from "@/core/chats/chats-slice";
+import { resetActiveChat } from "@/core/chats/chats-slice";
 import { twMerge } from "tailwind-merge";
 import SearchBar from "@/components/search-bar";
 import ChatsSkeleton from "@/components/chats/chats-skeleton";
@@ -27,18 +27,18 @@ export default function Chats() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dispatch = useAppDispatch();
-  const { user } = useAuth();
   const { chats, isLoading, error, loadChats } = useChats();
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const { activeChat } = useAppSelector((state) => state.chats);
   const [search, setSearch] = useState("");
-  const activeChat = useAppSelector((state) => state.chats.activeChat);
 
   useFocusEffect(
     useCallback(() => {
       if (activeChat) {
         dispatch(resetActiveChat());
       }
-    }, [])
+    }, [activeChat])
   );
 
   const scrollY = useSharedValue(0);
@@ -58,25 +58,6 @@ export default function Chats() {
   if (error) {
     showToast({ type: "error", text1: "Error", text2: `${error}` });
   }
-
-  const handleOpenConversation = (conversationId: string) => {
-    const chat = chats?.find((chat) => chat._id === conversationId);
-    const chatReceiver = chat
-      ? chat.user1._id === user?._id
-        ? chat.user2
-        : chat.user1
-      : null;
-
-    if (!chatReceiver || !chat) return;
-
-    dispatch(
-      setActiveChat({
-        chat,
-        receiver: chatReceiver,
-      })
-    );
-    router.push(`/chat-message/${conversationId}`);
-  };
 
   return (
     <SafeAreaView className="flex flex-1">
@@ -144,9 +125,7 @@ export default function Chats() {
               <TouchableOpacity
                 activeOpacity={0.7}
                 className="w-full flex-row items-center bg-red"
-                onPress={() => {
-                  handleOpenConversation(`${item._id}`);
-                }}
+                onPress={() => router.push(`/chat-message/${item._id}`)}
               >
                 <View className="w-[40px] h-[40px] overflow-hidden rounded-full mr-4">
                   <Image
@@ -195,7 +174,7 @@ export default function Chats() {
                   </Text>
 
                   {item.user1._id == user?._id && item.unreadCountUser1 > 0 ? (
-                    <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
+                    <View className="min-w-[20px] max-w-fit h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
                       <Text className="text-white dark:text-white font-sans-thin text-sm">
                         {item.unreadCountUser1}
                       </Text>
@@ -203,7 +182,7 @@ export default function Chats() {
                   ) : null}
 
                   {item.user2._id === user?._id && item.unreadCountUser2 > 0 ? (
-                    <View className="w-[20px] h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
+                    <View className="min-w-[20px] max-w-fit h-[20px] rounded-full bg-primary-500 flex items-center justify-center">
                       <Text className="text-white dark:text-white font-sans-thin text-sm">
                         {item.unreadCountUser2}
                       </Text>
