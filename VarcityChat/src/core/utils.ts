@@ -13,7 +13,7 @@ export const trimText = (text: string, maxLength: number = 20) => {
 export const formatChatLastMessage = (text: any) => {
   if (typeof text !== "string") return "Send a message 👋";
   if (text.length === 0) return "Send a message 👋";
-  return trimText(text, 45);
+  return trimText(text, 70);
 };
 
 export const capitalize = (text: string): string => {
