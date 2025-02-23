@@ -1,5 +1,6 @@
 import { ExtendedMessage } from "@/api/chats/types";
 import Realm, { BSON } from "realm";
+import { optional } from "zod";
 
 export class MessageSchema extends Realm.Object<ExtendedMessage> {
   _id!: BSON.ObjectID;
@@ -10,6 +11,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
   sender!: string;
   receiver!: string;
   isQueued!: boolean;
+  mediaUrls?: string[];
   localSequence?: number;
   serverId?: string;
   serverSequence?: number;
@@ -27,6 +29,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
       deliveryStatus: { type: "string", default: "pending" },
       sender: "string",
       receiver: "string",
+      mediaUrls: { type: "list", objectType: "string", optional: true },
       isQueued: { type: "bool", default: false },
       localSequence: { type: "int", optional: true, indexed: true },
       serverSequence: { type: "int", optional: true, indexed: true },

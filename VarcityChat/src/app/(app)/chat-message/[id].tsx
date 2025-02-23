@@ -1,4 +1,4 @@
-import { Platform, SafeAreaView, StyleSheet } from "react-native";
+import { ImageBase, Platform, SafeAreaView, StyleSheet } from "react-native";
 import React, {
   useCallback,
   useEffect,
@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import {
+  BubbleProps,
   GiftedChat,
   GiftedChatProps,
   IMessage,
@@ -25,19 +26,26 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { useQuery } from "@realm/react";
 import { useSocket } from "@/context/useSocketContext";
 import { useChats } from "@/core/hooks/use-chats";
-import { convertToGiftedChatMessage } from "@/core/utils";
+import {
+  convertToGiftedChatMessage,
+  uploadToCloudinaryWithProgress,
+} from "@/core/utils";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
 import { ChatInput } from "@/components/chats/chat-input";
+import { ChatFooter } from "@/components/chats/chat-footer";
 import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import CustomMessageBubble from "@/components/chats/bubble";
 import ChatEmptyComponent from "@/components/chats/chat-empty";
 import SyncingMessagesComponent from "@/components/chats/sync-messages-loader";
+import { UploadingImage } from "@/types/chat";
+import { ImagePickerAsset } from "expo-image-picker";
+import { useToast } from "@/core/hooks/use-toast";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -46,6 +54,7 @@ export default function ChatMessage() {
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
+  const { showToast } = useToast();
   const { user } = useAuth();
   const { isConnected, socket } = useSocket();
   const activeChat = useAppSelector((state) => state.chats.activeChat);
@@ -66,6 +75,7 @@ export default function ChatMessage() {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [text, setText] = useState("");
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
+  const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
 
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
@@ -85,6 +95,13 @@ export default function ChatMessage() {
 
   useEffect(() => {
     return () => {
+      // Cancel all ongoing uploads
+      uploadingImages.forEach((img) => {
+        if (img.abortController) {
+          img.abortController.abort();
+        }
+      });
+      setUploadingImages([]);
       dispatch(resetActiveChat());
     };
   }, []);
@@ -130,6 +147,11 @@ export default function ChatMessage() {
       animated: true,
     });
 
+    // Check if they are images
+    const mediaUrls = uploadingImages
+      .filter((img) => img.cloudinaryUrl)
+      .map((img) => img.cloudinaryUrl) as string[];
+
     const message = messages[0];
     sendMessage(
       {
@@ -137,9 +159,64 @@ export default function ChatMessage() {
         content: message.text,
         sender: user!._id,
         receiver: activeChat!.receiver!._id,
+        mediaUrls,
       } as unknown as ExtendedMessage,
       conversationId as string
     );
+    setUploadingImages([]);
+  };
+
+  const handleImageSelected = async (images: ImagePickerAsset[]) => {
+    const newImages = images.map((img) => ({
+      uri: img.uri,
+      progress: 0,
+      abortController: new AbortController(),
+      error: false,
+    }));
+    setUploadingImages((prev) => [...prev, ...newImages]);
+
+    const uploadPromises = newImages.map(async (img) => {
+      try {
+        const cloudinaryUrl = await uploadToCloudinaryWithProgress(
+          img,
+          (progress) => {
+            setUploadingImages((prev) =>
+              prev.map((p) => (p.uri === img.uri ? { ...p, progress } : p))
+            );
+          },
+          img.abortController!
+        );
+
+        setUploadingImages((prev) =>
+          prev.map((p) =>
+            p.uri === img.uri ? { ...p, cloudinaryUrl: `${cloudinaryUrl}` } : p
+          )
+        );
+      } catch (error: any) {
+        if (error.message === "Upload cancelled") {
+          setUploadingImages((prev) => prev.filter((p) => p.uri !== img.uri));
+        } else {
+          setUploadingImages((prev) =>
+            prev.map((p) => (p.uri === img.uri ? { ...p, error: true } : p))
+          );
+          showToast({
+            type: "error",
+            text1: "Error",
+            text2: "Error uploading images",
+          });
+        }
+      }
+    });
+
+    await Promise.all(uploadPromises);
+  };
+
+  const handleRemoveImage = (uri: string) => {
+    const image = uploadingImages.find((img) => img.uri === uri);
+    if (image?.abortController) {
+      image.abortController.abort();
+    }
+    setUploadingImages((prev) => prev.filter((p) => p.uri !== uri));
   };
 
   const updateRowRef = useCallback(
@@ -173,17 +250,26 @@ export default function ChatMessage() {
         },
         onSend: (messages: any) => onSend(messages),
         user: { _id: user!._id },
-        renderBubble: (props) => <CustomMessageBubble {...props} />,
+        renderBubble: (
+          props: BubbleProps<IMessage & { mediaUrls: string[] }>
+        ) => <CustomMessageBubble {...props} />,
         onInputTextChanged: (text) => {
           setText(text);
           handleTyping(text);
         },
+        placeholder:
+          uploadingImages.length > 0 ? "Add a caption..." : "Type a message...",
         isTyping: isOtherUserTyping,
         renderAvatar: null,
-        maxComposeHeight: 100,
+        maxComposerHeight: 100,
         timeTextStyle: { right: { color: "gray" }, left: { color: "grey" } },
         renderSend: (props: SendProps<IMessage>) => (
-          <ChatInput text={text} sendProps={props} />
+          <ChatInput
+            text={text}
+            sendProps={props}
+            uploadingImages={uploadingImages}
+            onImageSelected={handleImageSelected}
+          />
         ),
         textInputProps: styles.composer,
         scrollToBottom: true,
@@ -191,6 +277,12 @@ export default function ChatMessage() {
         loadEarlier: hasMoreMessages,
         onLoadEarlier: loadEarlier,
         renderChatEmpty: () => (isSyncing ? null : <ChatEmptyComponent />),
+        renderChatFooter: () => (
+          <ChatFooter
+            uploadingImages={uploadingImages}
+            onRemoveImage={handleRemoveImage}
+          />
+        ),
         keyboardShouldPersistTaps: "never",
       } as GiftedChatProps),
     [
@@ -200,6 +292,7 @@ export default function ChatMessage() {
       hasMoreMessages,
       isOtherUserTyping,
       isSyncing,
+      uploadingImages,
     ]
   );
 
@@ -253,7 +346,6 @@ export default function ChatMessage() {
 
 const styles = StyleSheet.create({
   composer: {
-    backgroundColor: "#fff",
     paddingHorizontal: 5,
     fontSize: 14,
     fontFamily: "PlusJakartaSans_400Regular",

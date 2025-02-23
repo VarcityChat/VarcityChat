@@ -127,6 +127,66 @@ export const uploadToCloudinary = async (
   }
 };
 
+export const uploadToCloudinaryWithProgress = async (
+  image: { uri: string },
+  onProgress: (progress: number) => void,
+  abortController: AbortController
+): Promise<string | null> => {
+  const formData = new FormData();
+  const ext = image.uri.split(".").pop();
+  const fileName = `${Date.now()}.${ext}`;
+
+  formData.append("file", {
+    uri: image.uri,
+    type: `image/${ext}`,
+    name: fileName,
+  } as any);
+
+  // Change preset from "user_profiles" to "chats_media"
+  formData.append("upload_preset", "user_profiles");
+  formData.append("cloud_name", "dvjr6r50f");
+  formData.append("api_key", "159348833879711");
+
+  const xhr = new XMLHttpRequest();
+
+  return new Promise((resolve, reject) => {
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = (event.loaded / event.total) * 100;
+        onProgress(progress);
+      }
+    };
+
+    xhr.open(
+      "POST",
+      "https://api.cloudinary.com/v1_1/dvjr6r50f/image/upload",
+      true
+    );
+
+    // Handle abortion
+    abortController.signal.addEventListener("abort", () => {
+      xhr.abort();
+      reject(new Error("Upload cancelled"));
+    });
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        onProgress(100);
+        resolve(response.secure_url);
+      } else {
+        reject(new Error("Upload failed"));
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Upload failed"));
+    };
+
+    xhr.send(formData);
+  });
+};
+
 export const uploadToCloudinarySigned = async (
   cloudinaryConfig: {
     url: string;
@@ -174,7 +234,7 @@ export const uploadToCloudinarySigned = async (
 
 export const convertToGiftedChatMessage = (
   message: ExtendedMessage
-): IMessage => {
+): IMessage & { mediaUrls: string[] } => {
   return {
     _id: message._id.toString(),
     text: message.content || "",
@@ -182,6 +242,7 @@ export const convertToGiftedChatMessage = (
     user: {
       _id: message.sender,
     },
+    mediaUrls: message.mediaUrls || [],
     sent: message.deliveryStatus === "sent",
     received: message.deliveryStatus === "delivered",
     pending: message.deliveryStatus === "pending",

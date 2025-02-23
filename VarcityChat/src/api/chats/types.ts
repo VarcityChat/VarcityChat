@@ -13,7 +13,7 @@ export interface ExtendedMessage extends IMessage {
   sender: string;
   receiver: string;
   content?: string;
-  mediaUrl?: string[];
+  mediaUrls?: string[];
   localSequence: number;
   sequence: number;
   mediaType?: "audio" | "video" | "image";
