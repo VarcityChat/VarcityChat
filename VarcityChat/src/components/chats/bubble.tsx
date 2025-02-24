@@ -79,11 +79,11 @@ const CustomMessageBubble = memo(
               right: {
                 color: "#000",
                 fontSize: 14,
-                fontFamily: "PlusJakartaSans_400Regular",
+                fontFamily: "PlusJakartaSans_500Medium",
               },
               left: {
                 fontSize: 14,
-                fontFamily: "PlusJakartaSans_400Regular",
+                fontFamily: "PlusJakartaSans_500Medium",
               },
             }}
             wrapperStyle={{
@@ -94,7 +94,7 @@ const CustomMessageBubble = memo(
                   : undefined,
               },
               right: {
-                backgroundColor: colors.primary[50],
+                backgroundColor: "#FCEBEB",
                 maxWidth: props?.currentMessage?.mediaUrls?.length
                   ? MAX_IMAGE_WIDTH + 8
                   : undefined,
