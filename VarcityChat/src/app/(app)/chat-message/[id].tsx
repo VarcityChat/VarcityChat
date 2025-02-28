@@ -1,4 +1,9 @@
-import { Platform, SafeAreaView, StyleSheet } from "react-native";
+import {
+  ImageBackground,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
 import React, {
   useCallback,
   useEffect,
@@ -274,7 +279,10 @@ export default function ChatMessage() {
             onImageSelected={handleImageSelected}
           />
         ),
-        textInputProps: styles.composer,
+        textInputProps: {
+          ...styles.composer,
+          color: isDark ? colors.white : colors.black,
+        },
         scrollToBottom: true,
         infiniteScroll: true,
         loadEarlier: hasMoreMessages,
@@ -291,7 +299,6 @@ export default function ChatMessage() {
             {...props}
             containerStyle={{
               backgroundColor: isDark ? colors.black : colors.white,
-              paddingBottom: insets.bottom,
             }}
           />
         ),
@@ -310,45 +317,51 @@ export default function ChatMessage() {
 
   // avoidOffset={10}
   return (
-    <View className="flex flex-1 bg-white dark:bg-charcoal-700">
-      {isConversationPending && activeChat.chat?.user1._id !== user?._id ? (
-        <MessageRequest chat={activeChat.chat!} />
-      ) : isConversationRejected &&
-        activeChat!.chat?.user1._id !== user?._id ? (
-        <MessageRequest chat={activeChat.chat!} />
-      ) : Platform.OS === "ios" ? (
-        <AvoidSoftInputView
-          hideAnimationDelay={50}
-          hideAnimationDuration={200}
-          showAnimationDelay={50}
-          showAnimationDuration={200}
-          style={styles.softInputStyles}
-        >
-          <GiftedChat
-            {...chatProps}
-            // renderMessage={(props) => (
-            //   <ChatMessageBox
-            //     {...props}
-            //     setReplyOnSwipe={setReplyMessage}
-            //     updateRowRef={updateRowRef}
-            //   />
-            // )}
-            // renderChatFooter={() => (
-            //   <ReplyMessageBar
-            //     clearReply={() => setReplyMessage(null)}
-            //     message={replyMessage}
-            //   />
-            // )}
-            isKeyboardInternallyHandled={false}
-          />
-        </AvoidSoftInputView>
-      ) : (
-        <GiftedChat {...chatProps} />
-      )}
+    <View
+      className="flex flex-1 bg-white dark:bg-black"
+      style={{ paddingBottom: insets.bottom }}
+    >
+      <View className="flex flex-1 bg-white dark:bg-charcoal-700">
+        {isConversationPending && activeChat.chat?.user1._id !== user?._id ? (
+          <MessageRequest chat={activeChat.chat!} />
+        ) : isConversationRejected &&
+          activeChat!.chat?.user1._id !== user?._id ? (
+          <MessageRequest chat={activeChat.chat!} />
+        ) : Platform.OS === "ios" ? (
+          <AvoidSoftInputView
+            avoidOffset={10}
+            hideAnimationDelay={50}
+            hideAnimationDuration={200}
+            showAnimationDelay={50}
+            showAnimationDuration={200}
+            style={styles.softInputStyles}
+          >
+            <GiftedChat
+              {...chatProps}
+              // renderMessage={(props) => (
+              //   <ChatMessageBox
+              //     {...props}
+              //     setReplyOnSwipe={setReplyMessage}
+              //     updateRowRef={updateRowRef}
+              //   />
+              // )}
+              // renderChatFooter={() => (
+              //   <ReplyMessageBar
+              //     clearReply={() => setReplyMessage(null)}
+              //     message={replyMessage}
+              //   />
+              // )}
+              isKeyboardInternallyHandled={false}
+            />
+          </AvoidSoftInputView>
+        ) : (
+          <GiftedChat {...chatProps} />
+        )}
 
-      {isSyncing && messagesFromRealm.length == 0 && !isConversationPending && (
-        <SyncingMessagesComponent />
-      )}
+        {isSyncing &&
+          messagesFromRealm.length == 0 &&
+          !isConversationPending && <SyncingMessagesComponent />}
+      </View>
     </View>
   );
 }
