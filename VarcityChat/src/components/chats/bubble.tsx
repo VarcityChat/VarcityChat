@@ -40,13 +40,18 @@ const CustomMessageBubble = memo(
     const renderMessageImages = (props: BubbleProps<IMessage>) => {
       const message = props?.currentMessage as ExtendedMessage;
       if (!message?.mediaUrls?.length) return null;
+
       const mediaLength = message.mediaUrls.length;
+      const textIsEmpty = !message.text || message.text.trim().length === 0;
 
       return (
         <View
-          style={
-            mediaLength < 4 ? styles.imageContainer : styles.fourImagesContainer
-          }
+          style={[
+            mediaLength < 4
+              ? styles.imageContainer
+              : styles.fourImagesContainer,
+            textIsEmpty && styles.noTextContainer,
+          ]}
         >
           {message.mediaUrls?.map((url, index) => (
             <Pressable
@@ -135,6 +140,9 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     paddingHorizontal: 4,
     paddingTop: 4,
+  },
+  noTextContainer: {
+    paddingBottom: 4,
   },
   imageWrapper: {
     margin: 1,

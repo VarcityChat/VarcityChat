@@ -105,6 +105,7 @@ export default function Chats() {
         <Animated.FlatList
           showsVerticalScrollIndicator={false}
           onScroll={scrollHandler}
+          scrollEventThrottle={16}
           ListHeaderComponent={
             <>
               <SearchBar
@@ -171,7 +172,7 @@ export default function Chats() {
                       ? "Pending request"
                       : item.status === "rejected"
                       ? "Rejected request"
-                      : formatChatLastMessage(item?.lastMessage?.content)}
+                      : formatChatLastMessage(item?.lastMessage)}
                   </Text>
                 </View>
 

@@ -139,6 +139,7 @@ export default function ChatMessage() {
   }, [page, messagesFromRealm.length]);
 
   const onSend = (messages: IMessage[]) => {
+    console.log("TRYING TO SEND MESSAGE:");
     stopTyping();
     messageContainerRef?.current?.scrollToOffset({
       offset: 0,

@@ -8,10 +8,19 @@ export const trimText = (text: string, maxLength: number = 20) => {
     : text.slice(0, maxLength);
 };
 
-export const formatChatLastMessage = (text: any) => {
-  if (typeof text !== "string") return "Send a message 👋";
-  if (text.length === 0) return "Send a message 👋";
-  return trimText(text, 70);
+export const formatChatLastMessage = (
+  message: Partial<ExtendedMessage> | undefined
+) => {
+  if (!message) return "Send a message 👋";
+  if (message.content?.trim()?.length === 0 && !message.mediaUrls?.length)
+    return "Send a message 👋";
+
+  if (message?.mediaUrls?.length && !message.content?.trim().length)
+    return `🗾 ${message.mediaUrls.length} image${
+      message.mediaUrls.length > 1 ? "s" : ""
+    }`;
+
+  return trimText(message.content || "", 70);
 };
 
 export const capitalize = (text: string): string => {

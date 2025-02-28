@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { SendProps, IMessage, Send } from "react-native-gifted-chat";
+import { SendProps, IMessage } from "react-native-gifted-chat";
 import { View, TouchableOpacity } from "@/ui";
 import MicrophoneSvg from "@/ui/icons/chat/microphone-svg";
 import AttachmentSvg from "@/ui/icons/chat/attachment-svg";
@@ -23,7 +23,13 @@ export const ChatInput = memo(
     const isUploading = uploadingImages.some(
       (img) => img.progress < 100 && !img.error
     );
-    const hasImages = uploadingImages.length > 0;
+
+    const hasCompletedImages = uploadingImages.some(
+      (img) => img?.cloudinaryUrl && !img.error
+    );
+
+    const canSend =
+      (text.trim().length > 0 || hasCompletedImages) && !isUploading;
 
     const handleImageSelection = async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -40,19 +46,30 @@ export const ChatInput = memo(
       }
     };
 
+    const handleSend = () => {
+      if (canSend) {
+        if (text.trim().length > 0) {
+          sendProps.onSend?.({ text }, true);
+        } else if (hasCompletedImages) {
+          sendProps.onSend?.({ text: "" }, true);
+        }
+      }
+    };
+
     return (
       <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
-        {(text.length > 0 || hasImages) && (
-          <Send
-            {...sendProps}
-            containerStyle={{ justifyContent: "center" }}
-            alwaysShowSend
-            disabled={isUploading}
+        {(text.length > 0 ||
+          (uploadingImages.length > 0 && hasCompletedImages)) && (
+          <TouchableOpacity
+            className="h-[44px] justify-end items-center"
+            onPress={handleSend}
+            disabled={!canSend}
+            activeOpacity={0.4}
           >
             <SendSvg width={30} height={30} />
-          </Send>
+          </TouchableOpacity>
         )}
-        {text.length === 0 && !hasImages && (
+        {text.length === 0 && uploadingImages.length === 0 && (
           <>
             <TouchableOpacity>
               <MicrophoneSvg />
