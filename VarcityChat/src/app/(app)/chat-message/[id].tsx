@@ -315,13 +315,12 @@ export default function ChatMessage() {
     ]
   );
 
-  // avoidOffset={10}
   return (
     <View
       className="flex flex-1 bg-white dark:bg-black"
       style={{ paddingBottom: insets.bottom }}
     >
-      <View className="flex flex-1 bg-white dark:bg-charcoal-700">
+      <View className="flex flex-1 bg-white dark:bg-charcoal-950">
         {isConversationPending && activeChat.chat?.user1._id !== user?._id ? (
           <MessageRequest chat={activeChat.chat!} />
         ) : isConversationRejected &&
