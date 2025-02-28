@@ -1,4 +1,4 @@
-import { ImageBase, Platform, SafeAreaView, StyleSheet } from "react-native";
+import { Platform, SafeAreaView, StyleSheet } from "react-native";
 import React, {
   useCallback,
   useEffect,
@@ -26,10 +26,8 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { useQuery } from "@realm/react";
 import { useSocket } from "@/context/useSocketContext";
 import { useChats } from "@/core/hooks/use-chats";
-import {
-  convertToGiftedChatMessage,
-  uploadToCloudinaryWithProgress,
-} from "@/core/utils";
+import { convertToGiftedChatMessage } from "@/core/utils";
+import { uploadToCloudinaryWithProgress } from "@/core/upload-utils";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";

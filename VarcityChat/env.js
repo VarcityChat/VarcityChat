@@ -29,7 +29,7 @@ const client = z.object({
   VERSION: z.string(),
 
   // ADD YOUR CLIENT ENV VARS HERE
-  API_URL: z.string(),
+  API_URL: z.string().optional(),
 });
 
 const buildTime = z.object({
