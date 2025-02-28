@@ -15,7 +15,7 @@ import {
   RenderMessageTextProps,
   SendProps,
 } from "react-native-gifted-chat";
-import { TouchableOpacity, View } from "@/ui";
+import { colors, TouchableOpacity, View } from "@/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
@@ -44,6 +44,7 @@ import SyncingMessagesComponent from "@/components/chats/sync-messages-loader";
 import { UploadingImage } from "@/types/chat";
 import { ImagePickerAsset } from "expo-image-picker";
 import { useToast } from "@/core/hooks/use-toast";
+import { useColorScheme } from "nativewind";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -55,9 +56,13 @@ export default function ChatMessage() {
   const { showToast } = useToast();
   const { user } = useAuth();
   const { isConnected, socket } = useSocket();
+  const { colorScheme } = useColorScheme();
+
+  const isDark = colorScheme === "dark";
   const activeChat = useAppSelector((state) => state.chats.activeChat);
   const isConversationPending = activeChat?.chat.status === "pending";
   const isConversationRejected = activeChat?.chat.status === "rejected";
+
   const { updateChatCount } = useChats();
   const { sendMessage, syncMessagesFromBackend, isSyncing } = useChatMessages();
   const { isOtherUserTyping, handleTyping, stopTyping } = useTypingStatus({
@@ -139,7 +144,6 @@ export default function ChatMessage() {
   }, [page, messagesFromRealm.length]);
 
   const onSend = (messages: IMessage[]) => {
-    console.log("TRYING TO SEND MESSAGE:");
     stopTyping();
     messageContainerRef?.current?.scrollToOffset({
       offset: 0,
@@ -282,6 +286,15 @@ export default function ChatMessage() {
             onRemoveImage={handleRemoveImage}
           />
         ),
+        renderInputToolbar: (props) => (
+          <InputToolbar
+            {...props}
+            containerStyle={{
+              backgroundColor: isDark ? colors.black : colors.white,
+              paddingBottom: insets.bottom,
+            }}
+          />
+        ),
         keyboardShouldPersistTaps: "never",
       } as GiftedChatProps),
     [
@@ -295,8 +308,9 @@ export default function ChatMessage() {
     ]
   );
 
+  // avoidOffset={10}
   return (
-    <SafeAreaView className="flex flex-1">
+    <View className="flex flex-1 bg-white dark:bg-charcoal-700">
       {isConversationPending && activeChat.chat?.user1._id !== user?._id ? (
         <MessageRequest chat={activeChat.chat!} />
       ) : isConversationRejected &&
@@ -304,7 +318,6 @@ export default function ChatMessage() {
         <MessageRequest chat={activeChat.chat!} />
       ) : Platform.OS === "ios" ? (
         <AvoidSoftInputView
-          avoidOffset={10}
           hideAnimationDelay={50}
           hideAnimationDuration={200}
           showAnimationDelay={50}
@@ -313,9 +326,6 @@ export default function ChatMessage() {
         >
           <GiftedChat
             {...chatProps}
-            // renderInputToolbar={(props) => (
-            //   <InputToolbar {...props} containerStyle={{ height: 60 }} />
-            // )}
             // renderMessage={(props) => (
             //   <ChatMessageBox
             //     {...props}
@@ -339,7 +349,7 @@ export default function ChatMessage() {
       {isSyncing && messagesFromRealm.length == 0 && !isConversationPending && (
         <SyncingMessagesComponent />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

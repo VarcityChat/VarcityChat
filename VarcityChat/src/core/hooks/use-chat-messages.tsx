@@ -170,6 +170,7 @@ export const useChatMessages = () => {
       updateChatOrder({
         conversationId: chatId,
         content: message.content,
+        mediaUrls: message.mediaUrls,
         createdAt: new Date(),
       });
 

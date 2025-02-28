@@ -58,10 +58,9 @@ export const ChatInput = memo(
 
     return (
       <View className="flex flex-row items-center justify-center gap-2 h-[44px] px-4">
-        {(text.length > 0 ||
-          (uploadingImages.length > 0 && hasCompletedImages)) && (
+        {(text.length > 0 || uploadingImages.length > 0) && (
           <TouchableOpacity
-            className="h-[44px] justify-end items-center"
+            className="h-[44px] justify-center items-center"
             onPress={handleSend}
             disabled={!canSend}
             activeOpacity={0.4}

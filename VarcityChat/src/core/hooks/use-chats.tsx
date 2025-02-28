@@ -44,7 +44,10 @@ export const useChats = () => {
             // add to beginning with update message
             draft.unshift({
               ...chat,
-              lastMessage: { content: newMessage.content },
+              lastMessage: {
+                content: newMessage.content,
+                mediaUrls: newMessage.mediaUrls,
+              },
               lastMessageTimestamp: newMessage.createdAt
                 ? newMessage.createdAt.toString()
                 : new Date().toString(),
