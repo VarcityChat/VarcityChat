@@ -12,8 +12,14 @@ export const formatChatLastMessage = (
   message: Partial<ExtendedMessage> | undefined
 ) => {
   if (!message) return "Send a message 👋";
-  if (message.content?.trim()?.length === 0 && !message.mediaUrls?.length)
+  if (
+    message.content?.trim()?.length === 0 &&
+    !message.mediaUrls?.length &&
+    !message?.audio
+  )
     return "Send a message 👋";
+
+  if (message?.audio) return `🎙️ voice note`;
 
   if (message?.mediaUrls?.length && !message.content?.trim().length)
     return `🗾 ${message.mediaUrls.length} image${

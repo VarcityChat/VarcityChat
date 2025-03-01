@@ -186,7 +186,7 @@ export default function ChatMessage() {
         sendMessage(
           {
             conversationId: conversationId as string,
-            content: "[Voice Message]",
+            content: "",
             sender: user!._id,
             receiver: activeChat!.receiver!._id,
             audio: result.url,
