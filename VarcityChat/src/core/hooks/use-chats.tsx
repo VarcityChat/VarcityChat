@@ -47,6 +47,7 @@ export const useChats = () => {
               lastMessage: {
                 content: newMessage.content,
                 mediaUrls: newMessage.mediaUrls,
+                audio: newMessage?.audio,
               },
               lastMessageTimestamp: newMessage.createdAt
                 ? newMessage.createdAt.toString()

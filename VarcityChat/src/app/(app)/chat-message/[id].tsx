@@ -331,7 +331,7 @@ export default function ChatMessage() {
             {...props}
             isRecording={isRecording}
             setIsRecording={setIsRecording}
-            onSend={handleAudioSend}
+            onAudioSend={handleAudioSend}
           />
         ),
         keyboardShouldPersistTaps: "never",

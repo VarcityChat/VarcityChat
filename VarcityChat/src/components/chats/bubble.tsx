@@ -7,6 +7,7 @@ import { View, Image } from "@/ui";
 import { StyleSheet, Dimensions, Pressable } from "react-native";
 import { Bubble, IMessage, BubbleProps } from "react-native-gifted-chat";
 import { ImageViewer } from "./image-viewer";
+import { AudioMessageBubble } from "./audio-message-bubble";
 
 const { width } = Dimensions.get("window");
 const MAX_IMAGE_WIDTH = width * 0.6;
@@ -108,6 +109,14 @@ const CustomMessageBubble = memo(
             renderTicks={renderTicks}
             renderCustomView={(props) => {
               return renderMessageImages(props);
+            }}
+            renderMessageAudio={(props) => {
+              return (
+                <AudioMessageBubble
+                  message={props.currentMessage}
+                  isSender={props.position === "right"}
+                />
+              );
             }}
           />
         </View>

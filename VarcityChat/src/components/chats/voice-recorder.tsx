@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
 import { StyleSheet } from "react-native";
+import { formatDuration } from "@/core/utils";
 import SendSvg from "@/ui/icons/chat/send-svg";
 
 const AnimatedTouchableOpacity =
@@ -89,13 +90,6 @@ export const VoiceRecorder = ({
       };
     });
   });
-
-  // Format the duration as MM:SS
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
 
   // Start recording function
   const startRecording = async () => {

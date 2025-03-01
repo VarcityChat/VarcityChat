@@ -1,22 +1,29 @@
-import React, { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
-import { View, TouchableOpacity, Text } from "@/ui";
-import { Audio } from "expo-av";
-import { FontAwesome } from "@expo/vector-icons";
+import { Audio, AVPlaybackStatus } from "expo-av";
+import { useEffect, useState } from "react";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
+import { colors } from "@/ui";
+import { View, Text, TouchableOpacity } from "@/ui";
+import { FontAwesome } from "@expo/vector-icons";
+import { formatDuration } from "@/core/utils";
+import { useAudioPlayer } from "@/context/AudioPlayerContext";
 
 interface AudioPlayerProps {
   audioUrl: string;
   isSender: boolean;
+  messageId: string;
 }
 
-export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
+export const AudioPlayer = ({
+  audioUrl,
+  isSender,
+  messageId,
+}: AudioPlayerProps) => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -24,6 +31,15 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
+
+  // Get audio context
+  const {
+    currentPlayingId,
+    setCurrentPlayingId,
+    stopCurrentPlaying,
+    registerPlayer,
+    unregisterPlayer,
+  } = useAudioPlayer();
 
   const progressWidth = useSharedValue(0);
 
@@ -39,10 +55,20 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
     loadSound();
     return () => {
       if (sound) {
+        unregisterPlayer(messageId);
         sound.unloadAsync();
       }
     };
   }, [audioUrl]);
+
+  // Handle global playback coordination
+  useEffect(() => {
+    if (currentPlayingId && currentPlayingId !== messageId && isPlaying) {
+      sound?.pauseAsync().then(() => {
+        setIsPlaying(false);
+      });
+    }
+  }, [currentPlayingId, messageId, isPlaying]);
 
   // Update progress during playback
   useEffect(() => {
@@ -60,6 +86,7 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
 
             if (status.didJustFinish) {
               setIsPlaying(false);
+              setCurrentPlayingId(null);
               setPosition(0);
               progressWidth.value = withTiming(0, { duration: 300 });
               await sound.setPositionAsync(0);
@@ -76,13 +103,6 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
     };
   }, [isPlaying, sound]);
 
-  // Format time as MM:SS
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
-
   // Load the audio file
   const loadSound = async () => {
     setIsLoading(true);
@@ -93,6 +113,9 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
         updateSoundStatus
       );
       setSound(newSound);
+
+      // Register this player
+      registerPlayer(messageId, newSound);
 
       // Get and set initial duration
       const status = await newSound.getStatusAsync();
@@ -107,11 +130,12 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
   };
 
   // Update sound status callback
-  const updateSoundStatus = (status: Audio.) => {
+  const updateSoundStatus = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       setIsPlaying(status.isPlaying);
       if (status.didJustFinish) {
         setIsPlaying(false);
+        setCurrentPlayingId(null);
         setPosition(0);
         progressWidth.value = withTiming(0, { duration: 300 });
       }
@@ -124,32 +148,39 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
 
     if (isPlaying) {
       await sound.pauseAsync();
+      setCurrentPlayingId(null);
+      // setIsPlaying(false);
     } else {
+      if (currentPlayingId !== messageId) {
+        await stopCurrentPlaying();
+      }
+
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
       });
+
       await sound.playAsync();
+      setCurrentPlayingId(messageId);
+      // setIsPlaying(true);
     }
   };
 
-  // UI colors based on sender/receiver
+  // Ui colors based on sender/receiver
   const getColors = () => {
     if (isSender) {
       return {
-        background: isDark ? colors.primary[500] : colors.primary[500],
-        text: colors.white,
-        progress: colors.primary[500],
-        progressTrack: "rgba(255, 255, 255, 0.3)",
+        text: colors.black,
+        progress: colors.primary[400],
+        progressTrack: `rgba(0, 0, 0, 0.1)`,
         icon: colors.white,
       };
     } else {
       return {
-        background: isDark ? colors.grey[800] : colors.grey[200],
         text: isDark ? colors.white : colors.black,
-        progress: colors.primary[500],
+        progress: colors.primary[400],
         progressTrack: isDark
-          ? "rgba(255, 255, 255, 0.15)"
+          ? `rgba(255, 255, 255, 0.15)`
           : "rgba(0, 0, 0, 0.1)",
         icon: isDark ? colors.white : colors.black,
       };
@@ -159,11 +190,22 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
   const uiColors = getColors();
 
   return (
-    <View style={[styles.container, { backgroundColor: uiColors.background as string }]}>
+    <View style={styles.container}>
       <TouchableOpacity
         style={styles.playButton}
-        onPress={togglePlayback}
-        disabled={isLoading}
+        onPress={() => {
+          if (isLoading) return;
+
+          // Reload the audio if it has not loaded yet
+          if (!sound) {
+            loadSound();
+            console.log("RELOADING THE SOUND:");
+            return;
+          }
+
+          togglePlayback();
+        }}
+        // disabled={isLoading}
       >
         <FontAwesome
           name={isLoading ? "circle-o-notch" : isPlaying ? "pause" : "play"}
@@ -183,23 +225,24 @@ export const AudioPlayer = ({ audioUrl, isSender }: AudioPlayerProps) => {
             style={[
               styles.progressBar,
               progressStyle,
-              { backgroundColor: uiColors.progress as string },
+              { backgroundColor: uiColors.progress },
             ]}
           />
         </View>
 
         <View style={styles.timeContainer}>
           <Text style={[styles.timeText, { color: uiColors.text }]}>
-            {formatTime(position)}
+            {formatDuration(position)}
           </Text>
           <Text style={[styles.timeText, { color: uiColors.text }]}>
-            {formatTime(duration)}
+            {formatDuration(duration)}
           </Text>
         </View>
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",

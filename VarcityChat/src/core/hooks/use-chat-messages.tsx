@@ -76,6 +76,7 @@ export const useChatMessages = () => {
                   serverId: message._id,
                   serverSequence: Number(message.sequence),
                   localSequence: Number(message.sequence),
+                  audio: message?.audio,
                   createdAt: message.createdAt,
                   lastSyncTimestamp: new Date(message.createdAt),
                 });
@@ -110,6 +111,7 @@ export const useChatMessages = () => {
             conversationId: message.conversationId,
             mediaUrls: message?.mediaUrls,
             deliveryStatus: "sent",
+            audio: message?.audio,
             serverId: message._id,
             localSequence: Number(message.sequence),
           });
@@ -171,6 +173,7 @@ export const useChatMessages = () => {
         conversationId: chatId,
         content: message.content,
         mediaUrls: message.mediaUrls,
+        audio: message?.audio,
         createdAt: new Date(),
       });
 

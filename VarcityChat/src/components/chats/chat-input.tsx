@@ -10,7 +10,7 @@ import { colors } from "@/ui";
 type ChatInputProps = {
   isRecording: boolean;
   setIsRecording: (isRecording: boolean) => void;
-  onSend: (audioUri: string) => void;
+  onAudioSend: (audioUri: string) => void;
 };
 
 export const ChatInput = (
@@ -24,7 +24,7 @@ export const ChatInput = (
       <VoiceRecorder
         isRecording={props.isRecording}
         setIsRecording={props.setIsRecording}
-        onSend={props.onSend}
+        onSend={props.onAudioSend}
       />
     );
   }

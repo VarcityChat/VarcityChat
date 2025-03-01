@@ -79,6 +79,13 @@ export const formatLastMessageTime = (timestamp: Date | string | undefined) => {
   });
 };
 
+// Format the duration as MM:SS
+export const formatDuration = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+};
+
 export const convertToGiftedChatMessage = (
   message: ExtendedMessage
 ): IMessage & { mediaUrls: string[] } => {
