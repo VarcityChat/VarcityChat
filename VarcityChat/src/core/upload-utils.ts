@@ -176,3 +176,65 @@ export const uploadToCloudinarySigned = async (
     }
   }
 };
+
+// Audio Upload
+export const uploadAudioToCloudinary = async (
+  audioFile: { uri: string; fileName?: string; duration?: number },
+  retryCount = 0
+): Promise<string | null> => {
+  try {
+    const fileExtension = audioFile.uri.split(".").pop() || "mp3";
+    const fileName =
+      audioFile.fileName || `audio_${Date.now()}.${fileExtension}`;
+
+    const formData = new FormData();
+
+    // Append the audio file to the form data
+    formData.append("file", {
+      uri: audioFile.uri,
+      type: `audio/${fileExtension}`,
+      name: fileName,
+    } as any);
+
+    // Use the appropriate preset for audio files
+    formData.append("upload_preset", "user_profiles");
+    formData.append("cloud_name", "dvjr6r50f");
+    formData.append("api_key", "159348833879711");
+
+    // Add audio duration metadata if available
+    if (audioFile.duration) {
+      formData.append(
+        "context",
+        JSON.stringify({
+          custom: { duration: audioFile.duration },
+        })
+      );
+    }
+
+    // Use the auto endpoint to let Cloudinary detect the resource type
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/dvjr6r50f/auto/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const responseJson = await response.json();
+    if (responseJson?.secure_url) return responseJson.secure_url;
+    return null;
+  } catch (error) {
+    console.error(`Audio upload failed for ${audioFile.uri}`, error);
+
+    if (retryCount < MAX_RETRIES) {
+      console.log(`Retrying upload (${retryCount + 1}/${MAX_RETRIES})...`);
+      return uploadAudioToCloudinary(audioFile, retryCount + 1);
+    } else {
+      console.warn(
+        `Upload failed after ${MAX_RETRIES} attempts`,
+        audioFile.uri
+      );
+      return null;
+    }
+  }
+};

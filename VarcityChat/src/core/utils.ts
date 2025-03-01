@@ -83,6 +83,7 @@ export const convertToGiftedChatMessage = (
     user: {
       _id: message.sender,
     },
+    audio: message?.audio,
     mediaUrls: message.mediaUrls || [],
     sent: message.deliveryStatus === "sent",
     received: message.deliveryStatus === "delivered",

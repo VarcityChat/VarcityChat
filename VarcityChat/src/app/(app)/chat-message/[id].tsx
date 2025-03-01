@@ -38,7 +38,7 @@ import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
-import { ChatInput } from "@/components/chats/chat-input";
+import { CustomSend } from "@/components/chats/custom-send";
 import { ChatFooter } from "@/components/chats/chat-footer";
 import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
@@ -50,6 +50,8 @@ import { UploadingImage } from "@/types/chat";
 import { ImagePickerAsset } from "expo-image-picker";
 import { useToast } from "@/core/hooks/use-toast";
 import { useColorScheme } from "nativewind";
+import { ChatInput } from "@/components/chats/chat-input";
+import { useAudioUpload } from "@/core/hooks/chatHooks/use-audio-upload";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -75,10 +77,12 @@ export default function ChatMessage() {
     userId: user!._id,
     receiverId: `${activeChat?.receiver!._id}`,
   });
+  const { handleUploadAudio, handleCancelAudioUpload } = useAudioUpload();
 
   const messageContainerRef = useRef<FlatList>(null);
   const swipeableRef = useRef<Swipeable | null>(null);
 
+  const [isRecording, setIsRecording] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [text, setText] = useState("");
@@ -110,6 +114,7 @@ export default function ChatMessage() {
         }
       });
       setUploadingImages([]);
+      handleCancelAudioUpload();
       dispatch(resetActiveChat());
     };
   }, []);
@@ -169,9 +174,33 @@ export default function ChatMessage() {
         receiver: activeChat!.receiver!._id,
         mediaUrls,
       } as unknown as ExtendedMessage,
-      conversationId as string
+      `${conversationId}`
     );
     setUploadingImages([]);
+  };
+
+  const handleAudioSend = async (audioUri: string) => {
+    try {
+      const result = await handleUploadAudio(audioUri);
+      if (result && result.url) {
+        sendMessage(
+          {
+            conversationId: conversationId as string,
+            content: "[Voice Message]",
+            sender: user!._id,
+            receiver: activeChat!.receiver!._id,
+            audio: result.url,
+          } as unknown as ExtendedMessage,
+          `${conversationId}`
+        );
+      }
+    } catch (error) {
+      showToast({
+        type: "error",
+        text1: "Error",
+        text2: "An error occurred when uploading the audio",
+      });
+    }
   };
 
   const handleImageSelected = async (images: ImagePickerAsset[]) => {
@@ -272,9 +301,11 @@ export default function ChatMessage() {
         maxComposerHeight: 100,
         timeTextStyle: { right: { color: "gray" }, left: { color: "grey" } },
         renderSend: (props: SendProps<IMessage>) => (
-          <ChatInput
+          <CustomSend
             text={text}
             sendProps={props}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
             uploadingImages={uploadingImages}
             onImageSelected={handleImageSelected}
           />
@@ -286,6 +317,7 @@ export default function ChatMessage() {
         scrollToBottom: true,
         infiniteScroll: true,
         loadEarlier: hasMoreMessages,
+        maxInputLength: 2000,
         onLoadEarlier: loadEarlier,
         renderChatEmpty: () => (isSyncing ? null : <ChatEmptyComponent />),
         renderChatFooter: () => (
@@ -295,11 +327,11 @@ export default function ChatMessage() {
           />
         ),
         renderInputToolbar: (props) => (
-          <InputToolbar
+          <ChatInput
             {...props}
-            containerStyle={{
-              backgroundColor: isDark ? colors.black : colors.white,
-            }}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            onSend={handleAudioSend}
           />
         ),
         keyboardShouldPersistTaps: "never",
@@ -312,6 +344,7 @@ export default function ChatMessage() {
       isOtherUserTyping,
       isSyncing,
       uploadingImages,
+      isRecording,
     ]
   );
 

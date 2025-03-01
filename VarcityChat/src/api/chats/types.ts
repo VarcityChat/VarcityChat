@@ -14,6 +14,7 @@ export interface ExtendedMessage extends IMessage {
   receiver: string;
   content?: string;
   mediaUrls?: string[];
+  audio?: string;
   localSequence: number;
   sequence: number;
   mediaType?: "audio" | "video" | "image";
@@ -39,6 +40,7 @@ export interface IChatUser {
   firstname: string;
   lastname: string;
   images: string[];
+  audio?: string;
 }
 export interface IChat {
   _id: string;

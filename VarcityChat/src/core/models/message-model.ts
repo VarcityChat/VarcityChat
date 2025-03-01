@@ -12,6 +12,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
   receiver!: string;
   isQueued!: boolean;
   mediaUrls?: string[];
+  audio?: string;
   localSequence?: number;
   serverId?: string;
   serverSequence?: number;
@@ -30,6 +31,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
       sender: "string",
       receiver: "string",
       mediaUrls: { type: "list", objectType: "string", optional: true },
+      audio: { type: "string", optional: true },
       isQueued: { type: "bool", default: false },
       localSequence: { type: "int", optional: true, indexed: true },
       serverSequence: { type: "int", optional: true, indexed: true },
