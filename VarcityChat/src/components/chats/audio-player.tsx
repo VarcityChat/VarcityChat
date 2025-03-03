@@ -53,13 +53,13 @@ export const AudioPlayer = ({
   });
 
   // Clean up useEffect
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        unregisterPlayer(messageId);
-      }
-    };
-  }, [sound, messageId, unregisterPlayer]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (sound) {
+  //       unregisterPlayer(messageId);
+  //     }
+  //   };
+  // }, [sound, messageId, unregisterPlayer]);
 
   // Handle global playback coordination
   useEffect(() => {

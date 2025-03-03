@@ -1,9 +1,4 @@
-import {
-  ImageBackground,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { Platform, SafeAreaView, StyleSheet } from "react-native";
 import React, {
   useCallback,
   useEffect,
@@ -79,7 +74,7 @@ export default function ChatMessage() {
     receiverId: `${activeChat?.receiver!._id}`,
   });
   const { handleUploadAudio, handleCancelAudioUpload } = useAudioUpload();
-  // const { releaseUnusedPlayers } = useAudioPlayer();
+  const { stopAllPlayers } = useAudioPlayer();
 
   const messageContainerRef = useRef<FlatList>(null);
   const swipeableRef = useRef<Swipeable | null>(null);
@@ -118,7 +113,7 @@ export default function ChatMessage() {
       });
       setUploadingImages([]);
       handleCancelAudioUpload();
-      // releaseUnusedPlayers();
+      stopAllPlayers();
       dispatch(resetActiveChat());
     };
   }, []);

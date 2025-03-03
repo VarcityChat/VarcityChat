@@ -12,6 +12,7 @@ interface AudioContextType {
   currentPlayingId: string | null;
   setCurrentPlayingId: (id: string | null) => void;
   stopCurrentPlaying: () => void;
+  stopAllPlayers: () => void;
   registerPlayer: (id: string, sound: Audio.Sound) => void;
   unregisterPlayer: (id: string) => void;
   releaseUnusedPlayers: () => void;
@@ -62,10 +63,43 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentPlayingId(null);
   };
 
+  const stopAllPlayers = useCallback(async () => {
+    // First, stop the current playing audio
+    if (currentPlayingId) {
+      await stopCurrentPlaying();
+    }
+
+    const stopPromises: Promise<void>[] = [];
+    soundsRef.current.forEach((sound, id) => {
+      stopPromises.push(
+        sound
+          .getStatusAsync()
+          .then((status) => {
+            if (status.isLoaded) {
+              if (status.isPlaying) {
+                sound.pauseAsync();
+              }
+              sound.unloadAsync();
+            }
+            return Promise.resolve();
+          })
+          .catch((err) => {
+            console.error(`Error stopping sound ${id}`, err);
+            soundsRef.current.delete(id);
+            return Promise.resolve();
+          })
+      );
+    });
+
+    // Wait for all pause operations to complete
+    await Promise.all(stopPromises);
+    setCurrentPlayingId(null);
+  }, [currentPlayingId, stopCurrentPlaying]);
+
   // release unused players to save memory
   const releaseUnusedPlayers = useCallback(() => {
     const now = Date.now();
-    const THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes
+    const THRESHOLD_MS = 5 * 60 * 1000; // 3 minutes
 
     for (const [id, timestamp] of lastPlayedTimestamps.current.entries()) {
       if (now - timestamp > THRESHOLD_MS && id !== currentPlayingId) {
@@ -87,6 +121,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         currentPlayingId,
         setCurrentPlayingId,
         stopCurrentPlaying,
+        stopAllPlayers,
         registerPlayer,
         unregisterPlayer,
         releaseUnusedPlayers,
