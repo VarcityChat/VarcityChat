@@ -52,6 +52,7 @@ import { useToast } from "@/core/hooks/use-toast";
 import { useColorScheme } from "nativewind";
 import { ChatInput } from "@/components/chats/chat-input";
 import { useAudioUpload } from "@/core/hooks/chatHooks/use-audio-upload";
+import { useAudioPlayer } from "@/context/AudioPlayerContext";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
@@ -78,6 +79,7 @@ export default function ChatMessage() {
     receiverId: `${activeChat?.receiver!._id}`,
   });
   const { handleUploadAudio, handleCancelAudioUpload } = useAudioUpload();
+  // const { releaseUnusedPlayers } = useAudioPlayer();
 
   const messageContainerRef = useRef<FlatList>(null);
   const swipeableRef = useRef<Swipeable | null>(null);
@@ -105,6 +107,7 @@ export default function ChatMessage() {
     }
   }, [conversationId, isConnected]);
 
+  // Chats screen cleanup
   useEffect(() => {
     return () => {
       // Cancel all ongoing uploads
@@ -115,12 +118,12 @@ export default function ChatMessage() {
       });
       setUploadingImages([]);
       handleCancelAudioUpload();
+      // releaseUnusedPlayers();
       dispatch(resetActiveChat());
     };
   }, []);
 
   useEffect(() => {
-    // update conversation unread count for current authenticated user
     socket?.emit("mark-conversation-as-read", {
       conversationId: conversationId as string,
       userId: user?._id,

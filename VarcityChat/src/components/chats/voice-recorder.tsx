@@ -15,6 +15,7 @@ import { useColorScheme } from "nativewind";
 import { StyleSheet } from "react-native";
 import { formatDuration } from "@/core/utils";
 import SendSvg from "@/ui/icons/chat/send-svg";
+import { IOSOutputFormat } from "expo-av/build/Audio";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -102,7 +103,15 @@ export const VoiceRecorder = ({
 
       const newRecording = new Audio.Recording();
       setRecording(newRecording);
-      await newRecording.prepareToRecordAsync();
+      const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
+      await newRecording.prepareToRecordAsync({
+        android,
+        ios: {
+          ...ios,
+          extension: ".mp4",
+          outputFormat: IOSOutputFormat.MPEG4AAC,
+        },
+      } as Audio.RecordingOptions);
       await newRecording.startAsync();
 
       setIsRecording(true);

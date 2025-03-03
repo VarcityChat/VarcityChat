@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { Audio, AVPlaybackStatus } from "expo-av";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -12,6 +12,7 @@ import { View, Text, TouchableOpacity } from "@/ui";
 import { FontAwesome } from "@expo/vector-icons";
 import { formatDuration } from "@/core/utils";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
+import { useToast } from "@/core/hooks/use-toast";
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -24,15 +25,17 @@ export const AudioPlayer = ({
   isSender,
   messageId,
 }: AudioPlayerProps) => {
+  const { showToast } = useToast();
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 
-  // Get audio context
   const {
     currentPlayingId,
     setCurrentPlayingId,
@@ -43,130 +46,220 @@ export const AudioPlayer = ({
 
   const progressWidth = useSharedValue(0);
 
-  // Progress animation
   const progressStyle = useAnimatedStyle(() => {
     return {
       width: `${progressWidth.value}%`,
     };
   });
 
-  // Load the sound
+  // Clean up useEffect
   useEffect(() => {
-    loadSound();
     return () => {
       if (sound) {
         unregisterPlayer(messageId);
-        sound.unloadAsync();
       }
     };
-  }, [audioUrl]);
+  }, [sound, messageId, unregisterPlayer]);
 
   // Handle global playback coordination
   useEffect(() => {
     if (currentPlayingId && currentPlayingId !== messageId && isPlaying) {
-      sound?.pauseAsync().then(() => {
-        setIsPlaying(false);
-      });
+      sound
+        ?.pauseAsync()
+        .then(() => {
+          setIsPlaying(false);
+        })
+        .catch((error) =>
+          console.error("Error pausing current player:", error)
+        );
     }
-  }, [currentPlayingId, messageId, isPlaying]);
+  }, [currentPlayingId, messageId, isPlaying, sound]);
 
   // Update progress during playback
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+  // useEffect(() => {
+  //   let interval: NodeJS.Timeout | null = null;
 
-    if (isPlaying) {
-      interval = setInterval(async () => {
-        if (sound) {
-          const status = await sound.getStatusAsync();
-          if (status.isLoaded) {
-            setPosition(status.positionMillis / 1000);
-            const progress =
-              (status.positionMillis / status.durationMillis!) * 100;
-            progressWidth.value = withTiming(progress, { duration: 100 });
+  //   if (isPlaying) {
+  //     interval = setInterval(async () => {
+  //       if (sound) {
+  //         const status = await sound.getStatusAsync();
+  //         if (status.isLoaded) {
+  //           setPosition(status.positionMillis / 1000);
+  //           const progress =
+  //             (status.positionMillis / status.durationMillis!) * 100;
+  //           progressWidth.value = withTiming(progress, { duration: 100 });
+  //         }
+  //       }
+  //     }, 100);
+  //   }
 
-            if (status.didJustFinish) {
-              setIsPlaying(false);
-              setCurrentPlayingId(null);
-              setPosition(0);
-              progressWidth.value = withTiming(0, { duration: 300 });
-              await sound.setPositionAsync(0);
-            }
-          }
-        }
-      }, 100);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isPlaying, sound]);
-
-  // Load the audio file
-  const loadSound = async () => {
-    setIsLoading(true);
-    try {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl },
-        { shouldPlay: false },
-        updateSoundStatus
-      );
-      setSound(newSound);
-
-      // Register this player
-      registerPlayer(messageId, newSound);
-
-      // Get and set initial duration
-      const status = await newSound.getStatusAsync();
-      if (status.isLoaded) {
-        setDuration(status.durationMillis! / 1000);
-      }
-    } catch (error) {
-      console.error("Error loading audio:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //   return () => {
+  //     if (interval) {
+  //       clearInterval(interval);
+  //     }
+  //   };
+  // }, [isPlaying, sound]);
 
   // Update sound status callback
   const updateSoundStatus = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       setIsPlaying(status.isPlaying);
-      if (status.didJustFinish) {
+
+      setPosition(status.positionMillis / 1000);
+      const progress = status.durationMillis
+        ? (status.positionMillis / status.durationMillis) * 100
+        : 0;
+      progressWidth.value = withTiming(progress, { duration: 100 });
+
+      if (
+        status.didJustFinish ||
+        status.positionMillis >= status.durationMillis! - 100
+      ) {
         setIsPlaying(false);
         setCurrentPlayingId(null);
         setPosition(0);
-        progressWidth.value = withTiming(0, { duration: 300 });
+        progressWidth.value = withTiming(0, { duration: 200 });
+
+        // Reset the sound position but doesn't use await here
+        if (sound) {
+          sound.stopAsync().catch((err) => {
+            console.error("Position reset error:", err);
+          });
+        }
       }
     }
   };
 
-  // Play/pause toggle
-  const togglePlayback = async () => {
-    if (!sound) return;
+  const loadSound = useCallback(async () => {
+    if (isLoaded || isLoading) return;
 
-    if (isPlaying) {
-      await sound.pauseAsync();
-      setCurrentPlayingId(null);
-      // setIsPlaying(false);
-    } else {
-      if (currentPlayingId !== messageId) {
-        await stopCurrentPlaying();
-      }
+    setIsLoading(true);
+    setLoadError(false);
 
+    try {
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
       });
 
-      await sound.playAsync();
-      setCurrentPlayingId(messageId);
-      // setIsPlaying(true);
+      const soundObject = new Audio.Sound();
+      soundObject.setOnPlaybackStatusUpdate(updateSoundStatus);
+
+      await soundObject.loadAsync(
+        { uri: audioUrl },
+        { shouldPlay: false, progressUpdateIntervalMillis: 100 }
+      );
+
+      const status = await soundObject.getStatusAsync();
+      if (!status.isLoaded) {
+        throw new Error("Audio failed to load");
+      }
+
+      setSound(soundObject);
+      setIsLoaded(true);
+      setDuration(status.durationMillis! / 1000);
+
+      // register with context
+      registerPlayer(messageId, soundObject);
+
+      return soundObject;
+    } catch (error) {
+      console.error("Error loading audio:", error);
+      showToast({
+        type: "error",
+        text1: "Error",
+        text2: "An error occurred when trying to load the audio",
+      });
+      setLoadError(true);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    audioUrl,
+    messageId,
+    isLoaded,
+    isLoading,
+    registerPlayer,
+    updateSoundStatus,
+  ]);
+
+  const togglePlayback = async () => {
+    // if there's an error, retry loading
+    if (loadError) {
+      setLoadError(false);
+      await loadSound();
+      return;
+    }
+
+    // if not loaded, load and play
+    if (!isLoaded) {
+      try {
+        const newSound = await loadSound();
+        if (!newSound) return;
+
+        if (currentPlayingId && currentPlayingId !== messageId) {
+          await stopCurrentPlaying();
+        }
+
+        // play the newly loaded sound
+        setIsPlaying(true);
+        setCurrentPlayingId(messageId);
+        await newSound.playAsync();
+      } catch (error) {
+        showToast({
+          type: "error",
+          text1: "Error",
+          text2: "Error loading sound",
+        });
+        setLoadError(true);
+      }
+      return;
+    }
+
+    // Already loaded - toggle play/pause
+    if (!sound) {
+      setIsLoaded(false);
+      return;
+    }
+
+    try {
+      const status = await sound.getStatusAsync();
+
+      if (!status.isLoaded) {
+        setIsLoaded(false);
+        setSound(null);
+        return;
+      }
+
+      if (status.isPlaying) {
+        await sound.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        if (currentPlayingId && currentPlayingId !== messageId) {
+          await stopCurrentPlaying();
+        }
+
+        if (
+          status.positionMillis > 0 &&
+          status.positionMillis >= status.durationMillis! - 100
+        ) {
+          setPosition(0);
+          progressWidth.value = withTiming(0, { duration: 100 });
+          await sound.stopAsync();
+        }
+
+        setIsPlaying(true);
+        setCurrentPlayingId(messageId);
+        await sound.playAsync();
+      }
+    } catch (error) {
+      setIsLoaded(false);
+      setSound(null);
+      setLoadError(true);
     }
   };
 
-  // Ui colors based on sender/receiver
   const getColors = () => {
     if (isSender) {
       return {
@@ -177,11 +270,9 @@ export const AudioPlayer = ({
       };
     } else {
       return {
-        text: isDark ? colors.white : colors.black,
+        text: colors.black,
         progress: colors.primary[400],
-        progressTrack: isDark
-          ? `rgba(255, 255, 255, 0.15)`
-          : "rgba(0, 0, 0, 0.1)",
+        progressTrack: `rgba(0, 0, 0, 0.1)`,
         icon: isDark ? colors.white : colors.black,
       };
     }
@@ -191,25 +282,10 @@ export const AudioPlayer = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.playButton}
-        onPress={() => {
-          if (isLoading) return;
-
-          // Reload the audio if it has not loaded yet
-          if (!sound) {
-            loadSound();
-            console.log("RELOADING THE SOUND:");
-            return;
-          }
-
-          togglePlayback();
-        }}
-        // disabled={isLoading}
-      >
+      <TouchableOpacity style={styles.playButton} onPress={togglePlayback}>
         <FontAwesome
           name={isLoading ? "circle-o-notch" : isPlaying ? "pause" : "play"}
-          size={24}
+          size={20}
           color={uiColors.icon}
         />
       </TouchableOpacity>
@@ -235,7 +311,7 @@ export const AudioPlayer = ({
             {formatDuration(position)}
           </Text>
           <Text style={[styles.timeText, { color: uiColors.text }]}>
-            {formatDuration(duration)}
+            {isLoaded ? formatDuration(duration) : "--:--"}
           </Text>
         </View>
       </View>
