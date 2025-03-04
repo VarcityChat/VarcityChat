@@ -6,6 +6,7 @@ import {
 } from "react-native-gifted-chat";
 import { VoiceRecorder } from "./voice-recorder";
 import { colors } from "@/ui";
+import { useEffect } from "react";
 
 type ChatInputProps = {
   isRecording: boolean;
@@ -18,6 +19,12 @@ export const ChatInput = (
 ) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
+
+  // useEffect(() => {
+  //   if (props.isRecording) {
+  //     props.setIsRecording(false)
+  //   }
+  // }, [props.isRecording])
 
   if (props.isRecording) {
     return (

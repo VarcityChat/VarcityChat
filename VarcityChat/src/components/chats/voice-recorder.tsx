@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Text, View, TouchableOpacity } from "@/ui";
-import { Audio } from "expo-av";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { formatDuration } from "@/core/utils";
 import SendSvg from "@/ui/icons/chat/send-svg";
 import { IOSOutputFormat } from "expo-av/build/Audio";
@@ -42,6 +42,7 @@ export const VoiceRecorder = ({
   const insets = useSafeAreaInsets();
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const wasUnloadedRef = useRef(false);
   const audioLevels = useSharedValue(0);
   const containerHeight = useSharedValue(0);
   const buttonHeight = useSharedValue(0);
@@ -56,8 +57,11 @@ export const VoiceRecorder = ({
     }));
 
   const containerStyle = useAnimatedStyle(() => {
+    const isIOS = Platform.OS === "ios";
     return {
-      height: withTiming(containerHeight.value, { duration: 300 }),
+      height: withTiming(containerHeight.value, {
+        duration: isIOS ? 300 : 50,
+      }),
       opacity: interpolate(containerHeight.value, [0, 44], [0, 1], "clamp"),
     };
   });
@@ -95,10 +99,20 @@ export const VoiceRecorder = ({
   // Start recording function
   const startRecording = async () => {
     try {
+      if (recording) {
+        await recording.stopAndUnloadAsync();
+        setRecording(null);
+      }
+
+      wasUnloadedRef.current = false;
+
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        staysActiveInBackground: false,
       });
 
       const newRecording = new Audio.Recording();
@@ -108,7 +122,7 @@ export const VoiceRecorder = ({
         android,
         ios: {
           ...ios,
-          extension: ".mp4",
+          extension: ".m4a",
           outputFormat: IOSOutputFormat.MPEG4AAC,
         },
       } as Audio.RecordingOptions);
@@ -128,6 +142,7 @@ export const VoiceRecorder = ({
       }, 1000);
     } catch (error) {
       console.log("Failed to start recording:", error);
+      resetRecorder();
     }
   };
 
@@ -166,8 +181,11 @@ export const VoiceRecorder = ({
       }
 
       await recording.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+      wasUnloadedRef.current = true;
       const uri = recording.getURI();
-
       waveOpacity.value = withTiming(0, { duration: 300 });
       setRecording(null);
 
@@ -190,7 +208,17 @@ export const VoiceRecorder = ({
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    if (recording) {
+      try {
+        await recording.stopAndUnloadAsync();
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+        });
+      } catch (error) {
+        console.error("Error stopping recording during cancel", error);
+      }
+    }
     resetRecorder();
     onCancel?.();
   };
@@ -204,6 +232,7 @@ export const VoiceRecorder = ({
     setDuration(0);
     containerHeight.value = 0;
     audioLevels.value = 0;
+    wasUnloadedRef.current = false;
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -212,8 +241,10 @@ export const VoiceRecorder = ({
   };
 
   useEffect(() => {
-    startRecording();
-  }, []);
+    if (isRecording) {
+      startRecording();
+    }
+  }, [isRecording]);
 
   // Clean up on unmonut
   useEffect(() => {
@@ -222,11 +253,14 @@ export const VoiceRecorder = ({
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      if (recording) {
+      if (recording && !wasUnloadedRef.current) {
         recording.stopAndUnloadAsync();
+        Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+        });
       }
     };
-  }, [recording]);
+  }, []);
 
   return (
     <Animated.View
@@ -313,8 +347,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    // height: 40,
-    // marginVertical: 8,
   },
   wave: {
     width: 2,

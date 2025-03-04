@@ -1,11 +1,18 @@
 import { IMessage } from "react-native-gifted-chat";
 import { EntityId } from "@reduxjs/toolkit";
 
+export type DELIVERY_STATUSES =
+  | "sent"
+  | "delivered"
+  | "read"
+  | "failed"
+  | "pending";
+
 // Extend GiftedChat's IMessage with our custom field
 export interface ExtendedMessage extends IMessage {
   _id: string;
   conversationId: string;
-  deliveryStatus: "sent" | "delivered" | "read" | "failed" | "pending";
+  deliveryStatus: DELIVERY_STATUSES;
   localId?: string; // For optimistic updates
   deliveredAt?: number;
   readAt?: number;
@@ -18,6 +25,7 @@ export interface ExtendedMessage extends IMessage {
   localSequence: number;
   sequence: number;
   mediaType?: "audio" | "video" | "image";
+  // isAudioUploading: "bo"
   reply?: {
     messageId: string;
     content: string;

@@ -1,5 +1,10 @@
 import { StyleSheet } from "react-native";
-import { Audio, AVPlaybackStatus } from "expo-av";
+import {
+  Audio,
+  AVPlaybackStatus,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from "expo-av";
 import { useCallback, useEffect, useState } from "react";
 import Animated, {
   useAnimatedStyle,
@@ -13,17 +18,20 @@ import { FontAwesome } from "@expo/vector-icons";
 import { formatDuration } from "@/core/utils";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { useToast } from "@/core/hooks/use-toast";
+import { DELIVERY_STATUSES } from "@/api/chats/types";
 
 interface AudioPlayerProps {
   audioUrl: string;
   isSender: boolean;
   messageId: string;
+  deliveryStatus: DELIVERY_STATUSES;
 }
 
 export const AudioPlayer = ({
   audioUrl,
   isSender,
   messageId,
+  deliveryStatus,
 }: AudioPlayerProps) => {
   const { showToast } = useToast();
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -41,7 +49,6 @@ export const AudioPlayer = ({
     setCurrentPlayingId,
     stopCurrentPlaying,
     registerPlayer,
-    unregisterPlayer,
   } = useAudioPlayer();
 
   const progressWidth = useSharedValue(0);
@@ -51,15 +58,6 @@ export const AudioPlayer = ({
       width: `${progressWidth.value}%`,
     };
   });
-
-  // Clean up useEffect
-  // useEffect(() => {
-  //   return () => {
-  //     if (sound) {
-  //       unregisterPlayer(messageId);
-  //     }
-  //   };
-  // }, [sound, messageId, unregisterPlayer]);
 
   // Handle global playback coordination
   useEffect(() => {
@@ -74,31 +72,6 @@ export const AudioPlayer = ({
         );
     }
   }, [currentPlayingId, messageId, isPlaying, sound]);
-
-  // Update progress during playback
-  // useEffect(() => {
-  //   let interval: NodeJS.Timeout | null = null;
-
-  //   if (isPlaying) {
-  //     interval = setInterval(async () => {
-  //       if (sound) {
-  //         const status = await sound.getStatusAsync();
-  //         if (status.isLoaded) {
-  //           setPosition(status.positionMillis / 1000);
-  //           const progress =
-  //             (status.positionMillis / status.durationMillis!) * 100;
-  //           progressWidth.value = withTiming(progress, { duration: 100 });
-  //         }
-  //       }
-  //     }, 100);
-  //   }
-
-  //   return () => {
-  //     if (interval) {
-  //       clearInterval(interval);
-  //     }
-  //   };
-  // }, [isPlaying, sound]);
 
   // Update sound status callback
   const updateSoundStatus = (status: AVPlaybackStatus) => {
@@ -140,6 +113,10 @@ export const AudioPlayer = ({
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
       });
 
       const soundObject = new Audio.Sound();
@@ -147,8 +124,15 @@ export const AudioPlayer = ({
 
       await soundObject.loadAsync(
         { uri: audioUrl },
-        { shouldPlay: false, progressUpdateIntervalMillis: 100 }
+        {
+          shouldPlay: false,
+          progressUpdateIntervalMillis: 100,
+          volume: 1.0,
+          androidImplementation: "MediaPlayer",
+        }
       );
+
+      await soundObject.setVolumeAsync(1.0);
 
       const status = await soundObject.getStatusAsync();
       if (!status.isLoaded) {

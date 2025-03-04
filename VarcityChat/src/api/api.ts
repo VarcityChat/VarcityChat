@@ -3,7 +3,7 @@ import { RootState } from "@/core/store/store";
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import axios from "axios";
 
-const BASE_URL = "https://34fb-105-112-176-88.ngrok-free.app";
+const BASE_URL = "https://ec2b-102-90-99-237.ngrok-free.app";
 export const BASE_ENDPOINT = `${BASE_URL}/api/v1`;
 export const BASE_SOCKET_ENDPOINT = BASE_URL;
 

@@ -7,7 +7,7 @@ export class MessageSchema extends Realm.Object<ExtendedMessage> {
   conversationId!: string;
   content!: string;
   createdAt?: Date;
-  deliveryStatus!: "pending" | "sent" | "delivered" | "read";
+  deliveryStatus!: "pending" | "sent" | "delivered" | "read" | "failed";
   sender!: string;
   receiver!: string;
   isQueued!: boolean;

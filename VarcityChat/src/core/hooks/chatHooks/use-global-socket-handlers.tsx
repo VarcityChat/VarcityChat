@@ -11,7 +11,7 @@ export const useGlobalSocketHandlers = (
   isConnected: boolean
 ) => {
   const { user } = useAuth();
-  const { addMessageToLocalRealm, markUserMessagesInChatAsRead } =
+  const { addServerMessageToRealm, markUserMessagesInChatAsRead } =
     useChatMessages();
   const {
     updateChatOrder,
@@ -32,7 +32,7 @@ export const useGlobalSocketHandlers = (
 
   // Handle incoming socket message from server
   const handleNewMessage = (message: ExtendedMessage) => {
-    addMessageToLocalRealm(message);
+    addServerMessageToRealm(message);
     updateChatOrder(message);
     updateUnreadChatCount(message.conversationId, activeChatRef.current);
 

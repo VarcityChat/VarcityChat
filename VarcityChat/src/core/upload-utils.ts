@@ -179,7 +179,11 @@ export const uploadToCloudinarySigned = async (
 
 // Audio Upload
 export const uploadAudioToCloudinary = async (
-  audioFile: { uri: string; fileName?: string; duration?: number },
+  audioFile: {
+    uri: string;
+    abortController: AbortController;
+    fileName?: string;
+  },
   retryCount = 0
 ): Promise<string | null> => {
   try {
@@ -200,16 +204,6 @@ export const uploadAudioToCloudinary = async (
     formData.append("upload_preset", "user_profiles");
     formData.append("cloud_name", "dvjr6r50f");
     formData.append("api_key", "159348833879711");
-
-    // Add audio duration metadata if available
-    if (audioFile.duration) {
-      formData.append(
-        "context",
-        JSON.stringify({
-          custom: { duration: audioFile.duration },
-        })
-      );
-    }
 
     // Use the auto endpoint to let Cloudinary detect the resource type
     const response = await fetch(

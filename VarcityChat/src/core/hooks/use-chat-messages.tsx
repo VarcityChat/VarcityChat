@@ -15,6 +15,20 @@ export const useChatMessages = () => {
   const { socket, isConnected } = useSocket();
   const realm = useRealm();
 
+  const generateLocalId = () => new BSON.ObjectID();
+
+  const getNewMessageSequence = useCallback(
+    (chatId: string) => {
+      const lastMessageCounter =
+        realm
+          .objects<MessageSchema>("Message")
+          .filtered("conversationId==$0", chatId)
+          .max("localSequence") ?? 0;
+      return Number(lastMessageCounter) + 1;
+    },
+    [realm]
+  );
+
   const deleteAllMessages = useCallback(() => {
     realm.write(() => {
       realm.delete(realm.objects("Message"));
@@ -93,7 +107,7 @@ export const useChatMessages = () => {
     [realm]
   );
 
-  const addMessageToLocalRealm = useCallback(
+  const addServerMessageToRealm = useCallback(
     (message: ExtendedMessage) => {
       // Check if message with the same localId exists
       const messageExists = realm
@@ -120,7 +134,6 @@ export const useChatMessages = () => {
     },
     [realm]
   );
-
   const markUserMessagesInChatAsRead = useCallback(
     (conversationId: string) => {
       const unreadMessagesInConversation = realm
@@ -144,16 +157,8 @@ export const useChatMessages = () => {
   const sendMessage = useCallback(
     async (message: ExtendedMessage, chatId: string) => {
       // Generate a new local id for realm
-      const localId = new BSON.ObjectID();
-
-      // Get the highest local sequence
-      let lastMessageCounter =
-        realm
-          .objects<MessageSchema>("Message")
-          .filtered("conversationId == $0", chatId)
-          .max("localSequence") ?? 0;
-
-      const localSequence = Number(lastMessageCounter) + 1;
+      const localId = generateLocalId();
+      const localSequence = getNewMessageSequence(chatId);
 
       // optimistic update
       realm.write(() => {
@@ -225,12 +230,95 @@ export const useChatMessages = () => {
     [realm]
   );
 
+  const addAudioMessageToRealm = useCallback(
+    (message: ExtendedMessage, localId: BSON.ObjectID, chatId: string) => {
+      const localSequence = getNewMessageSequence(chatId);
+
+      // optimistic update
+      realm.write(() => {
+        realm.create("Message", {
+          ...message,
+          _id: localId,
+          conversationId: chatId,
+          deliveryStatus: "pending",
+          createdAt: new Date(),
+          isQueued: !isConnected || socket === null,
+          localSequence,
+        });
+      });
+    },
+    [realm, socket, isConnected]
+  );
+
+  const updateAudioMessage = useCallback(
+    (messageId: BSON.ObjectID, cloudinaryUrl: string) => {
+      const message = realm.objectForPrimaryKey<MessageSchema>(
+        "Message",
+        messageId
+      );
+      if (!message || message.deliveryStatus === "sent") return;
+
+      // update the audio url to the cloud version locally
+      realm.write(() => {
+        message.audio = cloudinaryUrl;
+      });
+
+      // after updating, send the local message to the server
+      if (isConnected && socket) {
+        socket.emit(
+          "new-message",
+          {
+            conversationId: message.conversationId,
+            content: message.content,
+            sender: message.sender,
+            receiver: message.receiver,
+            audio: message.audio,
+            localId: message._id,
+            localSequence: message.localSequence,
+          },
+          (ack: IChatAck) => {
+            if (ack.success) {
+              updateChatMessage(
+                message._id,
+                "sent",
+                ack.serverId,
+                ack.serverSequence,
+                ack.messageCreatedAt
+              );
+            }
+          }
+        );
+      } else {
+        markAudioUploadFailed(message._id);
+      }
+    },
+    [realm, socket, isConnected]
+  );
+
+  const markAudioUploadFailed = useCallback(
+    (messageId: BSON.ObjectID) => {
+      const message = realm.objectForPrimaryKey<MessageSchema>(
+        "Message",
+        messageId
+      );
+      if (!message) return;
+      realm.write(() => {
+        message.deliveryStatus = "failed";
+      });
+    },
+    [realm]
+  );
+
   return {
+    generateLocalId,
     sendMessage,
-    addMessageToLocalRealm,
+    addServerMessageToRealm,
+    addAudioMessageToRealm,
     markUserMessagesInChatAsRead,
     deleteAllMessages,
     syncMessagesFromBackend,
+    updateAudioMessage,
+    markAudioUploadFailed,
     isSyncing,
   };
 };

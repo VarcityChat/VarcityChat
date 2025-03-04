@@ -83,7 +83,7 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const realm = useRealm();
-  console.log(realm.path);
+  console.log("\nREALM PATH:", realm.path);
 
   useEffect(() => {
     const checkAuth = async () => {

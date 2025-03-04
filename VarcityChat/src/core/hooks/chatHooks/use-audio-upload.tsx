@@ -24,6 +24,7 @@ export const useAudioUpload = () => {
     try {
       const uploadUrl = await uploadAudioToCloudinary({
         uri: audioUri,
+        abortController: newAudio.abortController,
       });
 
       if (uploadUrl) {
@@ -33,7 +34,11 @@ export const useAudioUpload = () => {
           progress: 100,
           error: false,
         }));
-        return { success: true, url: uploadUrl };
+        return {
+          success: true,
+          url: uploadUrl,
+          message: "Success",
+        };
       }
       return { success: false };
     } catch (error: any) {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { colors } from "@/ui";
-import { ExtendedMessage } from "@/api/chats/types";
+import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { memo } from "react";
 import { View, Image } from "@/ui";
@@ -13,7 +13,11 @@ const { width } = Dimensions.get("window");
 const MAX_IMAGE_WIDTH = width * 0.6;
 
 const CustomMessageBubble = memo(
-  (props: BubbleProps<IMessage & { mediaUrls: string[] }>) => {
+  (
+    props: BubbleProps<
+      IMessage & { mediaUrls: string[]; deliveryStatus: DELIVERY_STATUSES }
+    >
+  ) => {
     const [isViewerVisible, setIsViewerVisible] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -25,6 +29,15 @@ const CustomMessageBubble = memo(
     const renderTicks = (message: ExtendedMessage) => {
       if (!message || !message.user) return null;
       if (message.user._id !== props?.user?._id) return null;
+
+      if (message.deliveryStatus === "failed") {
+        return (
+          <View style={styles.tickView}>
+            <Ionicons name="close" size={12} color="red" />
+          </View>
+        );
+      }
+
       return (
         <View style={styles.tickView}>
           {!!message.sent && (
@@ -113,7 +126,11 @@ const CustomMessageBubble = memo(
             renderMessageAudio={(props) => {
               return (
                 <AudioMessageBubble
-                  message={props.currentMessage}
+                  message={
+                    props.currentMessage as IMessage & {
+                      deliveryStatus: DELIVERY_STATUSES;
+                    }
+                  }
                   isSender={props.position === "right"}
                 />
               );

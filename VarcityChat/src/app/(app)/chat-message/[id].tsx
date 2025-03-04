@@ -16,12 +16,13 @@ import {
   SendProps,
 } from "react-native-gifted-chat";
 import { colors, TouchableOpacity, View } from "@/ui";
+import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import { MessageRequest } from "@/components/chats/message-request";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
-import { ExtendedMessage } from "@/api/chats/types";
+import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { useAuth } from "@/core/hooks/use-auth";
 import { useQuery } from "@realm/react";
 import { useSocket } from "@/context/useSocketContext";
@@ -67,7 +68,15 @@ export default function ChatMessage() {
   const isConversationRejected = activeChat?.chat.status === "rejected";
 
   const { updateChatCount } = useChats();
-  const { sendMessage, syncMessagesFromBackend, isSyncing } = useChatMessages();
+  const {
+    generateLocalId,
+    sendMessage,
+    syncMessagesFromBackend,
+    addAudioMessageToRealm,
+    updateAudioMessage,
+    markAudioUploadFailed,
+    isSyncing,
+  } = useChatMessages();
   const { isOtherUserTyping, handleTyping, stopTyping } = useTypingStatus({
     conversationId: `${conversationId}`,
     userId: user!._id,
@@ -105,6 +114,11 @@ export default function ChatMessage() {
   // Chats screen cleanup
   useEffect(() => {
     return () => {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+      });
+
       // Cancel all ongoing uploads
       uploadingImages.forEach((img) => {
         if (img.abortController) {
@@ -178,21 +192,35 @@ export default function ChatMessage() {
   };
 
   const handleAudioSend = async (audioUri: string) => {
+    const localId = generateLocalId();
     try {
+      // optimistic update
+      addAudioMessageToRealm(
+        {
+          conversationId: `${conversationId}`,
+          sender: user!._id,
+          receiver: activeChat!.receiver!._id,
+          audio: audioUri,
+          content: "",
+        } as unknown as ExtendedMessage,
+        localId,
+        `${conversationId}`
+      );
+
+      // Start the upload process
       const result = await handleUploadAudio(audioUri);
-      if (result && result.url) {
-        sendMessage(
-          {
-            conversationId: conversationId as string,
-            content: "",
-            sender: user!._id,
-            receiver: activeChat!.receiver!._id,
-            audio: result.url,
-          } as unknown as ExtendedMessage,
-          `${conversationId}`
-        );
+      if (result && result?.url) {
+        updateAudioMessage(localId, result.url);
+      } else {
+        markAudioUploadFailed(localId);
+        showToast({
+          type: "error",
+          text1: "Error",
+          text2: "An error occurred during audio upload",
+        });
       }
     } catch (error) {
+      markAudioUploadFailed(localId);
       showToast({
         type: "error",
         text1: "Error",
@@ -286,7 +314,12 @@ export default function ChatMessage() {
         onSend: (messages: any) => onSend(messages),
         user: { _id: user!._id },
         renderBubble: (
-          props: BubbleProps<IMessage & { mediaUrls: string[] }>
+          props: BubbleProps<
+            IMessage & {
+              mediaUrls: string[];
+              deliveryStatus: DELIVERY_STATUSES;
+            }
+          >
         ) => <CustomMessageBubble {...props} />,
         onInputTextChanged: (text) => {
           setText(text);
@@ -343,6 +376,7 @@ export default function ChatMessage() {
       isSyncing,
       uploadingImages,
       isRecording,
+      handleAudioSend,
     ]
   );
 

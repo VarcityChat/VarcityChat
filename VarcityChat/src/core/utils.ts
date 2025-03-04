@@ -1,4 +1,4 @@
-import { ExtendedMessage } from "@/api/chats/types";
+import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { IMessage } from "react-native-gifted-chat";
 
 export const trimText = (text: string, maxLength: number = 20) => {
@@ -88,7 +88,10 @@ export const formatDuration = (seconds: number) => {
 
 export const convertToGiftedChatMessage = (
   message: ExtendedMessage
-): IMessage & { mediaUrls: string[] } => {
+): IMessage & {
+  mediaUrls: string[];
+  deliveryStatus: DELIVERY_STATUSES;
+} => {
   return {
     _id: message._id.toString(),
     text: message.content || "",
@@ -101,6 +104,7 @@ export const convertToGiftedChatMessage = (
     sent: message.deliveryStatus === "sent",
     received: message.deliveryStatus === "delivered",
     pending: message.deliveryStatus === "pending",
+    deliveryStatus: message.deliveryStatus,
   };
 };
 
