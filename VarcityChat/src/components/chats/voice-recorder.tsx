@@ -8,11 +8,10 @@ import Animated, {
   withSequence,
   interpolate,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
-import { Platform, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { formatDuration } from "@/core/utils";
 import { IOSOutputFormat } from "expo-av/build/Audio";
 import SendSvg from "@/ui/icons/chat/send-svg";
@@ -41,7 +40,6 @@ export const VoiceRecorder = ({
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
-  const insets = useSafeAreaInsets();
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const wasUnloadedRef = useRef(false);
@@ -130,19 +128,9 @@ export const VoiceRecorder = ({
   // Start recording function
   const startRecording = async () => {
     try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-      }
       wasUnloadedRef.current = false;
 
       await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        staysActiveInBackground: false,
-      });
 
       const newRecording = new Audio.Recording();
       const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
@@ -151,6 +139,14 @@ export const VoiceRecorder = ({
       setIsRecording(true);
       containerHeight.value = VOICE_RECORDER_HEIGHT;
       waveOpacity.value = withTiming(1, { duration: 300 });
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        staysActiveInBackground: false,
+      });
 
       await newRecording.prepareToRecordAsync({
         android,
@@ -210,8 +206,8 @@ export const VoiceRecorder = ({
     if (recording) {
       try {
         console.log("Canceling the recording");
-        wasUnloadedRef.current = true;
         await recording.stopAndUnloadAsync();
+        wasUnloadedRef.current = true;
 
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
@@ -285,28 +281,6 @@ export const VoiceRecorder = ({
           }
         })();
       }
-
-      // resetRecorder();
-
-      // if (recording && !wasUnloadedRef.current) {
-
-      // (async () => {
-      //   try {
-      //     await recording.stopAndUnloadAsync();
-      //     resetRecorder();
-      //     wasUnloadedRef.current = true;
-      //     await Audio.setAudioModeAsync({
-      //       allowsRecordingIOS: false,
-      //       staysActiveInBackground: false,
-      //       playsInSilentModeIOS: false,
-      //     });
-      //   } catch (error) {
-      //     console.error("Error cleaning up recording:", error);
-      //   }
-      // })();
-
-      // console.log("RESETTING THE RECORDER");
-      // }
     };
   }, [recording]);
 

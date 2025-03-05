@@ -11,11 +11,9 @@ import {
   GiftedChat,
   GiftedChatProps,
   IMessage,
-  InputToolbar,
-  RenderMessageTextProps,
   SendProps,
 } from "react-native-gifted-chat";
-import { colors, TouchableOpacity, View } from "@/ui";
+import { colors, View } from "@/ui";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
@@ -198,6 +196,10 @@ export default function ChatMessage() {
   };
 
   const handleAudioSend = async (audioUri: string) => {
+    messageContainerRef?.current?.scrollToOffset({
+      offset: 0,
+      animated: true,
+    });
     const localId = generateLocalId();
     try {
       // optimistic update
