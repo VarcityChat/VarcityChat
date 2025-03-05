@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { SendProps, IMessage } from "react-native-gifted-chat";
 import { View, TouchableOpacity } from "@/ui";
 import MicrophoneSvg from "@/ui/icons/chat/microphone-svg";
@@ -9,6 +9,11 @@ import { UploadingImage } from "@/types/chat";
 import * as ImagePicker from "expo-image-picker";
 
 let renderedCount = 0;
+
+const SEND_ICON = <SendSvg width={30} height={30} />;
+const MICROPHONE_ICON = <MicrophoneSvg />;
+const ATTACHMENT_ICON = <AttachmentSvg />;
+const PICTURE_ICON = <PictureSvg />;
 
 export const CustomSend = memo(
   ({
@@ -27,6 +32,7 @@ export const CustomSend = memo(
     onImageSelected: (images: ImagePicker.ImagePickerAsset[]) => void;
   }) => {
     console.log(`[CustomSend]: ${renderedCount++}`);
+
     const isUploading = uploadingImages.some(
       (img) => img.progress < 100 && !img.error
     );
@@ -38,7 +44,7 @@ export const CustomSend = memo(
     const canSend =
       (text.trim().length > 0 || hasCompletedImages) && !isUploading;
 
-    const handleImageSelection = async () => {
+    const handleImageSelection = useCallback(async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         aspect: [4, 3],
@@ -51,7 +57,7 @@ export const CustomSend = memo(
         // call on image selected in the frontend
         onImageSelected(result.assets);
       }
-    };
+    }, [onImageSelected]);
 
     const handleSend = () => {
       if (canSend) {
@@ -63,9 +69,9 @@ export const CustomSend = memo(
       }
     };
 
-    const handleStartRecording = () => {
+    const handleStartRecording = useCallback(() => {
       setIsRecording(true);
-    };
+    }, [setIsRecording]);
 
     if (isRecording) return null;
 
@@ -78,19 +84,17 @@ export const CustomSend = memo(
             disabled={!canSend}
             activeOpacity={0.4}
           >
-            <SendSvg width={30} height={30} />
+            {SEND_ICON}
           </TouchableOpacity>
         )}
         {text.length === 0 && uploadingImages.length === 0 && (
           <>
             <TouchableOpacity onPress={handleStartRecording}>
-              <MicrophoneSvg />
+              {MICROPHONE_ICON}
             </TouchableOpacity>
-            <TouchableOpacity>
-              <AttachmentSvg />
-            </TouchableOpacity>
+            <TouchableOpacity>{ATTACHMENT_ICON}</TouchableOpacity>
             <TouchableOpacity onPress={handleImageSelection}>
-              <PictureSvg />
+              {PICTURE_ICON}
             </TouchableOpacity>
           </>
         )}

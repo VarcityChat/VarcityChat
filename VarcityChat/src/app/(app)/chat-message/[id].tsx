@@ -206,46 +206,49 @@ export default function ChatMessage() {
     });
   };
 
-  const handleAudioSend = async (audioUri: string) => {
+  const handleAudioSend = (audioUri: string) => {
     messageContainerRef?.current?.scrollToOffset({
       offset: 0,
       animated: true,
     });
-    const localId = generateLocalId();
-    try {
-      // optimistic update
-      addAudioMessageToRealm(
-        {
-          conversationId: `${conversationId}`,
-          sender: user!._id,
-          receiver: activeChat!.receiver!._id,
-          audio: audioUri,
-          content: "",
-        } as unknown as ExtendedMessage,
-        localId,
-        `${conversationId}`
-      );
 
-      // Start the upload process
-      const result = await handleUploadAudio(audioUri);
-      if (result && result?.url) {
-        updateAudioMessage(localId, result.url);
-      } else {
+    InteractionManager.runAfterInteractions(async () => {
+      const localId = generateLocalId();
+      try {
+        // optimistic update
+        addAudioMessageToRealm(
+          {
+            conversationId: `${conversationId}`,
+            sender: user!._id,
+            receiver: activeChat!.receiver!._id,
+            audio: audioUri,
+            content: "",
+          } as unknown as ExtendedMessage,
+          localId,
+          `${conversationId}`
+        );
+
+        // Start the upload process
+        const result = await handleUploadAudio(audioUri);
+        if (result && result?.url) {
+          updateAudioMessage(localId, result.url);
+        } else {
+          markAudioUploadFailed(localId);
+          showToast({
+            type: "error",
+            text1: "Error",
+            text2: "An error occurred during audio upload",
+          });
+        }
+      } catch (error) {
         markAudioUploadFailed(localId);
         showToast({
           type: "error",
           text1: "Error",
-          text2: "An error occurred during audio upload",
+          text2: "An error occurred when uploading the audio",
         });
       }
-    } catch (error) {
-      markAudioUploadFailed(localId);
-      showToast({
-        type: "error",
-        text1: "Error",
-        text2: "An error occurred when uploading the audio",
-      });
-    }
+    });
   };
 
   const handleImageSelected = async (images: ImagePickerAsset[]) => {
