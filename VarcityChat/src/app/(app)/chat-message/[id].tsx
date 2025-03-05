@@ -1,4 +1,9 @@
-import { Platform, SafeAreaView, StyleSheet } from "react-native";
+import {
+  InteractionManager,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
 import React, {
   useCallback,
   useEffect,
@@ -32,7 +37,6 @@ import { AvoidSoftInputView } from "react-native-avoid-softinput";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
-import { CustomSend } from "@/components/chats/custom-send";
 import { ChatFooter } from "@/components/chats/chat-footer";
 import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
@@ -47,11 +51,14 @@ import { useColorScheme } from "nativewind";
 import { ChatInput } from "@/components/chats/chat-input";
 import { useAudioUpload } from "@/core/hooks/chatHooks/use-audio-upload";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
+import { MessageInputContainer } from "@/components/chats/message-input-container";
 
 let renderedCount = 0;
 const MESSAGES_PER_PAGE = 60;
 
 export default function ChatMessage() {
+  console.log(`[ChatMessage]: ${renderedCount++}`);
+
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
@@ -89,7 +96,7 @@ export default function ChatMessage() {
   const [isRecording, setIsRecording] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
-  const [text, setText] = useState("");
+  // const [text, setText] = useState("");
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
 
@@ -170,30 +177,33 @@ export default function ChatMessage() {
     setPage((prev) => prev + 1);
   }, [page, messagesFromRealm.length]);
 
-  const onSend = (messages: IMessage[]) => {
+  const handleSend = (messages: IMessage[]) => {
     messageContainerRef?.current?.scrollToOffset({
       offset: 0,
       animated: true,
     });
-    stopTyping();
 
-    // Check if they are images
-    const mediaUrls = uploadingImages
-      .filter((img) => img.cloudinaryUrl)
-      .map((img) => img.cloudinaryUrl) as string[];
+    InteractionManager.runAfterInteractions(() => {
+      stopTyping();
 
-    const message = messages[0];
-    sendMessage(
-      {
-        conversationId: conversationId as string,
-        content: message.text,
-        sender: user!._id,
-        receiver: activeChat!.receiver!._id,
-        mediaUrls,
-      } as unknown as ExtendedMessage,
-      `${conversationId}`
-    );
-    setUploadingImages([]);
+      // Check if they are images
+      const mediaUrls = uploadingImages
+        .filter((img) => img.cloudinaryUrl)
+        .map((img) => img.cloudinaryUrl) as string[];
+
+      const message = messages[0];
+      sendMessage(
+        {
+          conversationId: conversationId as string,
+          content: message.text,
+          sender: user!._id,
+          receiver: activeChat!.receiver!._id,
+          mediaUrls,
+        } as unknown as ExtendedMessage,
+        `${conversationId}`
+      );
+      setUploadingImages([]);
+    });
   };
 
   const handleAudioSend = async (audioUri: string) => {
@@ -314,13 +324,13 @@ export default function ChatMessage() {
             convertToGiftedChatMessage(message as unknown as ExtendedMessage)
           ),
         listViewProps: {
-          windowSize: 7,
+          windowSize: 10,
           initialNumToRender: 25,
           maxToRenderPerBatch: 50,
           updateCellsBatchingPeriod: 50,
           removeCliippedSubviews: true,
         },
-        onSend: (messages: any) => onSend(messages),
+        onSend: (messages: IMessage[]) => handleSend(messages),
         user: { _id: user!._id },
         renderBubble: (
           props: BubbleProps<
@@ -330,26 +340,12 @@ export default function ChatMessage() {
             }
           >
         ) => <CustomMessageBubble {...props} />,
-        onInputTextChanged: (text) => {
-          setText(text);
-          handleTyping(text);
-        },
         placeholder:
           uploadingImages.length > 0 ? "Add a caption..." : "Type a message...",
         isTyping: isOtherUserTyping,
         renderAvatar: null,
         maxComposerHeight: 100,
         timeTextStyle: { right: { color: "gray" }, left: { color: "grey" } },
-        renderSend: (props: SendProps<IMessage>) => (
-          <CustomSend
-            text={text}
-            sendProps={props}
-            isRecording={isRecording}
-            setIsRecording={setIsRecording}
-            uploadingImages={uploadingImages}
-            onImageSelected={handleImageSelected}
-          />
-        ),
         textInputProps: {
           ...styles.composer,
           color: isDark ? colors.white : colors.black,
@@ -379,7 +375,6 @@ export default function ChatMessage() {
     [
       messagesFromRealm,
       page,
-      text,
       hasMoreMessages,
       isOtherUserTyping,
       isSyncing,
@@ -409,26 +404,27 @@ export default function ChatMessage() {
             showAnimationDuration={200}
             style={styles.softInputStyles}
           >
-            <GiftedChat
+            <MessageInputContainer
               {...chatProps}
-              // renderMessage={(props) => (
-              //   <ChatMessageBox
-              //     {...props}
-              //     setReplyOnSwipe={setReplyMessage}
-              //     updateRowRef={updateRowRef}
-              //   />
-              // )}
-              // renderChatFooter={() => (
-              //   <ReplyMessageBar
-              //     clearReply={() => setReplyMessage(null)}
-              //     message={replyMessage}
-              //   />
-              // )}
+              isRecording={isRecording}
+              onInputTextChanged={(text) => handleTyping(text)}
+              setIsRecording={setIsRecording}
+              uploadingImages={uploadingImages}
+              onImageSelected={handleImageSelected}
+              onAudioSend={handleAudioSend}
               isKeyboardInternallyHandled={false}
             />
           </AvoidSoftInputView>
         ) : (
-          <GiftedChat {...chatProps} />
+          <MessageInputContainer
+            {...chatProps}
+            onInputTextChanged={(text) => handleTyping(text)}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            uploadingImages={uploadingImages}
+            onImageSelected={handleImageSelected}
+            onAudioSend={handleAudioSend}
+          />
         )}
 
         {isSyncing &&

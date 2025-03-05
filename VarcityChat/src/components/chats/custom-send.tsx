@@ -8,6 +8,8 @@ import SendSvg from "@/ui/icons/chat/send-svg";
 import { UploadingImage } from "@/types/chat";
 import * as ImagePicker from "expo-image-picker";
 
+let renderedCount = 0;
+
 export const CustomSend = memo(
   ({
     text,
@@ -24,6 +26,7 @@ export const CustomSend = memo(
     setIsRecording: (isRecording: boolean) => void;
     onImageSelected: (images: ImagePicker.ImagePickerAsset[]) => void;
   }) => {
+    console.log(`[CustomSend]: ${renderedCount++}`);
     const isUploading = uploadingImages.some(
       (img) => img.progress < 100 && !img.error
     );
