@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Text, View, TouchableOpacity } from "@/ui";
+import { Text, View, TouchableOpacity, IS_IOS } from "@/ui";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import Animated, {
   useSharedValue,
@@ -14,8 +14,10 @@ import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
 import { Platform, StyleSheet } from "react-native";
 import { formatDuration } from "@/core/utils";
-import SendSvg from "@/ui/icons/chat/send-svg";
 import { IOSOutputFormat } from "expo-av/build/Audio";
+import SendSvg from "@/ui/icons/chat/send-svg";
+
+const VOICE_RECORDER_HEIGHT = 55;
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -57,18 +59,22 @@ export const VoiceRecorder = ({
     }));
 
   const containerStyle = useAnimatedStyle(() => {
-    const isIOS = Platform.OS === "ios";
     return {
       height: withTiming(containerHeight.value, {
-        duration: isIOS ? 300 : 50,
+        duration: IS_IOS ? 200 : 50,
       }),
-      opacity: interpolate(containerHeight.value, [0, 44], [0, 1], "clamp"),
+      opacity: interpolate(
+        containerHeight.value,
+        [0, VOICE_RECORDER_HEIGHT],
+        [0, 1],
+        "clamp"
+      ),
     };
   });
 
   const sendButtonstyle = useAnimatedStyle(() => {
     return {
-      height: withTiming(buttonHeight.value, { duration: 300 }),
+      height: withTiming(buttonHeight.value, { duration: 200 }),
     };
   });
 
@@ -96,56 +102,6 @@ export const VoiceRecorder = ({
     });
   });
 
-  // Start recording function
-  const startRecording = async () => {
-    try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        setRecording(null);
-      }
-
-      wasUnloadedRef.current = false;
-
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        staysActiveInBackground: false,
-      });
-
-      const newRecording = new Audio.Recording();
-      setRecording(newRecording);
-      const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
-      await newRecording.prepareToRecordAsync({
-        android,
-        ios: {
-          ...ios,
-          extension: ".m4a",
-          outputFormat: IOSOutputFormat.MPEG4AAC,
-        },
-      } as Audio.RecordingOptions);
-      await newRecording.startAsync();
-
-      setIsRecording(true);
-      setIsPaused(false);
-      setDuration(0);
-      containerHeight.value = 44;
-      waveOpacity.value = withTiming(1, { duration: 300 });
-
-      // Start timer
-      timerRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1);
-        // Simulate audio levels - in a real app you would use actual audio levels
-        audioLevels.value = Math.random();
-      }, 1000);
-    } catch (error) {
-      console.log("Failed to start recording:", error);
-      resetRecorder();
-    }
-  };
-
   // Pause/resume recording
   const togglePause = async () => {
     if (!recording) return;
@@ -171,6 +127,55 @@ export const VoiceRecorder = ({
     }
   };
 
+  // Start recording function
+  const startRecording = async () => {
+    try {
+      if (recording) {
+        await recording.stopAndUnloadAsync();
+      }
+      wasUnloadedRef.current = false;
+
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        staysActiveInBackground: false,
+      });
+
+      const newRecording = new Audio.Recording();
+      const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
+
+      setDuration(0);
+      setIsRecording(true);
+      containerHeight.value = VOICE_RECORDER_HEIGHT;
+      waveOpacity.value = withTiming(1, { duration: 300 });
+
+      await newRecording.prepareToRecordAsync({
+        android,
+        ios: {
+          ...ios,
+          extension: ".m4a",
+          outputFormat: IOSOutputFormat.MPEG4AAC,
+        },
+      } as Audio.RecordingOptions);
+      await newRecording.startAsync();
+
+      setRecording(newRecording);
+      setIsPaused(false);
+
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setDuration((prev) => prev + 1);
+        // Simulate audio levels - in a real app you would use actual audio levels
+        audioLevels.value = Math.random();
+      }, 1000);
+    } catch (error) {
+      console.log("Failed to start recording:", error);
+    }
+  };
+
   // Stop recording and get the file
   const stopRecording = async () => {
     if (!recording) return;
@@ -185,6 +190,7 @@ export const VoiceRecorder = ({
         allowsRecordingIOS: false,
       });
       wasUnloadedRef.current = true;
+
       const uri = recording.getURI();
       waveOpacity.value = withTiming(0, { duration: 300 });
       setRecording(null);
@@ -200,31 +206,31 @@ export const VoiceRecorder = ({
     }
   };
 
-  const handleSend = async () => {
-    const uri = await stopRecording();
-    if (uri) {
-      onSend(uri);
-      resetRecorder();
-    }
-  };
-
   const handleCancel = async () => {
     if (recording) {
       try {
+        console.log("Canceling the recording");
+        wasUnloadedRef.current = true;
         await recording.stopAndUnloadAsync();
+
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          playsInSilentModeIOS: false,
         });
       } catch (error) {
-        console.error("Error stopping recording during cancel", error);
+        console.error("Error stoppign recording during cancel:", error);
       }
     }
-    resetRecorder();
-    onCancel?.();
+
+    setTimeout(() => {
+      resetRecorder();
+      onCancel?.();
+    }, 300);
   };
 
   // Reset the recorder state
-  const resetRecorder = () => {
+  const resetRecorder = async () => {
     setRecording(null);
     setAudioUri(null);
     setIsRecording(false);
@@ -233,34 +239,76 @@ export const VoiceRecorder = ({
     containerHeight.value = 0;
     audioLevels.value = 0;
     wasUnloadedRef.current = false;
-
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
   };
 
-  useEffect(() => {
-    if (isRecording) {
-      startRecording();
+  const handleSend = async () => {
+    const uri = await stopRecording();
+    if (uri) {
+      onSend(uri);
+      resetRecorder();
     }
-  }, [isRecording]);
+  };
+
+  useEffect(() => {
+    startRecording();
+  }, []);
 
   // Clean up on unmonut
   useEffect(() => {
     return () => {
+      console.log("CALLING CLEANUP IN VOICE RECORDER:");
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
+
       if (recording && !wasUnloadedRef.current) {
-        recording.stopAndUnloadAsync();
-        Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-        });
+        console.log("RESETTING THE RECORDER:");
+        (async () => {
+          try {
+            console.log("Cleaning up recording on unmount");
+            await recording.stopAndUnloadAsync();
+            wasUnloadedRef.current = true;
+
+            // Reset audio mode
+            await Audio.setAudioModeAsync({
+              allowsRecordingIOS: false,
+              staysActiveInBackground: false,
+              playsInSilentModeIOS: false,
+            });
+          } catch (error) {
+            console.error("Error cleaning up recording:", error);
+          }
+        })();
       }
+
+      // resetRecorder();
+
+      // if (recording && !wasUnloadedRef.current) {
+
+      // (async () => {
+      //   try {
+      //     await recording.stopAndUnloadAsync();
+      //     resetRecorder();
+      //     wasUnloadedRef.current = true;
+      //     await Audio.setAudioModeAsync({
+      //       allowsRecordingIOS: false,
+      //       staysActiveInBackground: false,
+      //       playsInSilentModeIOS: false,
+      //     });
+      //   } catch (error) {
+      //     console.error("Error cleaning up recording:", error);
+      //   }
+      // })();
+
+      // console.log("RESETTING THE RECORDER");
+      // }
     };
-  }, []);
+  }, [recording]);
 
   return (
     <Animated.View
@@ -269,7 +317,7 @@ export const VoiceRecorder = ({
     >
       {isRecording && (
         <TouchableOpacity
-          className="w-6 h-6 flex flex-row items-center justify-center rounded-full mr-6"
+          className="w-7 h-7 flex flex-row items-center justify-center rounded-full mr-6"
           onPress={handleCancel}
         >
           <Ionicons name="close" size={18} color={isDark ? "white" : "black"} />
@@ -279,11 +327,6 @@ export const VoiceRecorder = ({
       {(isRecording || audioUri) && (
         <>
           <View className="flex-row flex-1 items-center">
-            {audioUri && (
-              <Text className="text-base font-semibold text-black dark:text-white">
-                Recording Complete
-              </Text>
-            )}
             {!audioUri && (
               <Animated.View
                 style={[waveContainerStyle]}
@@ -326,28 +369,6 @@ export const VoiceRecorder = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    borderTopWidth: 1,
-    borderTopColor: colors.grey[200],
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    justifyContent: "space-between",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  duration: {
-    fontSize: 16,
-    color: colors.primary[500],
-    fontWeight: "600",
-  },
-  waveContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-end",
-  },
   wave: {
     width: 2,
     height: 5,

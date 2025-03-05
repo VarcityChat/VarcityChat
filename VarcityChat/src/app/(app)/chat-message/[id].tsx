@@ -119,6 +119,11 @@ export default function ChatMessage() {
         staysActiveInBackground: false,
       });
 
+      if (isRecording) {
+        console.log("RECORDING was active during cleanup");
+        setIsRecording(false);
+      }
+
       // Cancel all ongoing uploads
       uploadingImages.forEach((img) => {
         if (img.abortController) {
@@ -126,6 +131,7 @@ export default function ChatMessage() {
         }
       });
       setUploadingImages([]);
+      setIsRecording(false);
       handleCancelAudioUpload();
       stopAllPlayers();
       dispatch(resetActiveChat());
@@ -166,11 +172,11 @@ export default function ChatMessage() {
   }, [page, messagesFromRealm.length]);
 
   const onSend = (messages: IMessage[]) => {
-    stopTyping();
     messageContainerRef?.current?.scrollToOffset({
       offset: 0,
       animated: true,
     });
+    stopTyping();
 
     // Check if they are images
     const mediaUrls = uploadingImages
