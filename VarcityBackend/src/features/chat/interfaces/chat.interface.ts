@@ -19,6 +19,7 @@ export interface IMessageDocument extends Document {
   sender: string | ObjectId;
   receiver: string | ObjectId;
   content?: string;
+  audio?: string;
   mediaUrls?: string[];
   mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
   seenAt: Date;
@@ -44,6 +45,7 @@ export interface IMessageData {
   receiver: string | ObjectId;
   content?: string;
   mediaUrl?: string[];
+  audio?: string;
   mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
   reply?: {
     messageId: ObjectId;

@@ -6,6 +6,7 @@ const messageSchema: Schema = new Schema<IMessageDocument>({
   sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   receiver: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String, required: false },
+  audio: { type: String, required: false },
   mediaUrls: [String],
   mediaType: {
     type: String,
@@ -25,8 +26,8 @@ const messageSchema: Schema = new Schema<IMessageDocument>({
   },
   seenAt: Date,
   readAt: Date,
-  sequence: { type: Number, required: true },
   localId: String,
+  sequence: { type: Number, required: true },
   localSequence: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

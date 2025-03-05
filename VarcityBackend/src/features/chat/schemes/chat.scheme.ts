@@ -6,6 +6,7 @@ const addChatSchema: ObjectSchema = Joi.object().keys({
   receiver: Joi.string().required(),
   content: Joi.string().optional().allow(null, ''),
   mediaUrls: Joi.array().max(5).optional(),
+  audio: Joi.string().optional(),
   mediaType: Joi.string().optional().allow(null, ''),
   reply: Joi.object().optional(),
   conversationStatus: Joi.string().optional(),
