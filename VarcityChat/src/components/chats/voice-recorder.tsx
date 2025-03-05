@@ -13,7 +13,11 @@ import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
 import { StyleSheet } from "react-native";
 import { formatDuration } from "@/core/utils";
-import { IOSOutputFormat } from "expo-av/build/Audio";
+import {
+  AndroidAudioEncoder,
+  AndroidOutputFormat,
+  IOSOutputFormat,
+} from "expo-av/build/Audio";
 import SendSvg from "@/ui/icons/chat/send-svg";
 
 const VOICE_RECORDER_HEIGHT = 55;
@@ -146,10 +150,19 @@ export const VoiceRecorder = ({
         interruptionModeIOS: InterruptionModeIOS.DoNotMix,
         interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
         staysActiveInBackground: false,
+        playThroughEarpieceAndroid: false,
       });
 
       await newRecording.prepareToRecordAsync({
-        android,
+        android: {
+          ...android,
+          extension: ".m4a",
+          outputFormat: AndroidOutputFormat.MPEG_4,
+          audioEncoder: AndroidAudioEncoder.AAC,
+          sampleRate: 44100,
+          bitRate: 128000,
+          numberOfChannels: 1,
+        },
         ios: {
           ...ios,
           extension: ".m4a",
@@ -213,6 +226,7 @@ export const VoiceRecorder = ({
           allowsRecordingIOS: false,
           staysActiveInBackground: false,
           playsInSilentModeIOS: false,
+          playThroughEarpieceAndroid: false,
         });
       } catch (error) {
         console.error("Error stoppign recording during cancel:", error);
@@ -222,7 +236,7 @@ export const VoiceRecorder = ({
     setTimeout(() => {
       resetRecorder();
       onCancel?.();
-    }, 300);
+    }, 100);
   };
 
   // Reset the recorder state
@@ -256,17 +270,14 @@ export const VoiceRecorder = ({
   // Clean up on unmonut
   useEffect(() => {
     return () => {
-      console.log("CALLING CLEANUP IN VOICE RECORDER:");
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
 
       if (recording && !wasUnloadedRef.current) {
-        console.log("RESETTING THE RECORDER:");
         (async () => {
           try {
-            console.log("Cleaning up recording on unmount");
             await recording.stopAndUnloadAsync();
             wasUnloadedRef.current = true;
 
@@ -275,6 +286,7 @@ export const VoiceRecorder = ({
               allowsRecordingIOS: false,
               staysActiveInBackground: false,
               playsInSilentModeIOS: false,
+              playThroughEarpieceAndroid: false,
             });
           } catch (error) {
             console.error("Error cleaning up recording:", error);

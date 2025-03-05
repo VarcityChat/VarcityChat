@@ -115,10 +115,11 @@ export default function ChatMessage() {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
+        playThroughEarpieceAndroid: false,
+        shouldDuckAndroid: false,
       });
 
       if (isRecording) {
-        console.log("RECORDING was active during cleanup");
         setIsRecording(false);
       }
 
