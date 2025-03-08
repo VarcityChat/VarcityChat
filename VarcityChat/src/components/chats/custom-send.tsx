@@ -100,5 +100,28 @@ export const CustomSend = memo(
         )}
       </View>
     );
+  },
+
+  (prevProps, nextProps) => {
+    // Only re-render if these specific props change
+    return (
+      prevProps.text === nextProps.text &&
+      prevProps.isRecording === nextProps.isRecording &&
+      prevProps.uploadingImages.length === nextProps.uploadingImages.length &&
+      JSON.stringify(
+        prevProps.uploadingImages.map((img) => ({
+          progress: img.progress,
+          error: img.error,
+          cloudinaryUrl: img.cloudinaryUrl,
+        }))
+      ) ===
+        JSON.stringify(
+          nextProps.uploadingImages.map((img) => ({
+            progress: img.progress,
+            error: img.error,
+            cloudinaryUrl: img.cloudinaryUrl,
+          }))
+        )
+    );
   }
 );

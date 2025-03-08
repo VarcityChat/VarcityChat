@@ -16,6 +16,7 @@ import {
   GiftedChat,
   GiftedChatProps,
   IMessage,
+  InputToolbarProps,
   SendProps,
 } from "react-native-gifted-chat";
 import { colors, View } from "@/ui";
@@ -54,7 +55,7 @@ import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { MessageInputContainer } from "@/components/chats/message-input-container";
 
 let renderedCount = 0;
-const MESSAGES_PER_PAGE = 60;
+const MESSAGES_PER_PAGE = 80;
 
 export default function ChatMessage() {
   console.log(`[ChatMessage]: ${renderedCount++}`);
@@ -96,7 +97,6 @@ export default function ChatMessage() {
   const [isRecording, setIsRecording] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
-  // const [text, setText] = useState("");
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
 
@@ -152,7 +152,7 @@ export default function ChatMessage() {
       user2Id: activeChat!.chat?.user2._id,
     });
     updateChatCount(conversationId as string, 0, true);
-  }, [conversationId, user, socket]);
+  }, [conversationId, user?._id, socket]);
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
@@ -177,132 +177,152 @@ export default function ChatMessage() {
     setPage((prev) => prev + 1);
   }, [page, messagesFromRealm.length]);
 
-  const handleSend = (messages: IMessage[]) => {
-    messageContainerRef?.current?.scrollToOffset({
-      offset: 0,
-      animated: true,
-    });
+  const handleSend = useCallback(
+    (messages: IMessage[]) => {
+      messageContainerRef?.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+      });
 
-    InteractionManager.runAfterInteractions(() => {
-      stopTyping();
+      InteractionManager.runAfterInteractions(() => {
+        stopTyping();
 
-      // Check if they are images
-      const mediaUrls = uploadingImages
-        .filter((img) => img.cloudinaryUrl)
-        .map((img) => img.cloudinaryUrl) as string[];
+        // Check if they are images
+        const mediaUrls = uploadingImages
+          .filter((img) => img.cloudinaryUrl)
+          .map((img) => img.cloudinaryUrl) as string[];
 
-      const message = messages[0];
-      sendMessage(
-        {
-          conversationId: conversationId as string,
-          content: message.text,
-          sender: user!._id,
-          receiver: activeChat!.receiver!._id,
-          mediaUrls,
-        } as unknown as ExtendedMessage,
-        `${conversationId}`
-      );
-      setUploadingImages([]);
-    });
-  };
-
-  const handleAudioSend = (audioUri: string) => {
-    messageContainerRef?.current?.scrollToOffset({
-      offset: 0,
-      animated: true,
-    });
-
-    InteractionManager.runAfterInteractions(async () => {
-      const localId = generateLocalId();
-      try {
-        // optimistic update
-        addAudioMessageToRealm(
+        const message = messages[0];
+        sendMessage(
           {
-            conversationId: `${conversationId}`,
+            conversationId: conversationId as string,
+            content: message.text,
             sender: user!._id,
             receiver: activeChat!.receiver!._id,
-            audio: audioUri,
-            content: "",
+            mediaUrls,
           } as unknown as ExtendedMessage,
-          localId,
           `${conversationId}`
         );
+        setUploadingImages([]);
+      });
+    },
+    [conversationId, uploadingImages, stopTyping, sendMessage, user, activeChat]
+  );
 
-        // Start the upload process
-        const result = await handleUploadAudio(audioUri);
-        if (result && result?.url) {
-          updateAudioMessage(localId, result.url);
-        } else {
+  const handleAudioSend = useCallback(
+    (audioUri: string) => {
+      messageContainerRef?.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+      });
+
+      InteractionManager.runAfterInteractions(async () => {
+        const localId = generateLocalId();
+        try {
+          // optimistic update
+          addAudioMessageToRealm(
+            {
+              conversationId: `${conversationId}`,
+              sender: user!._id,
+              receiver: activeChat!.receiver!._id,
+              audio: audioUri,
+              content: "",
+            } as unknown as ExtendedMessage,
+            localId,
+            `${conversationId}`
+          );
+
+          // Start the upload process
+          const result = await handleUploadAudio(audioUri);
+          if (result && result?.url) {
+            updateAudioMessage(localId, result.url);
+          } else {
+            markAudioUploadFailed(localId);
+            showToast({
+              type: "error",
+              text1: "Error",
+              text2: "An error occurred during audio upload",
+            });
+          }
+        } catch (error) {
           markAudioUploadFailed(localId);
           showToast({
             type: "error",
             text1: "Error",
-            text2: "An error occurred during audio upload",
+            text2: "An error occurred when uploading the audio",
           });
         }
-      } catch (error) {
-        markAudioUploadFailed(localId);
-        showToast({
-          type: "error",
-          text1: "Error",
-          text2: "An error occurred when uploading the audio",
-        });
-      }
-    });
-  };
+      });
+    },
+    [
+      generateLocalId,
+      addAudioMessageToRealm,
+      markAudioUploadFailed,
+      showToast,
+      handleUploadAudio,
+    ]
+  );
 
-  const handleImageSelected = async (images: ImagePickerAsset[]) => {
-    const newImages = images.map((img) => ({
-      uri: img.uri,
-      progress: 0,
-      abortController: new AbortController(),
-      error: false,
-    }));
-    setUploadingImages((prev) => [...prev, ...newImages]);
+  const handleImageSelected = useCallback(
+    async (images: ImagePickerAsset[]) => {
+      const newImages = images.map((img) => ({
+        uri: img.uri,
+        progress: 0,
+        abortController: new AbortController(),
+        error: false,
+      }));
+      setUploadingImages((prev) => [...prev, ...newImages]);
 
-    const uploadPromises = newImages.map(async (img) => {
-      try {
-        const cloudinaryUrl = await uploadToCloudinaryWithProgress(
-          img,
-          (progress) => {
-            setUploadingImages((prev) =>
-              prev.map((p) => (p.uri === img.uri ? { ...p, progress } : p))
-            );
-          },
-          img.abortController!
-        );
-
-        setUploadingImages((prev) =>
-          prev.map((p) =>
-            p.uri === img.uri ? { ...p, cloudinaryUrl: `${cloudinaryUrl}` } : p
-          )
-        );
-      } catch (error: any) {
-        if (error.message === "Upload cancelled") {
-          setUploadingImages((prev) => prev.filter((p) => p.uri !== img.uri));
-        } else {
-          setUploadingImages((prev) =>
-            prev.map((p) => (p.uri === img.uri ? { ...p, error: true } : p))
+      const uploadPromises = newImages.map(async (img) => {
+        try {
+          const cloudinaryUrl = await uploadToCloudinaryWithProgress(
+            img,
+            (progress) => {
+              setUploadingImages((prev) =>
+                prev.map((p) => (p.uri === img.uri ? { ...p, progress } : p))
+              );
+            },
+            img.abortController!
           );
-          showToast({
-            type: "error",
-            text1: "Error",
-            text2: "Error uploading images",
-          });
+
+          setUploadingImages((prev) =>
+            prev.map((p) =>
+              p.uri === img.uri
+                ? { ...p, cloudinaryUrl: `${cloudinaryUrl}` }
+                : p
+            )
+          );
+        } catch (error: any) {
+          if (error.message === "Upload cancelled") {
+            setUploadingImages((prev) => prev.filter((p) => p.uri !== img.uri));
+          } else {
+            setUploadingImages((prev) =>
+              prev.map((p) => (p.uri === img.uri ? { ...p, error: true } : p))
+            );
+            showToast({
+              type: "error",
+              text1: "Error",
+              text2: "Error uploading images",
+            });
+          }
         }
+      });
+
+      await Promise.all(uploadPromises);
+    },
+    [setUploadingImages, showToast]
+  );
+
+  const handleRemoveImage = useCallback(
+    (uri: string) => {
+      const image = uploadingImages.find((img) => img.uri === uri);
+      if (image?.abortController) {
+        image.abortController.abort();
       }
-    });
-
-    await Promise.all(uploadPromises);
-  };
-
-  const handleRemoveImage = (uri: string) => {
-    const image = uploadingImages.find((img) => img.uri === uri);
-    if (image?.abortController) {
-      image.abortController.abort();
-    }
-    setUploadingImages((prev) => prev.filter((p) => p.uri !== uri));
-  };
+      setUploadingImages((prev) => prev.filter((p) => p.uri !== uri));
+    },
+    [uploadingImages, setUploadingImages]
+  );
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -317,6 +337,52 @@ export default function ChatMessage() {
     [replyMessage]
   );
 
+  const renderBubble = useCallback(
+    (
+      props: BubbleProps<
+        IMessage & {
+          mediaUrls: string[];
+          deliveryStatus: DELIVERY_STATUSES;
+        }
+      >
+    ) => <CustomMessageBubble {...props} />,
+    []
+  );
+
+  const renderChatEmpty = useCallback(
+    () => (isSyncing ? null : <ChatEmptyComponent />),
+    [isSyncing]
+  );
+
+  const renderChatFooter = useCallback(
+    () => (
+      <ChatFooter
+        uploadingImages={uploadingImages}
+        onRemoveImage={handleRemoveImage}
+      />
+    ),
+    [uploadingImages, handleRemoveImage]
+  );
+
+  const renderInputToolbar = useCallback(
+    (
+      props: React.JSX.IntrinsicAttributes &
+        InputToolbarProps<IMessage> & {
+          isRecording: boolean;
+          setIsRecording: (isRecording: boolean) => void;
+          onAudioSend: (audioUri: string) => void;
+        }
+    ) => (
+      <ChatInput
+        {...props}
+        isRecording={isRecording}
+        setIsRecording={setIsRecording}
+        onAudioSend={handleAudioSend}
+      />
+    ),
+    [handleAudioSend, isRecording, setIsRecording]
+  );
+
   const chatProps = useMemo(
     () =>
       ({
@@ -327,22 +393,21 @@ export default function ChatMessage() {
             convertToGiftedChatMessage(message as unknown as ExtendedMessage)
           ),
         listViewProps: {
-          windowSize: 10,
+          windowSize: 20,
           initialNumToRender: 25,
           maxToRenderPerBatch: 50,
           updateCellsBatchingPeriod: 50,
           removeCliippedSubviews: true,
+          // maintainVisibleContentPosition: {
+          //   minIndexForVisible: 1,
+          // },
+          viewabilityConfig: {
+            itemVisiblePercenThreshold: 50,
+          },
         },
         onSend: (messages: IMessage[]) => handleSend(messages),
         user: { _id: user!._id },
-        renderBubble: (
-          props: BubbleProps<
-            IMessage & {
-              mediaUrls: string[];
-              deliveryStatus: DELIVERY_STATUSES;
-            }
-          >
-        ) => <CustomMessageBubble {...props} />,
+        renderBubble,
         placeholder:
           uploadingImages.length > 0 ? "Add a caption..." : "Type a message...",
         isTyping: isOtherUserTyping,
@@ -358,21 +423,9 @@ export default function ChatMessage() {
         loadEarlier: hasMoreMessages,
         maxInputLength: 2000,
         onLoadEarlier: loadEarlier,
-        renderChatEmpty: () => (isSyncing ? null : <ChatEmptyComponent />),
-        renderChatFooter: () => (
-          <ChatFooter
-            uploadingImages={uploadingImages}
-            onRemoveImage={handleRemoveImage}
-          />
-        ),
-        renderInputToolbar: (props) => (
-          <ChatInput
-            {...props}
-            isRecording={isRecording}
-            setIsRecording={setIsRecording}
-            onAudioSend={handleAudioSend}
-          />
-        ),
+        renderChatEmpty,
+        renderChatFooter,
+        renderInputToolbar,
         keyboardShouldPersistTaps: "never",
       } as GiftedChatProps),
     [
@@ -410,7 +463,7 @@ export default function ChatMessage() {
             <MessageInputContainer
               {...chatProps}
               isRecording={isRecording}
-              onInputTextChanged={(text) => handleTyping(text)}
+              onInputTextChanged={(text: string) => handleTyping(text)}
               setIsRecording={setIsRecording}
               uploadingImages={uploadingImages}
               onImageSelected={handleImageSelected}
@@ -421,7 +474,7 @@ export default function ChatMessage() {
         ) : (
           <MessageInputContainer
             {...chatProps}
-            onInputTextChanged={(text) => handleTyping(text)}
+            onInputTextChanged={(text: string) => handleTyping(text)}
             isRecording={isRecording}
             setIsRecording={setIsRecording}
             uploadingImages={uploadingImages}

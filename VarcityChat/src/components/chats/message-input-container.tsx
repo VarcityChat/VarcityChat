@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, memo } from "react";
 import {
   GiftedChat,
   GiftedChatProps,
@@ -19,60 +19,62 @@ interface MessageInputContainerProps {
   onAudioSend: (audioUri: string) => void;
 }
 
-export const MessageInputContainer = ({
-  onSend,
-  onInputTextChanged,
-  isRecording,
-  setIsRecording,
-  uploadingImages,
-  onImageSelected,
-  onAudioSend,
-  ...restProps
-}: GiftedChatProps & MessageInputContainerProps) => {
-  const [text, setText] = useState("");
+export const MessageInputContainer = memo(
+  ({
+    onSend,
+    onInputTextChanged,
+    isRecording,
+    setIsRecording,
+    uploadingImages,
+    onImageSelected,
+    onAudioSend,
+    ...restProps
+  }: GiftedChatProps & MessageInputContainerProps) => {
+    const [text, setText] = useState("");
 
-  const handleTextChange = useCallback(
-    (newText: string) => {
-      setText(newText);
-      onInputTextChanged?.(newText);
-    },
-    [onInputTextChanged]
-  );
+    const handleTextChange = useCallback(
+      (newText: string) => {
+        setText(newText);
+        onInputTextChanged?.(newText);
+      },
+      [onInputTextChanged]
+    );
 
-  const handleSend = useCallback(
-    (messages: IMessage[]) => {
-      onSend?.(messages);
-      setText("");
-    },
-    [onSend]
-  );
+    const handleSend = useCallback(
+      (messages: IMessage[]) => {
+        onSend?.(messages);
+        setText("");
+      },
+      [onSend]
+    );
 
-  return (
-    <>
-      <GiftedChat
-        {...restProps}
-        text={text}
-        onSend={handleSend}
-        onInputTextChanged={handleTextChange}
-        renderInputToolbar={(props) => (
-          <ChatInput
-            {...props}
-            isRecording={isRecording}
-            setIsRecording={setIsRecording}
-            onAudioSend={onAudioSend}
-          />
-        )}
-        renderSend={(props) => (
-          <CustomSend
-            text={text}
-            sendProps={props}
-            isRecording={isRecording}
-            setIsRecording={setIsRecording}
-            uploadingImages={uploadingImages}
-            onImageSelected={onImageSelected}
-          />
-        )}
-      />
-    </>
-  );
-};
+    return (
+      <>
+        <GiftedChat
+          {...restProps}
+          text={text}
+          onSend={handleSend}
+          onInputTextChanged={handleTextChange}
+          renderInputToolbar={(props) => (
+            <ChatInput
+              {...props}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
+              onAudioSend={onAudioSend}
+            />
+          )}
+          renderSend={(props) => (
+            <CustomSend
+              text={text}
+              sendProps={props}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
+              uploadingImages={uploadingImages}
+              onImageSelected={onImageSelected}
+            />
+          )}
+        />
+      </>
+    );
+  }
+);
