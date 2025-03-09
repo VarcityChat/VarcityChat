@@ -6,7 +6,15 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { View, Text, TouchableOpacity, Image, colors, List } from "@/ui";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  colors,
+  List,
+  IS_IOS,
+} from "@/ui";
 import { useRouter } from "expo-router";
 import { Platform, SafeAreaView, StatusBar } from "react-native";
 import { useColorScheme } from "nativewind";
@@ -38,7 +46,7 @@ export default function DiscoverScreen() {
       ? hasNotch
         ? 110
         : 70
-      : 70 + (StatusBar?.currentHeight ?? 0);
+      : 60 + (StatusBar?.currentHeight ?? 0);
 
   const isDark = colorScheme === "dark";
   const router = useRouter();
@@ -181,7 +189,11 @@ export default function DiscoverScreen() {
         className="flex flex-1 flex-grow px-6"
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        style={{ paddingTop: HEADER_HEIGHT - insets.top + 10 }}
+        style={{
+          paddingTop: IS_IOS
+            ? HEADER_HEIGHT - insets.top + 10
+            : HEADER_HEIGHT + 10,
+        }}
       >
         <View>
           <SearchBar
