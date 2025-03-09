@@ -5,11 +5,15 @@ import { ExtendedMessage, IChat, IUpdateChatRequest } from "@/api/chats/types";
 import { useChats } from "../use-chats";
 import { useAppSelector } from "@/core/store/store";
 import { useAuth } from "../use-auth";
+import { api } from "@/api/api";
+import { useAppDispatch } from "@/core/store/store";
+import { setHasNotification } from "@/core/notifications/notification-slice";
 
 export const useGlobalSocketHandlers = (
   socket: Socket | null,
   isConnected: boolean
 ) => {
+  const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { addServerMessageToRealm, markUserMessagesInChatAsRead } =
     useChatMessages();
@@ -64,6 +68,11 @@ export const useGlobalSocketHandlers = (
     markUserMessagesInChatAsRead(data.conversationId);
   };
 
+  const handleNewNotification = (data: any) => {
+    dispatch(api.util.invalidateTags(["Notifications"]));
+    dispatch(setHasNotification(true));
+  };
+
   useEffect(() => {
     if (!socket || !isConnected) return;
 
@@ -72,6 +81,7 @@ export const useGlobalSocketHandlers = (
     socket.on("accepted-conversation-request", handleMessageRequestAccepted);
     socket.on("rejected-conversation-request", handleMessageRequestRejected);
     socket.on("user-read-messages", handleMarkMessagesInChatAsRead);
+    socket.on("new-notification", handleNewNotification);
 
     return () => {
       socket.off("new-message", handleNewMessage);
@@ -79,6 +89,7 @@ export const useGlobalSocketHandlers = (
       socket.off("accepted-conversation-request", handleMessageRequestAccepted);
       socket.off("rejected-conversation-request", handleMessageRequestRejected);
       socket.off("user-read-messages", handleMarkMessagesInChatAsRead);
+      socket.off("new-notification", handleNewNotification);
     };
   }, [socket, isConnected]);
 };
