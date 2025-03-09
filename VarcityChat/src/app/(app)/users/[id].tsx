@@ -102,7 +102,6 @@ export default function User() {
         typeof data.conversation === "object" &&
         "_id" in data.conversation
       ) {
-        console.log("\nCONVERSATION:", data.conversation);
         dispatch(
           setActiveChat({
             chat: data.conversation as IChat,
