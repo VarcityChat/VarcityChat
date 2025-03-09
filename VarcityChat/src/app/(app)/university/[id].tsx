@@ -20,7 +20,7 @@ import { List } from "@/ui";
 import { IUser } from "@/types/user";
 import { useToast } from "@/core/hooks/use-toast";
 import { useRef } from "react";
-import { trimText } from "@/core/utils";
+import { capitalize, trimText } from "@/core/utils";
 import { AxiosResponse } from "axios";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -37,7 +37,7 @@ const SCROLL_THRESHOLD = 10;
 const AnimatedList = Animated.createAnimatedComponent(List<IUser>);
 
 export default function University() {
-  const { id: universityId } = useLocalSearchParams();
+  const { id: universityId, name } = useLocalSearchParams();
   const { showToast } = useToast();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -197,7 +197,7 @@ export default function University() {
           </View>
 
           <Text className="font-sans-semibold text-lg">
-            {trimText("Lead University")}
+            {capitalize(trimText(`${name}`))}
           </Text>
 
           <TouchableOpacity

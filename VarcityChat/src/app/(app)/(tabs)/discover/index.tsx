@@ -112,7 +112,12 @@ export default function DiscoverScreen() {
     ({ item, index }: { item: IUniversity; index: number }) => {
       return (
         <TouchableOpacity
-          onPress={() => router.push(`/university/${item._id}`)}
+          onPress={() =>
+            router.push({
+              pathname: "/university/[id]",
+              params: { id: item._id, name: item.name },
+            })
+          }
           activeOpacity={0.7}
           className={`flex flex-1 h-[130px] mb-8 
           ${(index + 1) % 3 === 0 ? "ml-2" : ""}

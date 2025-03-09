@@ -2,7 +2,7 @@ import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { IMessage } from "react-native-gifted-chat";
 
 export const trimText = (text: string, maxLength: number = 20) => {
-  if (typeof text !== "string") return;
+  if (typeof text !== "string") return "";
   return text.length > maxLength
     ? text.slice(0, maxLength - 3) + "..."
     : text.slice(0, maxLength);
