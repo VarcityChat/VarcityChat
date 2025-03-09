@@ -20,7 +20,7 @@ import {
 } from "expo-av/build/Audio";
 import SendSvg from "@/ui/icons/chat/send-svg";
 
-const VOICE_RECORDER_HEIGHT = 55;
+const VOICE_RECORDER_HEIGHT = 45;
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -63,7 +63,7 @@ export const VoiceRecorder = ({
   const containerStyle = useAnimatedStyle(() => {
     return {
       height: withTiming(containerHeight.value, {
-        duration: IS_IOS ? 200 : 50,
+        duration: 50,
       }),
       opacity: interpolate(
         containerHeight.value,
@@ -156,12 +156,6 @@ export const VoiceRecorder = ({
       await newRecording.prepareToRecordAsync({
         android: {
           ...android,
-          extension: ".m4a",
-          outputFormat: AndroidOutputFormat.MPEG_4,
-          audioEncoder: AndroidAudioEncoder.AAC,
-          sampleRate: 44100,
-          bitRate: 128000,
-          numberOfChannels: 1,
         },
         ios: {
           ...ios,
@@ -299,7 +293,7 @@ export const VoiceRecorder = ({
   return (
     <Animated.View
       className="w-full flex-row items-center py-2 px-4 bg-white dark:bg-black"
-      style={[containerStyle]}
+      style={{ height: VOICE_RECORDER_HEIGHT }}
     >
       {isRecording && (
         <TouchableOpacity

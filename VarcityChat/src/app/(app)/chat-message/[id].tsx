@@ -1,9 +1,4 @@
-import {
-  InteractionManager,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { InteractionManager, Platform, StyleSheet } from "react-native";
 import React, {
   useCallback,
   useEffect,
@@ -17,7 +12,6 @@ import {
   GiftedChatProps,
   IMessage,
   InputToolbarProps,
-  SendProps,
 } from "react-native-gifted-chat";
 import { colors, View } from "@/ui";
 import { Audio } from "expo-av";
@@ -148,7 +142,7 @@ export default function ChatMessage() {
     socket?.emit("mark-conversation-as-read", {
       conversationId: conversationId as string,
       userId: user?._id,
-      user1Id: activeChat!.chat?.user1._id,
+      user1Id: user?._id,
       user2Id: activeChat!.chat?.user2._id,
     });
     updateChatCount(conversationId as string, 0, true);

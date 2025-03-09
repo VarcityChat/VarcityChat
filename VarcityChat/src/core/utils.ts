@@ -19,7 +19,7 @@ export const formatChatLastMessage = (
   )
     return "Send a message 👋";
 
-  if (message?.audio) return `🎙️ voice note`;
+  if (message?.audio) return `🎙️ voice message`;
 
   if (message?.mediaUrls?.length && !message.content?.trim().length)
     return `🗾 ${message.mediaUrls.length} image${
