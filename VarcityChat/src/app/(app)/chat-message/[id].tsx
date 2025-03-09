@@ -440,9 +440,12 @@ export default function ChatMessage() {
       style={{ paddingBottom: insets.bottom }}
     >
       <View className="flex flex-1 bg-white dark:bg-charcoal-950">
-        {isConversationPending && activeChat.chat?.user1._id !== user?._id ? (
+        {isConversationPending &&
+        activeChat.chat?.user1?._id &&
+        activeChat.chat?.user1._id !== user?._id ? (
           <MessageRequest chat={activeChat.chat!} />
         ) : isConversationRejected &&
+          activeChat.chat?.user1?._id &&
           activeChat!.chat?.user1._id !== user?._id ? (
           <MessageRequest chat={activeChat.chat!} />
         ) : Platform.OS === "ios" ? (

@@ -21,13 +21,19 @@ import { IUniversity } from "@/api/universities/types";
 import { useChats } from "@/core/hooks/use-chats";
 import { useApi } from "@/core/hooks/use-api";
 import { useInitializeConversationMutation } from "@/api/chats/chat-api";
+import { useAppDispatch } from "@/core/store/store";
+import { setActiveChat } from "@/core/chats/chats-slice";
+import { useAuth } from "@/core/hooks/use-auth";
+import { IChat } from "@/api/chats/types";
 
 const IMG_HEIGHT = 300;
 
 const hobbies = ["football", "baseball", "cooking", "movies"];
 
 export default function User() {
+  const dispatch = useAppDispatch();
   const { user } = useLocalSearchParams();
+  const { user: authUser } = useAuth();
   const userData = JSON.parse(user as string) as IUser;
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -71,12 +77,16 @@ export default function User() {
 
   const handleOpenChat = async () => {
     if (chats?.length) {
-      const conversationIndex = chats.findIndex(
+      const chatIndex = chats.findIndex(
         (chat) =>
           chat.user1._id === userData._id || chat.user2._id === userData._id
       );
-      if (conversationIndex > -1) {
-        router.push(`/(app)/chat-message/${chats[conversationIndex]._id}`);
+      if (chatIndex > -1) {
+        const chat = chats[chatIndex];
+        const chatReceiver =
+          chat.user1._id === authUser?._id ? chat.user2 : chat.user1;
+        dispatch(setActiveChat({ chat, receiver: chatReceiver }));
+        router.push(`/(app)/chat-message/${chat._id}`);
         return;
       }
     }
@@ -87,14 +97,24 @@ export default function User() {
     );
 
     if (!isError && data && "conversation" in data) {
+      if (
+        data.conversation &&
+        typeof data.conversation === "object" &&
+        "_id" in data.conversation
+      ) {
+        console.log("\nCONVERSATION:", data.conversation);
+        dispatch(
+          setActiveChat({
+            chat: data.conversation as IChat,
+            receiver:
+              (data.conversation as IChat).user1._id === authUser?._id
+                ? (data.conversation as IChat).user2
+                : (data.conversation as IChat).user1,
+          })
+        );
+      }
       setTimeout(() => {
-        if (
-          data.conversation &&
-          typeof data.conversation === "object" &&
-          "_id" in data.conversation
-        ) {
-          router.push(`/(app)/chat-message/${data.conversation._id}`);
-        }
+        router.push(`/(app)/chat-message/${(data.conversation as IChat)._id}`);
       }, 200);
     }
   };
