@@ -69,7 +69,7 @@ class Update {
     }
 
     if (conversation.user2.toString() !== req.currentUser?.userId) {
-      throw new NotAuthorizedError('You cannot accept this conversation');
+      throw new NotAuthorizedError('You cannot reject this conversation');
     }
     const currentUser = await userService.getUserById(`${req.currentUser.userId}`);
 
