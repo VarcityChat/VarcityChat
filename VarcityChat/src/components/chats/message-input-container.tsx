@@ -9,6 +9,7 @@ import { ChatInput } from "./chat-input";
 import { CustomSend } from "./custom-send";
 import { UploadingImage } from "@/types/chat";
 import { ImagePickerAsset } from "expo-image-picker";
+import { View } from "react-native";
 
 interface MessageInputContainerProps {
   onInputTextChanged?: (text: string) => void;

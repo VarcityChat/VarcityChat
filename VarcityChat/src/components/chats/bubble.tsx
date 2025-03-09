@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { colors } from "@/ui";
 import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { Ionicons, Feather } from "@expo/vector-icons";
@@ -51,7 +51,7 @@ const CustomMessageBubble = memo(
       );
     };
 
-    const renderMessageImages = (props: BubbleProps<IMessage>) => {
+    const renderMessageImages = useCallback((props: BubbleProps<IMessage>) => {
       const message = props?.currentMessage as ExtendedMessage;
       if (!message?.mediaUrls?.length) return null;
 
@@ -87,7 +87,7 @@ const CustomMessageBubble = memo(
           ))}
         </View>
       );
-    };
+    }, []);
 
     return (
       <>

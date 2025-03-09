@@ -19,7 +19,7 @@ import {
   InputToolbarProps,
   SendProps,
 } from "react-native-gifted-chat";
-import { colors, View } from "@/ui";
+import { colors, IS_IOS, View } from "@/ui";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Swipeable } from "react-native-gesture-handler";
@@ -58,6 +58,7 @@ let renderedCount = 0;
 const MESSAGES_PER_PAGE = 80;
 
 export default function ChatMessage() {
+  const giftedChatRef = useRef();
   console.log(`[ChatMessage]: ${renderedCount++}`);
 
   const dispatch = useAppDispatch();
@@ -179,32 +180,31 @@ export default function ChatMessage() {
 
   const handleSend = useCallback(
     (messages: IMessage[]) => {
-      messageContainerRef?.current?.scrollToOffset({
-        offset: 0,
-        animated: true,
-      });
+      // InteractionManager.runAfterInteractions(() => {
+      stopTyping();
 
-      InteractionManager.runAfterInteractions(() => {
-        stopTyping();
+      // Check if they are images
+      const mediaUrls = uploadingImages
+        .filter((img) => img.cloudinaryUrl)
+        .map((img) => img.cloudinaryUrl) as string[];
 
-        // Check if they are images
-        const mediaUrls = uploadingImages
-          .filter((img) => img.cloudinaryUrl)
-          .map((img) => img.cloudinaryUrl) as string[];
-
-        const message = messages[0];
-        sendMessage(
-          {
-            conversationId: conversationId as string,
-            content: message.text,
-            sender: user!._id,
-            receiver: activeChat!.receiver!._id,
-            mediaUrls,
-          } as unknown as ExtendedMessage,
-          `${conversationId}`
-        );
-        setUploadingImages([]);
-      });
+      const message = messages[0];
+      sendMessage(
+        {
+          conversationId: conversationId as string,
+          content: message.text,
+          sender: user!._id,
+          receiver: activeChat!.receiver!._id,
+          mediaUrls,
+        } as unknown as ExtendedMessage,
+        `${conversationId}`
+      );
+      setUploadingImages([]);
+      // messageContainerRef?.current?.scrollToOffset({
+      //   animated: true,
+      //   offset: 0,
+      // });
+      // });
     },
     [conversationId, uploadingImages, stopTyping, sendMessage, user, activeChat]
   );
@@ -383,6 +383,8 @@ export default function ChatMessage() {
     [handleAudioSend, isRecording, setIsRecording]
   );
 
+  const [maintainPosition, setMaintainPosition] = useState(true);
+
   const chatProps = useMemo(
     () =>
       ({
@@ -393,21 +395,19 @@ export default function ChatMessage() {
             convertToGiftedChatMessage(message as unknown as ExtendedMessage)
           ),
         listViewProps: {
-          windowSize: 20,
-          initialNumToRender: 25,
-          maxToRenderPerBatch: 50,
-          updateCellsBatchingPeriod: 50,
-          removeCliippedSubviews: true,
-          // maintainVisibleContentPosition: {
-          //   minIndexForVisible: 1,
-          // },
-          viewabilityConfig: {
-            itemVisiblePercenThreshold: 50,
+          windowSize: 12,
+          initialNumToRender: 15,
+          maxToRenderPerBatch: 40,
+          updateCellsBatchingPeriod: 60,
+          maintainVisibleContentPosition: {
+            minIndexForVisible: 0,
+            autoScrollTopThreshold: 10,
           },
+          // viewabilityConfig: {
+          //   itemVisiblePercenThreshold: 60,
+          // },
         },
-        onSend: (messages: IMessage[]) => handleSend(messages),
         user: { _id: user!._id },
-        renderBubble,
         placeholder:
           uploadingImages.length > 0 ? "Add a caption..." : "Type a message...",
         isTyping: isOtherUserTyping,
@@ -422,21 +422,21 @@ export default function ChatMessage() {
         infiniteScroll: true,
         loadEarlier: hasMoreMessages,
         maxInputLength: 2000,
+        keyboardShouldPersistTaps: "never",
+        onSend: handleSend,
+        renderBubble,
         onLoadEarlier: loadEarlier,
         renderChatEmpty,
         renderChatFooter,
         renderInputToolbar,
-        keyboardShouldPersistTaps: "never",
       } as GiftedChatProps),
     [
       messagesFromRealm,
-      page,
-      hasMoreMessages,
-      isOtherUserTyping,
+      // page,
+      // hasMoreMessages,
+      // isOtherUserTyping,
       isSyncing,
-      uploadingImages,
-      isRecording,
-      handleAudioSend,
+      // uploadingImages,
     ]
   );
 
