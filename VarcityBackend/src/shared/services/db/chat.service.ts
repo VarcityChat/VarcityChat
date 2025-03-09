@@ -21,6 +21,7 @@ class ChatService {
         user2: targetUserId,
         lastMessageTimestamp: new Date()
       });
+      await conversation.populate('user1 user2');
     }
     return conversation;
   }
