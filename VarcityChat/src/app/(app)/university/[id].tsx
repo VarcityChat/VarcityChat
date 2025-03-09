@@ -7,7 +7,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { colors, Text, View } from "@/ui";
+import { colors, IS_IOS, Text, View } from "@/ui";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -218,7 +218,11 @@ export default function University() {
       ) : (
         <AnimatedList
           ListHeaderComponent={
-            <View style={{ paddingTop: HEADER_HEIGHT - insets.top }}>
+            <View
+              style={{
+                paddingTop: IS_IOS ? HEADER_HEIGHT - insets.top : HEADER_HEIGHT,
+              }}
+            >
               <SearchBar
                 placeholder="Search for people here"
                 onTouchStart={() =>

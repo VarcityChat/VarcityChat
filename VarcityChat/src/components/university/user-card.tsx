@@ -1,4 +1,4 @@
-import { HEIGHT, View, Text, TouchableOpacity, Image } from "@/ui";
+import { HEIGHT, View, Text, TouchableOpacity, Image, IS_IOS } from "@/ui";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 import { IUser } from "@/types/user";
@@ -45,37 +45,67 @@ function UserCard({ user }: IUserCardProps) {
         ) : null}
       </View>
 
-      <BlurView
-        intensity={30}
-        tint="dark"
-        className="absolute bottom-0 left-0 right-0 flex-row z-10 w-full h-[26%] bg-green-200 px-4 items-center"
-      >
-        <View className="flex-1">
-          {user?.hobbies && user?.hobbies?.length && (
-            <View className="flex-row gap-2 mb-1">
-              {user.hobbies.slice(0, 3).map((hobby, index) => (
-                <Text className="text-sm text-grey-50" key={`hobby-${index}`}>
-                  {hobby}
-                </Text>
-              ))}
-              {user.hobbies.length > 3 && (
-                <Text className="text-sm text-grey-50">
-                  +{user.hobbies.length - 3} more
-                </Text>
-              )}
-            </View>
-          )}
-          <Text className="font-semibold text-white text-lg">
-            {user.firstname} {user.lastname}
-          </Text>
+      {IS_IOS ? (
+        <BlurView
+          intensity={30}
+          tint="dark"
+          className="absolute bottom-0 left-0 right-0 flex-row z-10 w-full h-[26%] bg-green-200 px-4 items-center"
+        >
+          <View className="flex-1">
+            {user?.hobbies && user?.hobbies?.length && (
+              <View className="flex-row gap-2 mb-1">
+                {user.hobbies.slice(0, 3).map((hobby, index) => (
+                  <Text className="text-sm text-grey-50" key={`hobby-${index}`}>
+                    {hobby}
+                  </Text>
+                ))}
+                {user.hobbies.length > 3 && (
+                  <Text className="text-sm text-grey-50">
+                    +{user.hobbies.length - 3} more
+                  </Text>
+                )}
+              </View>
+            )}
+            <Text className="font-semibold text-white text-lg">
+              {user.firstname} {user.lastname}
+            </Text>
+          </View>
+          <View className="">
+            <Text className="text-sm text-grey-50 mb-1">Looking for:</Text>
+            <Text className="text-white text-base font-semibold">
+              {user.lookingFor}
+            </Text>
+          </View>
+        </BlurView>
+      ) : (
+        <View className="absolute bottom-0 left-0 right-0 flex-row z-10 w-full h-[26%] bg-[#0000009a] px-4 items-center">
+          <View className="flex-1">
+            {user?.hobbies && user?.hobbies?.length && (
+              <View className="flex-row gap-2 mb-1">
+                {user.hobbies.slice(0, 3).map((hobby, index) => (
+                  <Text className="text-sm text-grey-50" key={`hobby-${index}`}>
+                    {hobby}
+                  </Text>
+                ))}
+                {user.hobbies.length > 3 && (
+                  <Text className="text-sm text-grey-50">
+                    +{user.hobbies.length - 3} more
+                  </Text>
+                )}
+              </View>
+            )}
+            <Text className="font-semibold text-white text-lg">
+              {user.firstname} {user.lastname}
+            </Text>
+          </View>
+          <View className="">
+            <Text className="text-sm text-grey-50 mb-1">Looking for:</Text>
+            <Text className="text-white text-base font-semibold">
+              {user.lookingFor}
+            </Text>
+          </View>
         </View>
-        <View className="">
-          <Text className="text-sm text-grey-50 mb-1">Looking for:</Text>
-          <Text className="text-white text-base font-semibold">
-            {user.lookingFor}
-          </Text>
-        </View>
-      </BlurView>
+      )}
     </TouchableOpacity>
   );
 }
