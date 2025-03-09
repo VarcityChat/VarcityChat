@@ -101,7 +101,7 @@ class ChatService {
 
       // user1, then user2 should see that user1 has read his messages
       await MessageModel.updateMany(
-        { conversationId, receiver: user2Id, readAt: { $exists: false } },
+        { conversationId, receiver: user1Id, readAt: { $exists: false } },
         { $set: { readAt: new Date() } }
       );
     } else {
@@ -113,7 +113,7 @@ class ChatService {
 
       // user2, then user1 should see that user2 has read his messages
       await MessageModel.updateMany(
-        { conversationId, receiver: user1Id, readAt: { $exists: false } },
+        { conversationId, receiver: user2Id, readAt: { $exists: false } },
         { $set: { readAt: new Date() } }
       );
     }
