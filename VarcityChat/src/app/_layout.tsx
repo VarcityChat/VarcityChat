@@ -29,6 +29,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { RealmProvider, useRealm } from "@realm/react";
 import { persistor, store, useAppDispatch } from "@/core/store/store";
+import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
 import { setAuth } from "@/core/auth/auth-slice";
@@ -39,9 +40,9 @@ export { ErrorBoundary } from "expo-router";
 
 import "../../global.css";
 
-// export const unstable_settings = {
-//   initialRouteName: "(auth)",
-// };
+export const unstable_settings = {
+  initialRouteName: "(auth)",
+};
 
 SplashScreen.preventAutoHideAsync();
 
@@ -71,13 +72,13 @@ export default function RootLayout() {
 
   return (
     <Providers>
-      <RootLayoutNav fontsLoaded={fontsLoaded} />
+      <RootLayoutNav />
       <Toast />
     </Providers>
   );
 }
 
-function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
+function RootLayoutNav() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
@@ -101,6 +102,7 @@ function RootLayoutNav({ fontsLoaded }: { fontsLoaded: boolean }) {
     };
 
     checkAuth();
+    loadSelectedTheme();
   }, []);
 
   useEffect(() => {

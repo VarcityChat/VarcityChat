@@ -5,6 +5,7 @@ import {
 } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
 import colors from "@/ui/colors";
+import { useMemo } from "react";
 
 const DarkTheme: Theme = {
   ..._DarkTheme,
@@ -30,6 +31,7 @@ const LightTheme: Theme = {
 export function useThemeConfig() {
   const { colorScheme } = useColorScheme();
 
-  if (colorScheme === "dark") return DarkTheme;
-  return LightTheme;
+  return useMemo(() => {
+    return colorScheme === "dark" ? DarkTheme : LightTheme;
+  }, [colorScheme]);
 }
