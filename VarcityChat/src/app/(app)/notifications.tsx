@@ -42,7 +42,7 @@ export default function NotificationsScreen() {
     : [];
 
   const renderItem = ({ item }: { item: INotification }) => (
-    <View className="flex-row items-center py-5 border-b border-gray-200 dark:border-gray-600">
+    <View className="flex-row items-center py-5 px-6 border-b border-gray-200 dark:border-gray-600">
       {!!item?.from && (item?.from as IUser)?.images.length > 0 && (
         <Image
           source={{ uri: (item.from as IUser)?.images[0] }}
@@ -76,17 +76,21 @@ export default function NotificationsScreen() {
             </Text>
           </TouchableOpacity>
         }
-      >
-        <SectionList
-          contentContainerStyle={{ paddingHorizontal: 24 }}
-          sections={sections}
-          keyExtractor={(item) => item._id}
-          renderSectionHeader={({ section: { title } }) => (
-            <Text className="font-sans-semibold text-sm py-4">{title}</Text>
-          )}
-          renderItem={renderItem}
-        />
-      </Header>
+        useScrollView={false}
+        listProps={{
+          component: SectionList,
+          sections: sections,
+          renderItem: renderItem,
+          keyExtractor: (item: INotification) => item._id,
+          renderSectionHeader(info) {
+            return (
+              <Text className="font-sans-semibold text-sm py-2 bg-grey-50 dark:bg-charcoal-850 px-6">
+                {info.section.title}
+              </Text>
+            );
+          },
+        }}
+      ></Header>
     </View>
   );
 }
