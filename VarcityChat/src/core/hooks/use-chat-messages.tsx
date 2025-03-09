@@ -62,6 +62,8 @@ export const useChatMessages = () => {
           // sort messages in ascending sequence
           serverMessages.sort((a, b) => a.sequence - b.sequence);
 
+          const messagesToCreate: Partial<MessageSchema>[] = [];
+
           for (const message of serverMessages) {
             const localMessage = realm.objectForPrimaryKey<MessageSchema>(
               "Message",
@@ -78,24 +80,30 @@ export const useChatMessages = () => {
                   : "sent";
               });
             } else {
-              realm.write(() => {
-                realm.create<MessageSchema>("Message", {
-                  _id: new BSON.ObjectID(message.localId),
-                  conversationId: message.conversationId,
-                  deliveryStatus: "sent",
-                  mediaUrls: message?.mediaUrls,
-                  content: message.content,
-                  sender: message.sender,
-                  receiver: message.receiver,
-                  serverId: message._id,
-                  serverSequence: Number(message.sequence),
-                  localSequence: Number(message.sequence),
-                  audio: message?.audio,
-                  createdAt: message.createdAt,
-                  lastSyncTimestamp: new Date(message.createdAt),
-                });
+              messagesToCreate.push({
+                _id: new BSON.ObjectID(message.localId),
+                conversationId: message.conversationId,
+                deliveryStatus: message?.readAt ? "delivered" : "sent",
+                mediaUrls: message?.mediaUrls,
+                content: message?.content,
+                sender: message.sender,
+                receiver: message.receiver,
+                serverId: message._id,
+                serverSequence: Number(message.sequence),
+                localSequence: Number(message.sequence),
+                audio: message?.audio,
+                createdAt: message.createdAt,
+                lastSyncTimestamp: new Date(message.createdAt),
               });
             }
+          }
+
+          if (messagesToCreate.length) {
+            realm.write(() => {
+              for (let i = 0; i < messagesToCreate.length; i++) {
+                realm.create<MessageSchema>("Message", messagesToCreate[i]);
+              }
+            });
           }
         }
       } catch (error) {
