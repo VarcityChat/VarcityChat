@@ -11,7 +11,7 @@ import { twMerge } from "tailwind-merge";
 import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { useToast } from "@/core/hooks/use-toast";
 import { useLazyUserExistsQuery, useSignupMutation } from "@/api/auth/auth-api";
-import { uploadToCloudinary } from "@/core/utils";
+import { uploadToCloudinary } from "@/core/upload-utils";
 import { useApi } from "@/core/hooks/use-api";
 import { setAuth, setShowSuccessModal } from "@/core/auth/auth-slice";
 

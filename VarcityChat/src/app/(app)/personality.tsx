@@ -13,7 +13,7 @@ import { LookingFor, RelationshipStatus } from "@/types/user";
 import * as ImagePicker from "expo-image-picker";
 import { twMerge } from "tailwind-merge";
 import { useUpdateUserMutation } from "@/api/auth/auth-api";
-import { uploadToCloudinary } from "@/core/utils";
+import { uploadToCloudinary } from "@/core/upload-utils";
 
 export default function Personality() {
   const { user } = useAuth();
@@ -120,7 +120,9 @@ export default function Personality() {
             await uploadToCloudinary({ preset: "user_profiles" }, img)
         )
       );
-      const successfulUploads = uploadedImageUrls.filter((url) => url !== null);
+      const successfulUploads = uploadedImageUrls.filter(
+        (url: null | string) => url !== null
+      );
       if (successfulUploads.length === 0) {
         showToast({
           type: "error",

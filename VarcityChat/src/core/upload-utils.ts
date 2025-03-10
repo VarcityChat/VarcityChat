@@ -28,7 +28,10 @@ export const uploadToCloudinary = async (
   retryCount = 0
 ): Promise<string | null> => {
   try {
-    const base64 = await FileSystem.readAsStringAsync(asset.uri, {
+    const compressedImageUri = await ImageCompressor.compress(asset.uri, {
+      maxWidth: 1000,
+    });
+    const base64 = await FileSystem.readAsStringAsync(compressedImageUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
     const mimeType = asset?.mimeType || "image/jpeg";
