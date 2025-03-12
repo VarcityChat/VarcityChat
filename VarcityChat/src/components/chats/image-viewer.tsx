@@ -1,4 +1,3 @@
-import { StyleSheet, Modal, View } from "react-native";
 import ImageViewing from "react-native-image-viewing";
 
 type ImageViewerProps = {
@@ -15,32 +14,16 @@ export const ImageViewer = ({
   onClose,
 }: ImageViewerProps) => {
   return (
-    <Modal
+    <ImageViewing
       visible={visible}
-      transparent
-      animationType="none"
+      images={imageUrls.map((url) => ({ uri: url }))}
+      imageIndex={initialIndex}
+      backgroundColor="rgba(0, 0, 0, 0.95)"
       onRequestClose={onClose}
-    >
-      <View style={styles.container}>
-        <ImageViewing
-          visible={visible}
-          images={imageUrls.map((url) => ({ uri: url }))}
-          imageIndex={initialIndex}
-          backgroundColor="rgba(0, 0, 0, 0.95)"
-          onRequestClose={onClose}
-          swipeToCloseEnabled
-          doubleTapToZoomEnabled
-          presentationStyle="overFullScreen"
-          animationType="none"
-        />
-      </View>
-    </Modal>
+      swipeToCloseEnabled
+      doubleTapToZoomEnabled
+      presentationStyle="overFullScreen"
+      animationType="none"
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.95)",
-  },
-});
