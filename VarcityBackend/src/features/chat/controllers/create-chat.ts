@@ -6,8 +6,11 @@ import { ioInstance } from '@root/shared/sockets/user';
 import { chatService } from '@service/db/chat.service';
 import { notificationService } from '@service/db/notification.service';
 import { userService } from '@service/db/user.service';
+import { ChatCache } from '@service/redis/chat.cache';
 import { Request, Response } from 'express';
 import HTTP_STATUS from 'http-status-codes';
+
+const chatCache = new ChatCache();
 
 class Add {
   @validator(addConversationSchema)
@@ -46,6 +49,14 @@ class Add {
       targetUserId,
       targetUser,
       fromUser: currentAuthUser
+    });
+
+    // Add user to conversation partners
+    await chatCache.addUserConversationPartner(req.currentUser!.userId, {
+      _id: conversation._id.toString(),
+      user1: req.currentUser!.userId,
+      user2: targetUserId,
+      status: conversation.status
     });
 
     // TODO: send push notification to 'targetUserId' informing on new message request

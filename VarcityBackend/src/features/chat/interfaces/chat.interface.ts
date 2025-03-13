@@ -1,16 +1,33 @@
+import { IUserDocument } from '@user/interfaces/user.interface';
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
 export interface IConversationDocument extends Document {
   _id: string | ObjectId;
-  user1: string | ObjectId;
-  user2: string | ObjectId;
-  lastMessage: string | null;
+  user1: string | ObjectId | IUserDocument;
+  user2: string | ObjectId | IUserDocument;
+  lastMessage: string | ObjectId | IMessageDocument | null;
   lastMessageTimestamp: Date | null;
   unreadCountUser1: number;
   unreadCountUser2: number;
   status: CONVERSATION_STATUS.pending | CONVERSATION_STATUS.accepted | CONVERSATION_STATUS.rejected;
   messageSequence: number;
+}
+
+export type PopulatedConversation = Omit<
+  IConversationDocument,
+  'user1' | 'user2' | 'lastMessage'
+> & {
+  user1: IUserDocument;
+  user2: IUserDocument;
+  lastMessage: IMessageDocument | null;
+};
+
+export interface ILeanConversation {
+  _id: string;
+  user1: string;
+  user2: string;
+  status: CONVERSATION_STATUS.pending | CONVERSATION_STATUS.accepted | CONVERSATION_STATUS.rejected;
 }
 
 export interface IMessageDocument extends Document {

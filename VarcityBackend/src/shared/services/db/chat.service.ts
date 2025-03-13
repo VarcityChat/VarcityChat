@@ -1,4 +1,8 @@
-import { CONVERSATION_STATUS, IMessageData } from '@chat/interfaces/chat.interface';
+import {
+  CONVERSATION_STATUS,
+  IMessageData,
+  PopulatedConversation
+} from '@chat/interfaces/chat.interface';
 import { IMessageDocument, IConversationDocument } from '@chat/interfaces/chat.interface';
 import { ConversationModel } from '@chat/models/conversation.model';
 import { MessageModel } from '@chat/models/message.model';
@@ -135,13 +139,16 @@ class ChatService {
 
   // public async getConversation(): Promise<IConversationDocument | null> {}
 
-  public async getConversationList(userId: string): Promise<IConversationDocument[]> {
-    const conversations: IConversationDocument[] = await ConversationModel.find({
+  public async getConversationList(userId: string): Promise<PopulatedConversation[]> {
+    const conversations = await ConversationModel.find({
       $or: [{ user1: userId }, { user2: userId }]
     })
-      .populate('user1 user2 lastMessage')
-      .sort({ lastMessageTimestamp: -1, createdAt: -1 });
-    return conversations;
+      .populate('user1')
+      .populate('user2')
+      .populate('lastMessage')
+      .sort({ lastMessageTimestamp: -1, createdAt: -1 })
+      .lean();
+    return conversations as PopulatedConversation[];
   }
 
   public async getMessages(conversationId: string, skip: number = 0): Promise<IMessageDocument[]> {
