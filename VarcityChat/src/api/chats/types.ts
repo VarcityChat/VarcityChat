@@ -25,7 +25,6 @@ export interface ExtendedMessage extends IMessage {
   localSequence: number;
   sequence: number;
   mediaType?: "audio" | "video" | "image";
-  // isAudioUploading: "bo"
   reply?: {
     messageId: string;
     content: string;
@@ -59,10 +58,18 @@ export interface IChat {
   unreadCountUser1: number;
   unreadCountUser2: number;
   status: "pending" | "rejected" | "accepted";
+  isOnline: boolean;
+  lastSeen: string;
 }
 
 export interface IUpdateChatRequest {
   conversationId: string;
+}
+
+export interface IUserStatusChanged {
+  userId: string;
+  status: "online" | "offline";
+  lastSeen: string;
 }
 
 export interface IChatAck {

@@ -37,7 +37,9 @@ export const capitalize = (text: string): string => {
   return text[0].toUpperCase() + text.substring(1);
 };
 
-export const formatLastMessageTime = (timestamp: Date | string | undefined) => {
+export const formatLastMessageTime = (
+  timestamp: Date | string | number | undefined
+) => {
   if (!timestamp) return "";
 
   const messageDate = new Date(timestamp);

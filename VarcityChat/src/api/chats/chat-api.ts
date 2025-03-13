@@ -26,7 +26,14 @@ export const messagesApi = api.injectEndpoints({
         url: "/chat/conversations",
         method: "GET",
       }),
-      transformResponse: (response: { list: IChat[] }) => response.list,
+      transformResponse: (response: { list: IChat[] }) =>
+        response.list.map((chat) => ({
+          ...chat,
+          isOnline: chat?.isOnline || false,
+          lastSeen: chat?.lastSeen
+            ? new Date(chat.lastSeen).toISOString()
+            : new Date().toISOString(),
+        })),
       providesTags: ["Chats"],
     }),
 

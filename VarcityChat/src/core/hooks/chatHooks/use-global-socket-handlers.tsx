@@ -1,7 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
 import { useChatMessages } from "../use-chat-messages";
-import { ExtendedMessage, IChat, IUpdateChatRequest } from "@/api/chats/types";
+import {
+  ExtendedMessage,
+  IChat,
+  IUpdateChatRequest,
+  IUserStatusChanged,
+} from "@/api/chats/types";
 import { useChats } from "../use-chats";
 import { useAppSelector } from "@/core/store/store";
 import { useAuth } from "../use-auth";
@@ -22,6 +27,7 @@ export const useGlobalSocketHandlers = (
     updateUnreadChatCount,
     loadChats,
     updateChatStatus,
+    updateUserOnlineStatus,
   } = useChats();
   const activeChat = useAppSelector((state) => state.chats.activeChat);
   const activeChatRef = useRef<IChat | null>(null);
@@ -73,6 +79,10 @@ export const useGlobalSocketHandlers = (
     dispatch(setHasNotification(true));
   };
 
+  const handleUserStatusChanged = (data: IUserStatusChanged) => {
+    updateUserOnlineStatus(data.userId, data.status, data.lastSeen);
+  };
+
   useEffect(() => {
     if (!socket || !isConnected) return;
 
@@ -82,6 +92,7 @@ export const useGlobalSocketHandlers = (
     socket.on("rejected-conversation-request", handleMessageRequestRejected);
     socket.on("user-read-messages", handleMarkMessagesInChatAsRead);
     socket.on("new-notification", handleNewNotification);
+    socket.on("user-status-changed", handleUserStatusChanged);
 
     return () => {
       socket.off("new-message", handleNewMessage);
@@ -90,6 +101,7 @@ export const useGlobalSocketHandlers = (
       socket.off("rejected-conversation-request", handleMessageRequestRejected);
       socket.off("user-read-messages", handleMarkMessagesInChatAsRead);
       socket.off("new-notification", handleNewNotification);
+      socket.off("user-status-changed", handleUserStatusChanged);
     };
   }, [socket, isConnected]);
 };

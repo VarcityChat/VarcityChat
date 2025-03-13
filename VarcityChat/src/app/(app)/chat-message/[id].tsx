@@ -106,6 +106,7 @@ export default function ChatMessage() {
 
   useEffect(() => {
     if (isConnected) {
+      socket?.emit("get-user-activity", activeChat?.receiver!._id);
       syncMessagesFromBackend(conversationId as string);
     }
   }, [conversationId, isConnected]);

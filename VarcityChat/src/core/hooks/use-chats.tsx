@@ -77,6 +77,24 @@ export const useChats = () => {
     );
   };
 
+  const updateUserOnlineStatus = (
+    userId: string,
+    status: "online" | "offline",
+    lastSeen: string
+  ) => {
+    dispatch(
+      messagesApi.util.updateQueryData("getChats", undefined, (draft) => {
+        const chat = draft.find(
+          (chat) => chat.user1._id === userId || chat.user2._id === userId
+        );
+        if (chat) {
+          chat.isOnline = status === "online";
+          chat.lastSeen = lastSeen || "";
+        }
+      })
+    );
+  };
+
   const updateChatCount = (
     chatId: string,
     count: number,
@@ -129,6 +147,7 @@ export const useChats = () => {
     updateChatStatus,
     updateUnreadChatCount,
     updateChatCount,
+    updateUserOnlineStatus,
     error,
     totalUnreadCount,
   };

@@ -6,13 +6,14 @@ import BackButton from "@/components/back-button";
 import { useActiveChat } from "@/core/hooks/use-chats";
 import { defaultAvatarUrl } from "../../../../constants/chats";
 import { useColorScheme } from "nativewind";
+import { formatLastMessageTime } from "@/core/utils";
 
 export default function ChatMessageLayout() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const { id } = useLocalSearchParams();
-  const { activeChatReceiver } = useActiveChat(id as string);
+  const { activeChatReceiver, chat } = useActiveChat(id as string);
 
   return (
     <Stack>
@@ -72,7 +73,13 @@ export default function ChatMessageLayout() {
                     {activeChatReceiver?.lastname}
                   </Text>
                   <Text className="text-sm text-grey-500 font-sans-regular">
-                    Active 5 mins ago
+                    {chat?.isOnline
+                      ? "Online"
+                      : chat?.lastSeen
+                      ? `Last Seen ${formatLastMessageTime(
+                          Number(chat?.lastSeen)
+                        )}`
+                      : "Offline"}
                   </Text>
                 </View>
               </View>
