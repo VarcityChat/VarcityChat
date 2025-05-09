@@ -33,9 +33,11 @@ import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
 import { setAuth } from "@/core/auth/auth-slice";
+import { usePushNotifications } from "@/core/hooks/use-push-notification";
+import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
 import Toast from "react-native-toast-message";
-import * as Updates from "expo-updates";
+// import * as Updates from "expo-updates";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -66,18 +68,18 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
-  const checkForOTAUpdate = async () => {
-    try {
-      const update = await Updates.checkForUpdateAsync();
-      if (update.isAvailable) {
-        await Updates.fetchUpdateAsync();
-        await Updates.reloadAsync();
-      }
-    } catch (e) {
-    } finally {
-      setIsUpdateChecked(true);
-    }
-  };
+  // const checkForOTAUpdate = async () => {
+  //   try {
+  //     const update = await Updates.checkForUpdateAsync();
+  //     if (update.isAvailable) {
+  //       await Updates.fetchUpdateAsync();
+  //       await Updates.reloadAsync();
+  //     }
+  //   } catch (e) {
+  //   } finally {
+  //     setIsUpdateChecked(true);
+  //   }
+  // };
 
   // useEffect(() => {
   //   checkForOTAUpdate();
@@ -105,6 +107,8 @@ function RootLayoutNav() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  // const { expoPushToken } = usePushNotifications();
+  const [updateDeviceToken] = useUpdateDeviceTokenMutation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -135,6 +139,10 @@ function RootLayoutNav() {
       }
     }
   }, [isAuthenticated, isAuthChecked]);
+
+  useEffect(() => {
+    updateDeviceToken({ deviceToken: "1234" });
+  }, [isAuthenticated]);
 
   if (!isAuthChecked) return null;
 
