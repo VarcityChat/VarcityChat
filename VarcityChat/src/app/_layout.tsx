@@ -33,11 +33,11 @@ import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
 import { setAuth } from "@/core/auth/auth-slice";
-import { usePushNotifications } from "@/core/hooks/use-push-notification";
-import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
+// import { usePushNotifications } from "@/core/hooks/use-push-notification";
+// import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
 import Toast from "react-native-toast-message";
-import * as Updates from "expo-updates";
+// import * as Updates from "expo-updates";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -68,28 +68,29 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
-  const checkForOTAUpdate = async () => {
-    try {
-      const update = await Updates.checkForUpdateAsync();
-      if (update.isAvailable) {
-        await Updates.fetchUpdateAsync();
-        await Updates.reloadAsync();
-      }
-    } catch (e) {
-    } finally {
-      setIsUpdateChecked(true);
-    }
-  };
+  // const checkForOTAUpdate = async () => {
+  //   try {
+  //     const update = await Updates.checkForUpdateAsync();
+  //     if (update.isAvailable) {
+  //       await Updates.fetchUpdateAsync();
+  //       await Updates.reloadAsync();
+  //     }
+  //   } catch (e) {
+  //     alert(`Update check failed: ${e}`);
+  //   } finally {
+  //     setIsUpdateChecked(true);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   checkForOTAUpdate();
+  // }, []);
 
   useEffect(() => {
-    checkForOTAUpdate();
-  }, []);
-
-  useEffect(() => {
-    if (fontsLoaded && isUpdateChecked) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, isUpdateChecked]);
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
 
@@ -107,8 +108,8 @@ function RootLayoutNav() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
-  const { expoPushToken, resetBadgeCount } = usePushNotifications();
-  const [updateDeviceToken] = useUpdateDeviceTokenMutation();
+  // const { expoPushToken, resetBadgeCount } = usePushNotifications();
+  // const [updateDeviceToken] = useUpdateDeviceTokenMutation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -130,20 +131,25 @@ function RootLayoutNav() {
 
   useEffect(() => {
     const inProtectedGroup = segments[0] === "(app)";
-    if (isAuthChecked) {
+    if (!isAuthChecked) {
       if (isAuthenticated && !inProtectedGroup) {
         router.replace("/discover");
-      } else if (!isAuthenticated) {
-        router.canDismiss() && router.dismissAll();
-        router.replace("/onboarding/onboarding-one");
+      } else {
+        // router.canDismiss() && router.dismissAll();
+        router.push("/onboarding/onboarding-one");
       }
     }
   }, [isAuthenticated, isAuthChecked]);
 
-  useEffect(() => {
-    updateDeviceToken({ deviceToken: expoPushToken });
-    resetBadgeCount();
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   const handleNotifications = () => {
+  //     try {
+  //       updateDeviceToken({ deviceToken: expoPushToken });
+  //       resetBadgeCount();
+  //     } catch (e) {}
+  //   };
+  //   handleNotifications();
+  // }, [isAuthenticated]);
 
   if (!isAuthChecked) return null;
 
@@ -159,9 +165,13 @@ function Providers({ children }: { children: ReactNode }) {
   const theme = useThemeConfig();
 
   const migration = (oldRealm: Realm, newRealm: Realm) => {
-    if (oldRealm.schemaVersion < 1) {
-      const oldObjects = oldRealm.objects("Message");
-      const newObjects = newRealm.objects("Message");
+    try {
+      if (oldRealm.schemaVersion < 1) {
+        const oldObjects = oldRealm.objects("Message");
+        const newObjects = newRealm.objects("Message");
+      }
+    } catch (error) {
+      alert(`REALM MIGRATION ERROR: ${error}`);
     }
   };
 
