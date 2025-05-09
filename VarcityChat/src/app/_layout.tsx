@@ -37,7 +37,7 @@ import { usePushNotifications } from "@/core/hooks/use-push-notification";
 import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
 import Toast from "react-native-toast-message";
-// import * as Updates from "expo-updates";
+import * as Updates from "expo-updates";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -68,22 +68,22 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
-  // const checkForOTAUpdate = async () => {
-  //   try {
-  //     const update = await Updates.checkForUpdateAsync();
-  //     if (update.isAvailable) {
-  //       await Updates.fetchUpdateAsync();
-  //       await Updates.reloadAsync();
-  //     }
-  //   } catch (e) {
-  //   } finally {
-  //     setIsUpdateChecked(true);
-  //   }
-  // };
+  const checkForOTAUpdate = async () => {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (e) {
+    } finally {
+      setIsUpdateChecked(true);
+    }
+  };
 
-  // useEffect(() => {
-  //   checkForOTAUpdate();
-  // }, []);
+  useEffect(() => {
+    checkForOTAUpdate();
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded && isUpdateChecked) {
@@ -107,7 +107,7 @@ function RootLayoutNav() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
-  // const { expoPushToken } = usePushNotifications();
+  const { expoPushToken, resetBadgeCount } = usePushNotifications();
   const [updateDeviceToken] = useUpdateDeviceTokenMutation();
 
   useEffect(() => {
@@ -141,7 +141,8 @@ function RootLayoutNav() {
   }, [isAuthenticated, isAuthChecked]);
 
   useEffect(() => {
-    updateDeviceToken({ deviceToken: "1234" });
+    updateDeviceToken({ deviceToken: expoPushToken });
+    resetBadgeCount();
   }, [isAuthenticated]);
 
   if (!isAuthChecked) return null;

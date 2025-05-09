@@ -46,7 +46,7 @@ export default function PersonalInformationForm({
     isLoading,
     isError,
   } = useGetUniversitiesQuery(null, {
-    pollingInterval: 60000,
+    pollingInterval: 30000,
     skipPollingIfUnfocused: true,
   });
 

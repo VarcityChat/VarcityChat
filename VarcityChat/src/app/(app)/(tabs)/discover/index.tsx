@@ -54,7 +54,9 @@ export default function DiscoverScreen() {
   const [search, setSearch] = useState("");
 
   // API calls
-  const { data: universities, isLoading } = useGetUniversitiesQuery(null);
+  const { data: universities, isLoading } = useGetUniversitiesQuery(null, {
+    pollingInterval: 30000,
+  });
 
   // Track scroll position and direction
   const scrollY = useSharedValue(0);
