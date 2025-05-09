@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import {
   BubbleProps,
-  GiftedChat,
   GiftedChatProps,
   IMessage,
   InputToolbarProps,
@@ -33,7 +32,6 @@ import { useAppDispatch, useAppSelector } from "@/core/store/store";
 import { resetActiveChat } from "@/core/chats/chats-slice";
 import { useTypingStatus } from "@/core/hooks/chatHooks/use-typing-status";
 import { ChatFooter } from "@/components/chats/chat-footer";
-import EmojiSelectSvg from "@/ui/icons/chat/emoji-select-svg";
 import ChatMessageBox from "@/components/chats/chat-message-box";
 import ReplyMessageBar from "@/components/chats/reply-message-bar";
 import CustomMessageBubble from "@/components/chats/bubble";
@@ -93,6 +91,8 @@ export default function ChatMessage() {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
+
+  // const [messages, setMessages] = useState()
 
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
@@ -392,13 +392,14 @@ export default function ChatMessage() {
           initialNumToRender: 25,
           maxToRenderPerBatch: 50,
           updateCellsBatchingPeriod: 50,
-          removeCliippedSubviews: true,
+          removeCliippedSubviews: Platform.OS === "android",
           // maintainVisibleContentPosition: {
           //   minIndexForVisible: 1,
+          //   autoScrollToTopThreshold: 0,
           // },
-          viewabilityConfig: {
-            itemVisiblePercenThreshold: 50,
-          },
+          // viewabilityConfig: {
+          //   itemVisiblePercenThreshold: 50,
+          // },
         },
         onSend: (messages: IMessage[]) => handleSend(messages),
         user: { _id: user!._id },
@@ -431,7 +432,6 @@ export default function ChatMessage() {
       isSyncing,
       uploadingImages,
       isRecording,
-      handleAudioSend,
     ]
   );
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Text, View, TouchableOpacity, IS_IOS } from "@/ui";
+import { Text, View, TouchableOpacity } from "@/ui";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import Animated, {
   useSharedValue,
@@ -19,6 +19,7 @@ import {
   IOSOutputFormat,
 } from "expo-av/build/Audio";
 import SendSvg from "@/ui/icons/chat/send-svg";
+import { useToast } from "@/core/hooks/use-toast";
 
 const VOICE_RECORDER_HEIGHT = 45;
 
@@ -38,6 +39,7 @@ export const VoiceRecorder = ({
   onSend,
   onCancel,
 }: VoiceRecorderProps) => {
+  const { showToast } = useToast();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -114,7 +116,7 @@ export const VoiceRecorder = ({
         timerRef.current = setInterval(() => {
           setDuration((prev) => prev + 1);
           audioLevels.value = Math.random();
-        }, 1000);
+        }, 1000) as unknown as NodeJS.Timeout;
       } else {
         // Pause recording
         await recording.pauseAsync();
@@ -133,16 +135,17 @@ export const VoiceRecorder = ({
   const startRecording = async () => {
     try {
       wasUnloadedRef.current = false;
+      const permissionResponse = await Audio.requestPermissionsAsync();
 
-      await Audio.requestPermissionsAsync();
-
-      const newRecording = new Audio.Recording();
-      const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
-
-      setDuration(0);
-      setIsRecording(true);
-      containerHeight.value = VOICE_RECORDER_HEIGHT;
-      waveOpacity.value = withTiming(1, { duration: 300 });
+      if (!permissionResponse.granted) {
+        showToast({
+          type: "error",
+          text1: "Permissions Denied",
+          text2:
+            "Open the settings app to grant recording permissions to Varcity",
+        });
+        return;
+      }
 
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
@@ -153,27 +156,25 @@ export const VoiceRecorder = ({
         playThroughEarpieceAndroid: false,
       });
 
-      await newRecording.prepareToRecordAsync({
-        android: {
-          ...android,
-        },
-        ios: {
-          ...ios,
-          extension: ".m4a",
-          outputFormat: IOSOutputFormat.MPEG4AAC,
-        },
-      } as Audio.RecordingOptions);
-      await newRecording.startAsync();
+      const { recording: newRecording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      setDuration(0);
+      setIsRecording(true);
+      containerHeight.value = VOICE_RECORDER_HEIGHT;
+      waveOpacity.value = withTiming(1, { duration: 300 });
 
       setRecording(newRecording);
       setIsPaused(false);
 
       // Start timer
       timerRef.current = setInterval(() => {
+        console.log("UPDATE DURATION");
         setDuration((prev) => prev + 1);
         // Simulate audio levels - in a real app you would use actual audio levels
         audioLevels.value = Math.random();
-      }, 1000);
+      }, 1000) as unknown as NodeJS.Timeout;
     } catch (error) {
       console.log("Failed to start recording:", error);
     }
@@ -212,10 +213,8 @@ export const VoiceRecorder = ({
   const handleCancel = async () => {
     if (recording) {
       try {
-        console.log("Canceling the recording");
         await recording.stopAndUnloadAsync();
         wasUnloadedRef.current = true;
-
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
           staysActiveInBackground: false,
@@ -223,14 +222,11 @@ export const VoiceRecorder = ({
           playThroughEarpieceAndroid: false,
         });
       } catch (error) {
-        console.error("Error stoppign recording during cancel:", error);
+        console.error("Error stopping recording during cancel:", error);
       }
     }
-
-    setTimeout(() => {
-      resetRecorder();
-      onCancel?.();
-    }, 100);
+    resetRecorder();
+    onCancel?.();
   };
 
   // Reset the recorder state
@@ -283,12 +279,12 @@ export const VoiceRecorder = ({
               playThroughEarpieceAndroid: false,
             });
           } catch (error) {
-            console.error("Error cleaning up recording:", error);
+            console.error("Error cleaning up audio:", error);
           }
         })();
       }
     };
-  }, [recording]);
+  }, []);
 
   return (
     <Animated.View

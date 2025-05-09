@@ -5,7 +5,7 @@ import * as SecureStore from "expo-secure-store";
 
 export const storage = new MMKV();
 
-export function getItem<T>(key: string): T {
+export function getItem<T>(key: string): T | null {
   const value = storage.getString(key);
   return value ? JSON.parse(value) || null : null;
 }

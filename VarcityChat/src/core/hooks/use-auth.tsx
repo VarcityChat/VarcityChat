@@ -10,11 +10,11 @@ export const useAuth = () => {
     (state) => state.auth
   );
   const logout = () => {
-    dispatch(logoutUser());
-    dispatch(api.util.resetApiState());
     realm.write(() => {
       realm.delete(realm.objects("Message"));
     });
+    dispatch(logoutUser());
+    dispatch(api.util.resetApiState());
   };
 
   return {

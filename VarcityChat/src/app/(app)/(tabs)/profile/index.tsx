@@ -17,40 +17,43 @@ import { useUpdateUserStatusMutation } from "@/api/auth/auth-api";
 import { useApi } from "@/core/hooks/use-api";
 import { useToast } from "@/core/hooks/use-toast";
 
-const LogoutModal = forwardRef<BottomSheetModal, {}>(({}, ref) => {
-  const { colorScheme } = useColorScheme();
-  const { logout } = useAuth();
-  const isDark = colorScheme === "dark";
-  const snapPoints = useMemo(() => [300], []);
+const LogoutModal = forwardRef<BottomSheetModal, { dismissModal: () => void }>(
+  ({ dismissModal }, ref) => {
+    const { colorScheme } = useColorScheme();
+    const { logout } = useAuth();
+    const isDark = colorScheme === "dark";
+    const snapPoints = useMemo(() => [300], []);
 
-  const handleLogout = () => {
-    logout();
-  };
+    const handleLogout = () => {
+      logout();
+      dismissModal?.();
+    };
 
-  return (
-    <Modal
-      ref={ref}
-      index={0}
-      snapPoints={snapPoints}
-      showCancelButton={false}
-      backgroundStyle={{
-        backgroundColor: isDark ? colors.neutral[800] : colors.white,
-      }}
-    >
-      <View className="flex flex-1 px-6 py-2">
-        <Text className="font-sans-semibold text-lg">Logout</Text>
-        <Text className="text-grey-500 text-base">
-          Do you want to log-out of your account?
-        </Text>
+    return (
+      <Modal
+        ref={ref}
+        index={0}
+        snapPoints={snapPoints}
+        showCancelButton={false}
+        backgroundStyle={{
+          backgroundColor: isDark ? colors.neutral[800] : colors.white,
+        }}
+      >
+        <View className="flex flex-1 px-6 py-2">
+          <Text className="font-sans-semibold text-lg">Logout</Text>
+          <Text className="text-grey-500 text-base">
+            Do you want to log-out of your account?
+          </Text>
 
-        <View className="flex flex-1 mt-8">
-          <Button label="Log out" onPress={handleLogout} />
-          <Button label="Go back" variant="tertiary" />
+          <View className="flex flex-1 mt-8">
+            <Button label="Log out" onPress={handleLogout} />
+            <Button label="Go back" variant="tertiary" />
+          </View>
         </View>
-      </View>
-    </Modal>
-  );
-});
+      </Modal>
+    );
+  }
+);
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -183,7 +186,7 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      <LogoutModal ref={logoutModal.ref} />
+      <LogoutModal ref={logoutModal.ref} dismissModal={logoutModal.dismiss} />
     </SafeAreaView>
   );
 }

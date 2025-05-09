@@ -84,7 +84,7 @@ function RootLayoutNav() {
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const realm = useRealm();
-  console.log("\nREALM PATH:", realm.path);
+  // console.log("\nREALM PATH:", realm.path);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -109,7 +109,7 @@ function RootLayoutNav() {
     SplashScreen.hideAsync();
     if (isAuthChecked) {
       if (isAuthenticated) {
-        router.replace("/(tabs)/discover");
+        router.replace("/discover");
       } else {
         router.replace("/onboarding/onboarding-one");
       }

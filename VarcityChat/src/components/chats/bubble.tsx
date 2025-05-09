@@ -21,6 +21,8 @@ const CustomMessageBubble = memo(
     const [isViewerVisible, setIsViewerVisible] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+    // console.log("RENDERED BUBBLE: ", props.currentMessage?.text);
+
     const handleImagePress = (urls: string[], index: number) => {
       setSelectedImageIndex(index);
       setIsViewerVisible(true);
@@ -145,6 +147,15 @@ const CustomMessageBubble = memo(
           onClose={() => setIsViewerVisible(false)}
         />
       </>
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.currentMessage._id === next.currentMessage._id &&
+      prev.currentMessage.text === next.currentMessage.text &&
+      JSON.stringify(prev.currentMessage?.mediaUrls) ===
+        JSON.stringify(next.currentMessage?.mediaUrls) &&
+      prev.currentMessage.deliveryStatus === next.currentMessage.deliveryStatus
     );
   }
 );

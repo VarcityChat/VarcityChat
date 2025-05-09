@@ -24,7 +24,6 @@ export default function ChatMessageLayout() {
             backgroundColor: isDark ? colors.black : colors.white,
           },
           title: "",
-          headerBackTitleVisible: false,
           headerBackVisible: false,
           headerLeft: () => {
             return (

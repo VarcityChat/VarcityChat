@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "VarcityChat",
-    "slug": "VarcityChat",
+    "name": "Varcity",
+    "slug": "Varcity",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,8 @@
       "bundleIdentifier": "com.sheggsmann.VarcityChat",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "XBX8KKX7L4"
     },
     "androidStatusBar": {
       "backgroundColor": "#000000"
@@ -45,9 +46,12 @@
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ],
-      ["expo-av", {
-        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
-      }]
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
