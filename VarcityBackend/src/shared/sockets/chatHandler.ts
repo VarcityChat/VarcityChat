@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CONVERSATION_STATUS,
   IConversationDocument,
