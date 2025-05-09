@@ -2,7 +2,7 @@ import "react-native-get-random-values";
 import Realm from "realm";
 import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
-import { SplashScreen, Stack, useRouter } from "expo-router";
+import { SplashScreen, Stack, useRouter, useSegments } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useThemeConfig } from "@/core/use-theme-config";
@@ -35,6 +35,7 @@ import { authStorage } from "@/core/storage";
 import { setAuth } from "@/core/auth/auth-slice";
 import { MessageSchema } from "@/core/models/message-model";
 import Toast from "react-native-toast-message";
+import * as Updates from "expo-updates";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -47,10 +48,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.preventAutoHideAsync();
-  }, []);
-
+  const [isUpdateChecked, setIsUpdateChecked] = useState(true);
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
     PlusJakartaSans_300Light,
@@ -68,6 +66,29 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
+  const checkForOTAUpdate = async () => {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (e) {
+    } finally {
+      setIsUpdateChecked(true);
+    }
+  };
+
+  // useEffect(() => {
+  //   checkForOTAUpdate();
+  // }, []);
+
+  useEffect(() => {
+    if (fontsLoaded && isUpdateChecked) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isUpdateChecked]);
+
   if (!fontsLoaded) return null;
 
   return (
@@ -80,11 +101,10 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const router = useRouter();
+  const segments = useSegments();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
-  const realm = useRealm();
-  // console.log("\nREALM PATH:", realm.path);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -97,7 +117,6 @@ function RootLayoutNav() {
         }
       } finally {
         setIsAuthChecked(true);
-        SplashScreen.hideAsync();
       }
     };
 
@@ -106,11 +125,12 @@ function RootLayoutNav() {
   }, []);
 
   useEffect(() => {
-    SplashScreen.hideAsync();
+    const inProtectedGroup = segments[0] === "(app)";
     if (isAuthChecked) {
-      if (isAuthenticated) {
+      if (isAuthenticated && !inProtectedGroup) {
         router.replace("/discover");
-      } else {
+      } else if (!isAuthenticated) {
+        router.canDismiss() && router.dismissAll();
         router.replace("/onboarding/onboarding-one");
       }
     }

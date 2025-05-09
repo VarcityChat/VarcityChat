@@ -15,7 +15,7 @@ const withEnvSuffix = (name) => {
 
 const BUNDLE_ID = "com.sheggsmann.VarcityChat";
 const PACKAGE = "com.sheggsmann.VarcityChat";
-const NAME = "VarcityChat";
+const NAME = "Varcity";
 const EXPO_ACCOUNT_OWNER = "sheggsmann";
 const EAS_PROJECT_ID = "cbc0cdda-cb4c-4de3-9baa-ccf4b51b0ee8";
 const SCHEME = "";

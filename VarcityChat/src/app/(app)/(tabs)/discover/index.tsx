@@ -46,7 +46,7 @@ export default function DiscoverScreen() {
       ? hasNotch
         ? 110
         : 70
-      : 60 + (StatusBar?.currentHeight ?? 0);
+      : 40 + (StatusBar?.currentHeight ?? 0);
 
   const isDark = colorScheme === "dark";
   const router = useRouter();
