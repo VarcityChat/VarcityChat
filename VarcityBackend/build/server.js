@@ -100,9 +100,16 @@ class VarcityServer {
     }
     startHttpServer(httpServer) {
         log.info(`Server has started with process id ${process.pid}`);
-        httpServer.listen(SERVER_PORT, () => {
-            log.info(`Server running on port ${SERVER_PORT}`);
-        });
+        if (config_1.config.NODE_ENV === 'development') {
+            httpServer.listen(SERVER_PORT, () => {
+                log.info(`Server running on port ${SERVER_PORT}`);
+            });
+        }
+        else {
+            httpServer.listen(config_1.config.SERVER_PORT, '0.0.0.0', () => {
+                log.info(`Server running on port ${SERVER_PORT}`);
+            });
+        }
     }
     socketIOConnections(io) {
         const userSocketHandler = new user_1.SocketIOUserHandler(io);
