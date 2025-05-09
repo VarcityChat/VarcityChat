@@ -70,10 +70,7 @@ export const usePushNotifications = () => {
         return pushTokenString;
       }
     } else {
-      showToast({
-        type: "Error",
-        text1: "Must use a physical device for push notifications",
-      });
+      alert("Must use a physical device for push notifications");
     }
   }
 
