@@ -1,7 +1,7 @@
 import { config } from '@root/config';
 import { createTransport } from 'nodemailer';
 import { TemplateType } from './email.interface';
-import smtpTransport from 'nodemailer-smtp-transport';
+// import smtpTransport from 'nodemailer-smtp-transport';
 
 type MsgResponse = 'error' | 'success';
 
@@ -33,16 +33,14 @@ class EmailTransport {
     body: string,
     template: TemplateType
   ): Promise<MsgResponse> {
-    const transport = createTransport(
-      smtpTransport({
-        host: config.EMAIL_HOST,
-        port: Number(config.EMAIL_PORT),
-        auth: {
-          user: config.EMAIL_USER,
-          pass: config.EMAIL_PASS
-        }
-      })
-    );
+    const transport = createTransport({
+      host: config.EMAIL_HOST,
+      port: parseInt(`${config.EMAIL_PORT}`),
+      auth: {
+        user: config.EMAIL_USER,
+        pass: config.EMAIL_PASS
+      }
+    });
 
     const mailOptions = {
       from: '"Varcity" <support@geelgeworden.nl>',
