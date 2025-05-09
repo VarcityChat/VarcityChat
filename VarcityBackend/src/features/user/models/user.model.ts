@@ -27,7 +27,7 @@ const userSchema: Schema = new Schema(
       default: LookingFor.OTHERS
     },
     email: String,
-    expoPushToken: String,
+    deviceToken: String,
     settings: {
       notificationsEnabled: { type: Boolean, default: true },
       activeStatus: { type: Boolean, default: true }

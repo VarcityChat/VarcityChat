@@ -17,7 +17,7 @@ export interface IUserDocument extends Document {
   lookingFor: keyof typeof LookingFor;
   about: string;
   hobbies: string[];
-  expoPushToken?: string;
+  deviceToken?: string;
   settings: {
     notificationsEnabled: boolean;
     activeStatus: boolean;

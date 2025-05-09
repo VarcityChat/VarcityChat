@@ -3,6 +3,7 @@ import { BadRequestError, NotFoundError } from '@global/helpers/error-handler';
 import { userService } from '@service/db/user.service';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { updateUserSchema } from '@user/schemes/user.scheme';
+import Expo from 'expo-server-sdk';
 import { Request, Response } from 'express';
 import HTTP_STATUS from 'http-status-codes';
 
@@ -69,13 +70,15 @@ class Update {
    * @param
    * @desc defines the endpoint to store expo push token
    */
-  //   @validator(savePushTokenSchema)
+  // @validator(savePushTokenSchema)
   public async savePushNotificationToken(req: Request, res: Response): Promise<void> {
-    // const { pushToken } = req.body;
-    // const updatedUser: Pick<IUserDocument, 'expoPushToken'> = { expoPushToken: pushToken };
-    // userQueue.addUserJob('updateUserInDB', { key: authPayload.userId, value: updatedUser });
-
-    res.status(HTTP_STATUS.OK).json({ message: 'PushToken saved successfully' });
+    const { deviceToken } = req.body;
+    if (Expo.isExpoPushToken(deviceToken)) {
+      await userService.updateUser(req.currentUser!.userId, { deviceToken });
+      res.status(HTTP_STATUS.OK).json({ message: 'PushToken saved successfully' });
+    } else {
+      throw new BadRequestError('Invalid Push Token');
+    }
   }
 }
 

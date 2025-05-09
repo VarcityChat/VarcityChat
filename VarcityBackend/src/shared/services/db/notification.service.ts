@@ -1,56 +1,58 @@
 import { INotificationDocument } from '@notification/interfaces/notification.interface';
 import { NotificationModel } from '@notification/models/notification.model';
-import { ExpoPushMessage, Expo } from 'expo-server-sdk';
+import { IUserDocument } from '@user/interfaces/user.interface';
+import { ExpoPushMessage, Expo, ExpoPushTicket } from 'expo-server-sdk';
+import { userService } from './user.service';
+import { IMessageData } from '@chat/interfaces/chat.interface';
 
 type NotificationMessage = Pick<ExpoPushMessage, 'body' | 'title'>;
 
 class NotificationService {
   public expo: Expo | undefined;
 
-  //   constructor() {
-  //     this.expo = new Expo();
-  //   }
+  constructor() {
+    this.expo = new Expo();
+  }
 
-  //   public async sendNotification(
-  //     pushTokens: string[],
-  //     notificationMessage: NotificationMessage
-  //   ): Promise<void> {
-  //     const messages: ExpoPushMessage[] = [];
+  public async sendNotification(
+    pushTokens: string[],
+    notificationMessage: NotificationMessage
+  ): Promise<void> {
+    const messages: ExpoPushMessage[] = [];
 
-  //     for (const pushToken of pushTokens) {
-  //       console.log('\nSENDING PUSH NOTIFICATIOn');
-  //       if (!Expo.isExpoPushToken(pushToken)) {
-  //         console.log('\nINVALID PUSH TOKEN:', pushToken);
-  //         continue;
-  //       }
+    for (const pushToken of pushTokens) {
+      console.log('\nSENDING PUSH NOTIFICATIOn');
+      if (!Expo.isExpoPushToken(pushToken)) {
+        continue;
+      }
 
-  //       messages.push({
-  //         to: pushToken,
-  //         sound: 'default',
-  //         body: notificationMessage.body,
-  //         title: notificationMessage.title
-  //       });
-  //     }
+      messages.push({
+        to: pushToken,
+        sound: 'default',
+        body: notificationMessage.body,
+        title: notificationMessage.title
+      });
+    }
 
-  //     const chunks = this.expo!.chunkPushNotifications(messages);
-  //     const tickets: ExpoPushTicket[] = [];
-  //     for (const chunk of chunks) {
-  //       try {
-  //         const ticketChunk: ExpoPushTicket[] = await this.expo!.sendPushNotificationsAsync(chunk);
-  //         console.log('\nPUSH NOTIFICATION TICKET:', ticketChunk);
-  //         tickets.push(...ticketChunk);
-  //       } catch (err) {
-  //         console.error(err);
-  //       }
-  //     }
-  //   }
+    const chunks = this.expo!.chunkPushNotifications(messages);
+    const tickets: ExpoPushTicket[] = [];
+    for (const chunk of chunks) {
+      try {
+        const ticketChunk: ExpoPushTicket[] = await this.expo!.sendPushNotificationsAsync(chunk);
+        console.log('\nPUSH NOTIFICATION TICKET:', ticketChunk);
+        tickets.push(...ticketChunk);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 
-  //   public async sendSingleNotification(
-  //     pushToken: string,
-  //     notificationMessage: NotificationMessage
-  //   ): Promise<void> {
-  //     await this.sendNotification([pushToken], notificationMessage);
-  //   }
+  public async sendSingleNotification(
+    pushToken: string,
+    notificationMessage: NotificationMessage
+  ): Promise<void> {
+    await this.sendNotification([pushToken], notificationMessage);
+  }
 
   public async getUserNotifications(userId: string): Promise<INotificationDocument[]> {
     return await NotificationModel.find({ to: userId })
@@ -76,23 +78,45 @@ class NotificationService {
     });
   }
 
+  // public async sendNotificationToUser(
+  //   userId: string,
+  //   notificationMessage: NotificationMessage
+  // ): Promise<void> {
+  //   console.log('Sending notification to user:', userId, notificationMessage);
+  // }
+
   public async sendNotificationToUser(
     userId: string,
-    notificationMessage: NotificationMessage
+    notificationMessage: Pick<ExpoPushMessage, 'title' | 'body'>
   ): Promise<void> {
-    console.log('Sending notification to user:', userId, notificationMessage);
+    const user: IUserDocument | null = await userService.getUserById(userId);
+    if (!user) return;
+
+    const pushToken = user?.deviceToken;
+    if (pushToken) await this.sendNotification([pushToken], notificationMessage);
   }
 
-  //   public async sendNotificationToUser(
-  //     userId: string,
-  //     notificationMessage: Pick<ExpoPushMessage, 'title' | 'body'>
-  //   ): Promise<void> {
-  //     const user: IUserDocument = await userService.getUserById(userId);
-  //     if (!user) return;
+  public async sendChatMessageNotification(message: IMessageData): Promise<void> {
+    try {
+      const user: IUserDocument | null = await userService.getUserById(`${message.receiver}`);
+      if (!user) return;
 
-  //     const pushToken = user?.expoPushToken;
-  //     if (pushToken) await this.sendNotification([pushToken], notificationMessage);
-  //   }
+      const pushToken = user?.deviceToken;
+      if (pushToken)
+        await this.sendNotification([pushToken], {
+          title: user.firstname,
+          body: message.content
+            ? message.content
+            : message?.audio
+              ? '🎙️ voice message'
+              : message?.mediaUrls
+                ? `🗾 ${message.mediaUrls.length} image${message.mediaUrls.length > 1 ? 's' : ''}`
+                : 'New Message'
+        });
+    } catch (err) {
+      console.error('An error occurred while sending chat push notifications:', err);
+    }
+  }
 }
 
 export const notificationService: NotificationService = new NotificationService();

@@ -61,7 +61,7 @@ export interface IMessageData {
   sender: string | ObjectId;
   receiver: string | ObjectId;
   content?: string;
-  mediaUrl?: string[];
+  mediaUrls?: string[];
   audio?: string;
   mediaType?: MEDIA_TYPE.image | MEDIA_TYPE.audio | MEDIA_TYPE.video;
   reply?: {
