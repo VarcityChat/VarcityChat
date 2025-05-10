@@ -1,12 +1,25 @@
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 import { SocketProvider } from "@/context/SocketProvider";
-import { Stack } from "expo-router";
+import { useAuth } from "@/core/hooks/use-auth";
+import { Redirect, Stack } from "expo-router";
+
+export const unstable_settings = {
+  initialRouteName: "(tabs)",
+};
 
 export default function HomeLayout() {
+  const { isAuthenticated } = useAuth();
+
+  console.log("[ PROTECTED ROUTE ]:", isAuthenticated);
+
+  if (!isAuthenticated) {
+    return <Redirect href="/onboarding/onboarding-one" />;
+  }
+
   return (
     <SocketProvider>
       <AudioPlayerProvider>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="chat-message" />
           <Stack.Screen name="university" />

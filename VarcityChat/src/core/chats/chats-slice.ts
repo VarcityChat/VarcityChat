@@ -26,12 +26,28 @@ const chatSlice = createSlice({
       state.activeChat = action.payload;
     },
 
+    updateActiveChat: (
+      state,
+      action: PayloadAction<{ chat: Partial<IChat> }>
+    ) => {
+      if (
+        state.activeChat &&
+        state.activeChat.chat._id === action.payload?.chat?._id
+      ) {
+        state.activeChat.chat = {
+          ...state.activeChat.chat,
+          ...action.payload,
+        };
+      }
+    },
+
     resetActiveChat: (state) => {
       state.activeChat = null;
     },
   },
 });
 
-export const { setActiveChat, resetActiveChat } = chatSlice.actions;
+export const { setActiveChat, updateActiveChat, resetActiveChat } =
+  chatSlice.actions;
 
 export default chatSlice.reducer;

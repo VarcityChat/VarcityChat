@@ -7,8 +7,11 @@ import {
   useRejectChatRequestMutation,
 } from "@/api/chats/chat-api";
 import { useApi } from "@/core/hooks/use-api";
+import { useAppDispatch } from "@/core/store/store";
+import { updateActiveChat } from "@/core/chats/chats-slice";
 
 export const MessageRequest = ({ chat }: { chat: IChat }) => {
+  const dispatch = useAppDispatch();
   const { activeChatReceiver } = useActiveChat(chat._id);
   const { updateChatStatus } = useChats();
   const { callMutationWithErrorHandler } = useApi();
@@ -25,6 +28,9 @@ export const MessageRequest = ({ chat }: { chat: IChat }) => {
 
     if (data) {
       updateChatStatus(chat._id, "accepted");
+      dispatch(
+        updateActiveChat({ chat: { _id: chat._id, status: "accepted" } })
+      );
     }
   };
   const handleRejectRequest = async () => {
@@ -33,6 +39,9 @@ export const MessageRequest = ({ chat }: { chat: IChat }) => {
     );
     if (data) {
       updateChatStatus(chat._id, "rejected");
+      dispatch(
+        updateActiveChat({ chat: { _id: chat._id, status: "rejected" } })
+      );
     }
   };
 
