@@ -1,12 +1,9 @@
-import { View } from "@/ui";
 import { Stack } from "expo-router";
 
 export default function DiscoverScreenLayout() {
   return (
-    <View className="flex flex-1">
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-      </Stack>
-    </View>
+    <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+      <Stack.Screen name="index" />
+    </Stack>
   );
 }

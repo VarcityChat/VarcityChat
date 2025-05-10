@@ -141,6 +141,7 @@ export default function Personality() {
         relationshipStatus,
         lookingFor,
         images: successfulUploads,
+        about: description,
       }).unwrap()
     );
 

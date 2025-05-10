@@ -27,12 +27,12 @@ import {
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { RealmProvider, useRealm } from "@realm/react";
+import { RealmProvider } from "@realm/react";
 import { persistor, store, useAppDispatch } from "@/core/store/store";
 import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
-import { setAuth } from "@/core/auth/auth-slice";
+import { logout, setAuth } from "@/core/auth/auth-slice";
 // import { usePushNotifications } from "@/core/hooks/use-push-notification";
 // import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
@@ -44,7 +44,7 @@ export { ErrorBoundary } from "expo-router";
 import "../../global.css";
 
 export const unstable_settings = {
-  initialRouteName: "(auth)",
+  initialRouteName: "(app)",
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -86,16 +86,27 @@ export default function RootLayout() {
   //   checkForOTAUpdate();
   // }, []);
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+  // useEffect(() => {
+  //   if (fontsLoaded) {
+  //     SplashScreen.hideAsync();
+  //   }
+  // }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
 
   return (
     <Providers>
+      {/* <Stack>
+        <Stack.Screen name="index" redirect />
+        <Stack.Screen
+          name="(app)"
+          options={{ headerShown: false, animation: "none" }}
+        />
+        <Stack.Screen
+          name="(auth)"
+          options={{ headerShown: false, animation: "none" }}
+        />
+      </Stack> */}
       <RootLayoutNav />
       <Toast />
     </Providers>
@@ -104,42 +115,59 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const router = useRouter();
-  const segments = useSegments();
+  // const segments = useSegments();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   // const { expoPushToken, resetBadgeCount } = usePushNotifications();
   // const [updateDeviceToken] = useUpdateDeviceTokenMutation();
+
+  // console.log("\nIS AUTHENTICATED:", isAuthenticated);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // dispatch(logout());
         const authData = await authStorage.getAuthData();
         if (authData) {
           dispatch(setAuth({ ...authData, isAuthenticated: true }));
-        } else {
-          dispatch(setAuth({ token: "", isAuthenticated: false }));
         }
+      } catch (e) {
+        console.log("ERROR FETCHING AUTH FROM STORAGE:", e);
       } finally {
-        setIsAuthChecked(true);
+        setIsReady(true);
       }
     };
 
+    console.log("[CHECKING AUTH]");
     checkAuth();
-    loadSelectedTheme();
+    // loadSelectedTheme();
   }, []);
 
   useEffect(() => {
-    const inProtectedGroup = segments[0] === "(app)";
-    if (!isAuthChecked) {
-      if (isAuthenticated && !inProtectedGroup) {
-        router.replace("/discover");
-      } else {
-        // router.canDismiss() && router.dismissAll();
-        router.push("/onboarding/onboarding-one");
-      }
+    console.log("[ IS AUTHENTICATED VALUE ]:", isAuthenticated);
+  }, [isAuthenticated]);
+
+  // useEffect(() => {
+  //   // const inProtectedGroup = segments[0] === "(app)";
+  //   // if (!isAuthChecked) {
+  //   console.log("[ IS AUTHENTICATED VALUE ]:", isAuthenticated);
+
+  //   if (isAuthenticated) {
+  //     router.replace("/(app)/(tabs)/discover");
+  //   } else {
+  //     router.canDismiss() && router.dismissAll();
+  //     router.replace("/(auth)/login");
+  //     // router.push("/onboarding/onboarding-one");
+  //   }
+  //   // }
+  // }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isReady) {
+      SplashScreen.hideAsync();
     }
-  }, [isAuthenticated, isAuthChecked]);
+  }, [isReady]);
 
   // useEffect(() => {
   //   const handleNotifications = () => {
@@ -151,12 +179,13 @@ function RootLayoutNav() {
   //   handleNotifications();
   // }, [isAuthenticated]);
 
-  if (!isAuthChecked) return null;
+  if (!isReady) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(app)" />
-      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="index" redirect />
+      <Stack.Screen name="(app)" options={{ animation: "none" }} />
+      <Stack.Screen name="(auth)" options={{ animation: "none" }} />
     </Stack>
   );
 }

@@ -1,10 +1,12 @@
 import { View, Text, Button } from "@/ui";
+import ConfettiCannon from "react-native-confetti-cannon";
 import {
   FlatList,
   ViewToken,
   SafeAreaView,
   Platform,
   Pressable,
+  InteractionManager,
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -36,6 +38,7 @@ export default function Index() {
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const slideRef = useRef<FlatList>(null);
+  const cannonRef = useRef<ConfettiCannon>(null);
   const scrollX = useSharedValue(0);
 
   const modalTranslateY = useSharedValue(500);
@@ -103,6 +106,7 @@ export default function Index() {
         stiffness: 120,
       });
       overlayOpacity.value = withTiming(1, { duration: 300 });
+      cannonRef.current?.start();
     }
   }, [showSuccessModal]);
 
@@ -169,6 +173,12 @@ export default function Index() {
         className="w-screen h-[45vh] bg-white absolute bottom-0 left-0 rounded-t-2xl flex items-center justify-center"
         style={modalStyle}
       >
+        <ConfettiCannon
+          count={200}
+          origin={{ x: -10, y: 0 }}
+          ref={cannonRef}
+          autoStart={false}
+        />
         <View className="flex w-[85%] items-center -mt-3">
           <RegisterSuccessSvg />
           <Text className="font-sans-semibold text-2xl mt-4">
@@ -183,12 +193,13 @@ export default function Index() {
             onPress={() => {
               modalTranslateY.value = withSpring(500);
               overlayOpacity.value = withTiming(0, { duration: 300 });
-              setTimeout(() => {
+              InteractionManager.runAfterInteractions(() => {
                 if (token && user !== null) {
                   dispatch(setShowSuccessModal(false));
                   dispatch(setAuth({ isAuthenticated: true }));
+                  router.replace("/(app)/(tabs)/discover");
                 }
-              }, 320);
+              });
             }}
           />
         </View>

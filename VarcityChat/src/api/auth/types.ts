@@ -32,6 +32,7 @@ export interface ISignupBody {
   relationshipStatus?: string;
   lookingFor?: string;
   images?: string[];
+  about?: string;
 }
 
 export interface IGetSignedUrlResponse {

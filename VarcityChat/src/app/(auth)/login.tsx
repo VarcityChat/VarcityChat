@@ -27,7 +27,12 @@ export default function Login() {
   const [login, { isLoading }] = useLoginMutation();
 
   const onSubmit = async (data: FormType) => {
-    await callMutationWithErrorHandler(() => login(data).unwrap());
+    const { isError } = await callMutationWithErrorHandler(() =>
+      login(data).unwrap()
+    );
+    if (!isError) {
+      router.replace("/(app)/(tabs)/discover");
+    }
   };
 
   return (

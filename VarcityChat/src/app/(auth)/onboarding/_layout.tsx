@@ -7,7 +7,10 @@ export default function OnboardingLayout() {
       initialRouteName="onboarding-one"
     >
       <Stack.Screen name="onboarding-one" />
-      <Stack.Screen name="onboarding-two" />
+      <Stack.Screen
+        name="onboarding-two"
+        options={{ animation: "ios_from_right" }}
+      />
     </Stack>
   );
 }
