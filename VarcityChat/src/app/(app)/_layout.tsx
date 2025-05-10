@@ -10,8 +10,6 @@ export const unstable_settings = {
 export default function HomeLayout() {
   const { isAuthenticated } = useAuth();
 
-  console.log("[ PROTECTED ROUTE ]:", isAuthenticated);
-
   if (!isAuthenticated) {
     return <Redirect href="/onboarding/onboarding-one" />;
   }
