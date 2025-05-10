@@ -2,7 +2,7 @@ import "react-native-get-random-values";
 import Realm from "realm";
 import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
-import { SplashScreen, Stack, useRouter, useSegments } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useThemeConfig } from "@/core/use-theme-config";
@@ -32,12 +32,12 @@ import { persistor, store, useAppDispatch } from "@/core/store/store";
 import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage } from "@/core/storage";
-import { logout, setAuth } from "@/core/auth/auth-slice";
-// import { usePushNotifications } from "@/core/hooks/use-push-notification";
-// import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
+import { setAuth } from "@/core/auth/auth-slice";
+import { usePushNotifications } from "@/core/hooks/use-push-notification";
+import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
 import Toast from "react-native-toast-message";
-// import * as Updates from "expo-updates";
+import * as Updates from "expo-updates";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -68,45 +68,28 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold_Italic,
   });
 
-  // const checkForOTAUpdate = async () => {
-  //   try {
-  //     const update = await Updates.checkForUpdateAsync();
-  //     if (update.isAvailable) {
-  //       await Updates.fetchUpdateAsync();
-  //       await Updates.reloadAsync();
-  //     }
-  //   } catch (e) {
-  //     alert(`Update check failed: ${e}`);
-  //   } finally {
-  //     setIsUpdateChecked(true);
-  //   }
-  // };
+  const checkForOTAUpdate = async () => {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (e) {
+      // alert(`Update check failed: ${e}`);
+    } finally {
+      setIsUpdateChecked(true);
+    }
+  };
 
-  // useEffect(() => {
-  //   checkForOTAUpdate();
-  // }, []);
-
-  // useEffect(() => {
-  //   if (fontsLoaded) {
-  //     SplashScreen.hideAsync();
-  //   }
-  // }, [fontsLoaded]);
+  useEffect(() => {
+    checkForOTAUpdate();
+  }, []);
 
   if (!fontsLoaded) return null;
 
   return (
     <Providers>
-      {/* <Stack>
-        <Stack.Screen name="index" redirect />
-        <Stack.Screen
-          name="(app)"
-          options={{ headerShown: false, animation: "none" }}
-        />
-        <Stack.Screen
-          name="(auth)"
-          options={{ headerShown: false, animation: "none" }}
-        />
-      </Stack> */}
       <RootLayoutNav />
       <Toast />
     </Providers>
@@ -114,20 +97,14 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const router = useRouter();
-  // const segments = useSegments();
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAuth();
   const [isReady, setIsReady] = useState(false);
-  // const { expoPushToken, resetBadgeCount } = usePushNotifications();
-  // const [updateDeviceToken] = useUpdateDeviceTokenMutation();
-
-  // console.log("\nIS AUTHENTICATED:", isAuthenticated);
+  const { expoPushToken, resetBadgeCount } = usePushNotifications();
+  const [updateDeviceToken] = useUpdateDeviceTokenMutation();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // dispatch(logout());
         const authData = await authStorage.getAuthData();
         if (authData) {
           dispatch(setAuth({ ...authData, isAuthenticated: true }));
@@ -138,30 +115,9 @@ function RootLayoutNav() {
         setIsReady(true);
       }
     };
-
-    console.log("[CHECKING AUTH]");
     checkAuth();
-    // loadSelectedTheme();
+    loadSelectedTheme();
   }, []);
-
-  useEffect(() => {
-    console.log("[ IS AUTHENTICATED VALUE ]:", isAuthenticated);
-  }, [isAuthenticated]);
-
-  // useEffect(() => {
-  //   // const inProtectedGroup = segments[0] === "(app)";
-  //   // if (!isAuthChecked) {
-  //   console.log("[ IS AUTHENTICATED VALUE ]:", isAuthenticated);
-
-  //   if (isAuthenticated) {
-  //     router.replace("/(app)/(tabs)/discover");
-  //   } else {
-  //     router.canDismiss() && router.dismissAll();
-  //     router.replace("/(auth)/login");
-  //     // router.push("/onboarding/onboarding-one");
-  //   }
-  //   // }
-  // }, [isAuthenticated]);
 
   useEffect(() => {
     if (isReady) {
@@ -169,15 +125,15 @@ function RootLayoutNav() {
     }
   }, [isReady]);
 
-  // useEffect(() => {
-  //   const handleNotifications = () => {
-  //     try {
-  //       updateDeviceToken({ deviceToken: expoPushToken });
-  //       resetBadgeCount();
-  //     } catch (e) {}
-  //   };
-  //   handleNotifications();
-  // }, [isAuthenticated]);
+  useEffect(() => {
+    const handleNotifications = () => {
+      try {
+        resetBadgeCount();
+        updateDeviceToken({ deviceToken: expoPushToken });
+      } catch (e) {}
+    };
+    handleNotifications();
+  }, []);
 
   if (!isReady) return null;
 
