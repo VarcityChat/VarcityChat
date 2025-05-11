@@ -40,7 +40,7 @@ const TabNavigation = () => {
       }}
     >
       <Tabs.Screen
-        name="discover"
+        name="index"
         options={{
           title: "Discover",
           tabBarIcon: ({ focused }) =>

@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useApi } from "@/core/hooks/use-api";
 import { useResetPasswordMutation } from "@/api/auth/auth-api";
 import { useToast } from "@/core/hooks/use-toast";
-const logo = require("../../../assets/icon.png");
+const logo = require("../../assets/icon.png");
 
 const schema = z
   .object({

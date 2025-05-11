@@ -6,9 +6,6 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": {
-        "simulator": true
-      },
       "env": {
         "APP_ENV": "development",
         "EXPO_NO_DOTENV": "1",

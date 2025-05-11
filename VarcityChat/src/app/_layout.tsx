@@ -1,6 +1,5 @@
 import "react-native-get-random-values";
-import Realm from "realm";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { SplashScreen, Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -31,11 +30,12 @@ import { RealmProvider } from "@realm/react";
 import { persistor, store, useAppDispatch } from "@/core/store/store";
 import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
-import { authStorage } from "@/core/storage";
-import { setAuth } from "@/core/auth/auth-slice";
+import { authStorage, setItem } from "@/core/storage";
+import { setAuth, setIsLoading } from "@/core/auth/auth-slice";
 import { usePushNotifications } from "@/core/hooks/use-push-notification";
 import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
+import { IsFirstLaunchKey } from "@/types/user";
 import Toast from "react-native-toast-message";
 import * as Updates from "expo-updates";
 
@@ -44,13 +44,12 @@ export { ErrorBoundary } from "expo-router";
 import "../../global.css";
 
 export const unstable_settings = {
-  initialRouteName: "(app)",
+  initialRouteName: "/",
 };
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [isUpdateChecked, setIsUpdateChecked] = useState(true);
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
     PlusJakartaSans_300Light,
@@ -76,9 +75,7 @@ export default function RootLayout() {
         await Updates.reloadAsync();
       }
     } catch (e) {
-      // alert(`Update check failed: ${e}`);
-    } finally {
-      setIsUpdateChecked(true);
+      alert(`Update check failed: ${e}`);
     }
   };
 
@@ -98,32 +95,36 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const dispatch = useAppDispatch();
-  const [isReady, setIsReady] = useState(false);
+  const { isFirstLaunch } = useAuth();
   const { expoPushToken, resetBadgeCount } = usePushNotifications();
   const [updateDeviceToken] = useUpdateDeviceTokenMutation();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const initApp = async () => {
       try {
+        // Check if this is the users first launch
+        if (isFirstLaunch) {
+          await setItem(IsFirstLaunchKey, "notFirstLaunch");
+        }
+
+        // Check if user was authenticated and rehydrate state
         const authData = await authStorage.getAuthData();
         if (authData) {
           dispatch(setAuth({ ...authData, isAuthenticated: true }));
         }
       } catch (e) {
-        console.log("ERROR FETCHING AUTH FROM STORAGE:", e);
+        alert("ERROR FETCHING AUTH FROM STORAGE" + `${e}`);
       } finally {
-        setIsReady(true);
+        dispatch(setIsLoading(false));
       }
     };
-    checkAuth();
-    loadSelectedTheme();
+
+    initApp();
   }, []);
 
   useEffect(() => {
-    if (isReady) {
-      SplashScreen.hideAsync();
-    }
-  }, [isReady]);
+    loadSelectedTheme();
+  }, []);
 
   useEffect(() => {
     const handleNotifications = () => {
@@ -135,13 +136,12 @@ function RootLayoutNav() {
     handleNotifications();
   }, []);
 
-  if (!isReady) return null;
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" redirect />
-      <Stack.Screen name="(app)" options={{ animation: "none" }} />
-      <Stack.Screen name="(auth)" options={{ animation: "none" }} />
+      <Stack.Screen
+        name="login"
+        options={{ gestureEnabled: false, animation: "none" }}
+      />
     </Stack>
   );
 }
@@ -149,23 +149,8 @@ function RootLayoutNav() {
 function Providers({ children }: { children: ReactNode }) {
   const theme = useThemeConfig();
 
-  const migration = (oldRealm: Realm, newRealm: Realm) => {
-    try {
-      if (oldRealm.schemaVersion < 1) {
-        const oldObjects = oldRealm.objects("Message");
-        const newObjects = newRealm.objects("Message");
-      }
-    } catch (error) {
-      alert(`REALM MIGRATION ERROR: ${error}`);
-    }
-  };
-
   return (
-    <RealmProvider
-      schema={[MessageSchema]}
-      schemaVersion={13}
-      onMigration={migration}
-    >
+    <RealmProvider schema={[MessageSchema]} schemaVersion={13}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <GestureHandlerRootView

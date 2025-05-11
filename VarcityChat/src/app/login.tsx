@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { Platform, Pressable, SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { z } from "zod";
-const logo = require("../../../assets/icon.png");
+const logo = require("../../assets/icon.png");
 
 const schema = z.object({
   email: z.string().email(),
@@ -27,11 +27,15 @@ export default function Login() {
   const [login, { isLoading }] = useLoginMutation();
 
   const onSubmit = async (data: FormType) => {
-    const { isError } = await callMutationWithErrorHandler(() =>
-      login(data).unwrap()
-    );
-    if (!isError) {
-      router.replace("/(app)/(tabs)/discover");
+    try {
+      const { isError } = await callMutationWithErrorHandler(() =>
+        login(data).unwrap()
+      );
+      if (!isError) {
+        router.replace("/");
+      }
+    } catch (err) {
+      alert(err);
     }
   };
 
@@ -75,12 +79,12 @@ export default function Login() {
             />
 
             <View className="flex items-end mt-2">
-              <Link
+              {/* <Link
                 href="/forgot-password"
                 className="text-primary-500 font-sans-semibold text-sm"
               >
                 Forgot password?
-              </Link>
+              </Link> */}
             </View>
 
             <View className="mt-10">

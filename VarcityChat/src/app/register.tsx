@@ -197,7 +197,7 @@ export default function Index() {
                 if (token && user !== null) {
                   dispatch(setShowSuccessModal(false));
                   dispatch(setAuth({ isAuthenticated: true }));
-                  router.replace("/(app)/(tabs)/discover");
+                  router.replace("/");
                 }
               });
             }}

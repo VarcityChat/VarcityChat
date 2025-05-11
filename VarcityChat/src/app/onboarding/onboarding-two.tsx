@@ -1,7 +1,7 @@
 import { View, Text, Image, Button } from "@/ui";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native";
-const onboardingImage = require("../../../../assets/images/onboarding/onboarding2.png");
+const onboardingImage = require("../../../assets/images/onboarding/onboarding2.png");
 
 export default function OnboardingTwo() {
   const router = useRouter();
