@@ -170,7 +170,7 @@ export default function Index() {
 
       {/* Success Modal */}
       <Animated.View
-        className="w-screen h-[45vh] bg-white absolute bottom-0 left-0 rounded-t-2xl flex items-center justify-center"
+        className="w-screen h-[45vh] bg-white dark:bg-charcoal-950 absolute bottom-0 left-0 rounded-t-2xl flex items-center justify-center"
         style={modalStyle}
       >
         <ConfettiCannon

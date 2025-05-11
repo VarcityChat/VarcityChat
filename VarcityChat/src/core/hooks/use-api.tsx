@@ -37,6 +37,8 @@ export const useApi = () => {
       //   errorMessage =
       //     "API Error:" + (error.data ? JSON.stringify(error.data) : "Unknown");
       // } else
+      console.log("[ERROR MESSAGE]:", errorMessage);
+      console.log(error);
 
       if (isSerializedError(error)) {
         errorMessage = error.data.message;

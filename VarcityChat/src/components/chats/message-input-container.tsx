@@ -3,7 +3,6 @@ import {
   GiftedChat,
   GiftedChatProps,
   IMessage,
-  Message,
 } from "react-native-gifted-chat";
 import { ChatInput } from "./chat-input";
 import { CustomSend } from "./custom-send";
@@ -49,32 +48,31 @@ export const MessageInputContainer = memo(
     );
 
     return (
-      <>
-        <GiftedChat
-          {...restProps}
-          text={text}
-          onSend={handleSend}
-          onInputTextChanged={handleTextChange}
-          renderInputToolbar={(props) => (
-            <ChatInput
-              {...props}
-              isRecording={isRecording}
-              setIsRecording={setIsRecording}
-              onAudioSend={onAudioSend}
-            />
-          )}
-          renderSend={(props) => (
-            <CustomSend
-              text={text}
-              sendProps={props}
-              isRecording={isRecording}
-              setIsRecording={setIsRecording}
-              uploadingImages={uploadingImages}
-              onImageSelected={onImageSelected}
-            />
-          )}
-        />
-      </>
+      <GiftedChat
+        {...restProps}
+        text={text}
+        onSend={handleSend}
+        maxComposerHeight={100}
+        onInputTextChanged={handleTextChange}
+        renderInputToolbar={(props) => (
+          <ChatInput
+            {...props}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            onAudioSend={onAudioSend}
+          />
+        )}
+        renderSend={(props) => (
+          <CustomSend
+            text={text}
+            sendProps={props}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            uploadingImages={uploadingImages}
+            onImageSelected={onImageSelected}
+          />
+        )}
+      />
     );
   }
 );
