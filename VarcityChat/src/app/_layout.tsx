@@ -32,8 +32,6 @@ import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage, setItem } from "@/core/storage";
 import { setAuth, setIsLoading } from "@/core/auth/auth-slice";
-import { usePushNotifications } from "@/core/hooks/use-push-notification";
-import { useUpdateDeviceTokenMutation } from "@/api/auth/auth-api";
 import { MessageSchema } from "@/core/models/message-model";
 import { IsFirstLaunchKey } from "@/types/user";
 import Toast from "react-native-toast-message";
@@ -96,8 +94,6 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const dispatch = useAppDispatch();
   const { isFirstLaunch } = useAuth();
-  const { expoPushToken, resetBadgeCount } = usePushNotifications();
-  const [updateDeviceToken] = useUpdateDeviceTokenMutation();
 
   useEffect(() => {
     const initApp = async () => {
@@ -124,16 +120,6 @@ function RootLayoutNav() {
 
   useEffect(() => {
     loadSelectedTheme();
-  }, []);
-
-  useEffect(() => {
-    const handleNotifications = () => {
-      try {
-        resetBadgeCount();
-        updateDeviceToken({ deviceToken: expoPushToken });
-      } catch (e) {}
-    };
-    handleNotifications();
   }, []);
 
   return (

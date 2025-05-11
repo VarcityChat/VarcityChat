@@ -10,10 +10,12 @@
         "APP_ENV": "development",
         "EXPO_NO_DOTENV": "1",
         "FLIPPER_DISABLE": "1"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "preview"
     },
     "staging": {
       "distribution": "internal",
@@ -28,14 +30,16 @@
         "APP_ENV": "production",
         "EXPO_NO_DOTENV": "1",
         "FLIPPER_DISABLE": "1"
-      }
+      },
+      "channel": "staging"
     },
     "production": {
       "env": {
         "APP_ENV": "production",
         "EXPO_NO_DOTENV": "1",
         "FLIPPER_DISABLE": "1"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {

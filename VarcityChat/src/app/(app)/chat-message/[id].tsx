@@ -46,12 +46,9 @@ import { useAudioUpload } from "@/core/hooks/chatHooks/use-audio-upload";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { MessageInputContainer } from "@/components/chats/message-input-container";
 
-let renderedCount = 0;
 const MESSAGES_PER_PAGE = 80;
 
 export default function ChatMessage() {
-  console.log(`[ChatMessage]: ${renderedCount++}`);
-
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
   const { id: conversationId } = useLocalSearchParams();
@@ -91,8 +88,6 @@ export default function ChatMessage() {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
-
-  // const [messages, setMessages] = useState()
 
   const messagesFromRealm = useQuery(MessageSchema)
     .filtered(`conversationId == $0`, conversationId)
@@ -146,7 +141,7 @@ export default function ChatMessage() {
       user1Id: user?._id,
       user2Id: activeChat!.chat?.user2._id,
     });
-    updateChatCount(conversationId as string, 0, true);
+    updateChatCount(`${conversationId}`, 0, true);
   }, [conversationId, user?._id, socket]);
 
   useEffect(() => {
@@ -408,7 +403,6 @@ export default function ChatMessage() {
           uploadingImages.length > 0 ? "Add a caption..." : "Type a message...",
         isTyping: isOtherUserTyping,
         renderAvatar: null,
-        maxComposerHeight: 100,
         timeTextStyle: { right: { color: "gray" }, left: { color: "grey" } },
         textInputProps: {
           ...styles.composer,

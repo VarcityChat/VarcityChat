@@ -34,9 +34,9 @@ const chatSlice = createSlice({
         state.activeChat &&
         state.activeChat.chat._id === action.payload?.chat?._id
       ) {
-        state.activeChat.chat = {
-          ...state.activeChat.chat,
-          ...action.payload,
+        state.activeChat = {
+          ...state.activeChat,
+          chat: { ...state.activeChat.chat, ...action.payload.chat },
         };
       }
     },

@@ -123,6 +123,7 @@ export default function ProfileScreen() {
             <Image
               source={{ uri: user?.images[0] || defaultAvatarUrl }}
               className="w-full h-full object-cover rounded-full"
+              contentFit="cover"
             />
           </View>
           <Text className="font-semibold text-lg">
