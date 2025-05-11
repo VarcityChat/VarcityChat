@@ -21,8 +21,12 @@ export const usePushNotifications = () => {
     Notifications.Notification | undefined
   >();
 
-  const notificationListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
+  const notificationListener = useRef<
+    Notifications.EventSubscription | undefined
+  >(undefined);
+  const responseListener = useRef<Notifications.EventSubscription | undefined>(
+    undefined
+  );
 
   async function registerPushNotificationsAsync() {
     let pushTokenString: string;
@@ -96,13 +100,8 @@ export const usePushNotifications = () => {
       Notifications.addNotificationResponseReceivedListener((response) => {});
 
     return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
+      notificationListener.current && notificationListener.current.remove();
+      responseListener.current && responseListener.current.remove();
     };
   }, []);
 

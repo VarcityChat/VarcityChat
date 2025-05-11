@@ -48,3 +48,5 @@ export enum LookingFor {
   RELATIONSHIP = "relationship",
   OTHERS = "others",
 }
+
+export const IsFirstLaunchKey = "isFirstLaunch";

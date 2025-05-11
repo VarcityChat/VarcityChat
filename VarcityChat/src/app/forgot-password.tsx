@@ -7,7 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useApi } from "@/core/hooks/use-api";
 import { useForgotPasswordMutation } from "@/api/auth/auth-api";
-const logo = require("../../../assets/icon.png");
+const logo = require("../../assets/icon.png");
 
 const schema = z.object({
   email: z.string().email(),

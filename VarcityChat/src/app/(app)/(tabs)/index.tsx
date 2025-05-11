@@ -224,7 +224,7 @@ export default function DiscoverScreen() {
             renderItem={renderUniversityItem}
             numColumns={3}
             contentContainerClassName="flex flex-1 flex-grow"
-            estimatedItemSize={50}
+            estimatedItemSize={100}
             ListFooterComponent={<View style={{ height: 150 }} />}
           />
         )}

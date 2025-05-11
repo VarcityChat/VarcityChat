@@ -30,7 +30,7 @@ const inputTv = tv({
     },
     error: {
       true: {
-        input: "border-danger-600",
+        input: "border-danger-600 dark:border-danger-600",
         label: "text-danger-600 dark:text-danger-600",
       },
     },
