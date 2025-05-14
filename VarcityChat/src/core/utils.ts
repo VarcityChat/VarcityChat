@@ -26,7 +26,19 @@ export const formatChatLastMessage = (
       message.mediaUrls.length > 1 ? "s" : ""
     }`;
 
-  return trimText(message.content || "", 70);
+  return trimText(limitNewLines(`${message.content}`, 2) || "", 70);
+};
+
+export const limitNewLines = (text: string, maxLines: number): string => {
+  if (!text || typeof text !== "string") return "";
+  const lines = text.split("\n");
+  if (lines.length <= maxLines) return text;
+  return lines.slice(0, maxLines).join("\n") + "...";
+};
+
+export const removeNewLinesAndTabs = (text: string): string => {
+  if (!text || typeof text !== "string") return "";
+  return text.replace(/[\n\r\t]/g, " ");
 };
 
 export const capitalize = (text: string): string => {

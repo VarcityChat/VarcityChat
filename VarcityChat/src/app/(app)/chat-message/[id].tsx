@@ -138,7 +138,7 @@ export default function ChatMessage() {
     socket?.emit("mark-conversation-as-read", {
       conversationId: conversationId as string,
       userId: user?._id,
-      user1Id: user?._id,
+      user1Id: activeChat!.chat?.user1._id,
       user2Id: activeChat!.chat?.user2._id,
     });
     updateChatCount(`${conversationId}`, 0, true);
