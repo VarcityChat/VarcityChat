@@ -59,9 +59,11 @@ export const usePushNotifications = () => {
         pushTokenString = (
           await Notifications.getExpoPushTokenAsync({ projectId })
         ).data;
+        alert(`PUSH TOKEN STRING: ${pushTokenString}`);
         return pushTokenString;
       } catch (e) {
         pushTokenString = "";
+        alert(`NOTIFICATIONS ERROR: ${e}`);
       }
 
       if (Platform.OS === "android") {

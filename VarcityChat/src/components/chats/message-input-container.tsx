@@ -1,5 +1,6 @@
 import { useCallback, useState, memo } from "react";
 import {
+  Composer,
   GiftedChat,
   GiftedChatProps,
   IMessage,
@@ -52,8 +53,9 @@ export const MessageInputContainer = memo(
         {...restProps}
         text={text}
         onSend={handleSend}
-        maxComposerHeight={100}
         onInputTextChanged={handleTextChange}
+        maxComposerHeight={100}
+        renderComposer={(props) => <Composer {...props} />}
         renderInputToolbar={(props) => (
           <ChatInput
             {...props}

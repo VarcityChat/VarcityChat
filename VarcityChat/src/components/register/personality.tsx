@@ -343,7 +343,7 @@ const ImageSelectCard = ({ onSelectImage, imageUri }: ImageSelectProps) => {
       {imageUri ? (
         <Image
           source={{ uri: imageUri }}
-          contentFit="fill"
+          contentFit="cover"
           className="w-full h-full"
         />
       ) : (

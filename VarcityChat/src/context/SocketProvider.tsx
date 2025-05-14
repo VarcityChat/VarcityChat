@@ -13,6 +13,7 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { useQueue } from "@/core/hooks/use-queue";
 import { useGlobalSocketHandlers } from "@/core/hooks/chatHooks/use-global-socket-handlers";
 import { SocketContext } from "./SocketContext";
+import { useChats } from "@/core/hooks/use-chats";
 
 const BANNER_HEIGHT = 40;
 
@@ -21,6 +22,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const { isAuthenticated } = useAuth();
+  const { loadChats } = useChats();
   const { processQueuedMessages } = useQueue();
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
@@ -74,6 +76,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setSocket(socketInstance);
 
       // Refresh the chats screen
+      loadChats();
 
       // Process queued messages
       processQueuedMessages(socketInstance);
