@@ -55,7 +55,13 @@ export const MessageInputContainer = memo(
         onSend={handleSend}
         onInputTextChanged={handleTextChange}
         maxComposerHeight={100}
-        renderComposer={(props) => <Composer {...props} />}
+        renderComposer={(props) => (
+          <Composer
+            {...props}
+            composerHeight={"auto"}
+            textInputStyle={{ maxHeight: 100 }}
+          />
+        )}
         renderInputToolbar={(props) => (
           <ChatInput
             {...props}
