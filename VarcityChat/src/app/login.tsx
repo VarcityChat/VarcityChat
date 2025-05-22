@@ -79,12 +79,12 @@ export default function Login() {
             />
 
             <View className="flex items-end mt-2">
-              {/* <Link
+              <Link
                 href="/forgot-password"
                 className="text-primary-500 font-sans-semibold text-sm"
               >
                 Forgot password?
-              </Link> */}
+              </Link>
             </View>
 
             <View className="mt-10">

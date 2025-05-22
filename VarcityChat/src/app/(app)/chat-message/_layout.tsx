@@ -6,7 +6,7 @@ import BackButton from "@/components/back-button";
 import { useActiveChat } from "@/core/hooks/use-chats";
 import { defaultAvatarUrl } from "../../../../constants/chats";
 import { useColorScheme } from "nativewind";
-import { formatLastMessageTime } from "@/core/utils";
+import { formatLastMessageTime, trimText } from "@/core/utils";
 
 export default function ChatMessageLayout() {
   const router = useRouter();
@@ -68,8 +68,10 @@ export default function ChatMessageLayout() {
                 />
                 <View>
                   <Text className="font-sans-semibold">
-                    {activeChatReceiver?.firstname}{" "}
-                    {activeChatReceiver?.lastname}
+                    {trimText(
+                      `${activeChatReceiver?.firstname} ${activeChatReceiver?.lastname}`,
+                      20
+                    )}
                   </Text>
                   <Text className="text-sm text-grey-500 font-sans-regular">
                     {chat?.isOnline
