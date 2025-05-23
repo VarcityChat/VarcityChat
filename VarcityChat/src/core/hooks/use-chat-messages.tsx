@@ -70,6 +70,15 @@ export const useChatMessages = () => {
               new BSON.ObjectId(message.localId)
             );
 
+            const replyObject = message?.reply
+              ? {
+                  messageId: message.reply.messageId,
+                  content: message.reply.content,
+                  sender: message.reply.sender,
+                  receiver: message.reply.receiver,
+                }
+              : undefined;
+
             if (localMessage) {
               realm.write(() => {
                 localMessage.serverSequence = Number(message.sequence);
@@ -78,6 +87,9 @@ export const useChatMessages = () => {
                 localMessage.deliveryStatus = message?.readAt
                   ? "delivered"
                   : "sent";
+                if (replyObject) {
+                  localMessage.reply = replyObject as any;
+                }
               });
             } else {
               messagesToCreate.push({
@@ -94,6 +106,7 @@ export const useChatMessages = () => {
                 audio: message?.audio,
                 createdAt: message.createdAt,
                 lastSyncTimestamp: new Date(message.createdAt),
+                reply: replyObject as any,
               });
             }
           }
@@ -122,6 +135,15 @@ export const useChatMessages = () => {
         .objects("Message")
         .filtered(`serverId == $0`, message._id);
 
+      const replyObject = message?.reply
+        ? {
+            messageId: message.reply.messageId,
+            content: message.reply.content,
+            sender: message.reply.sender,
+            receiver: message.reply.receiver,
+          }
+        : undefined;
+
       if (!messageExists.length) {
         realm.write(() => {
           realm.create("Message", {
@@ -136,6 +158,7 @@ export const useChatMessages = () => {
             audio: message?.audio,
             serverId: message._id,
             localSequence: Number(message.sequence),
+            reply: replyObject,
           });
         });
       }
@@ -168,6 +191,16 @@ export const useChatMessages = () => {
       const localId = generateLocalId();
       const localSequence = getNewMessageSequence(chatId);
 
+      // create reply object if message has a reply
+      const replyObject = message?.reply
+        ? {
+            messageId: message.reply.messageId,
+            content: message.reply.content,
+            sender: message.reply.sender,
+            receiver: message.reply.receiver,
+          }
+        : undefined;
+
       // optimistic update
       realm.write(() => {
         realm.create("Message", {
@@ -178,6 +211,7 @@ export const useChatMessages = () => {
           createdAt: new Date(),
           isQueued: !isConnected || socket === null,
           localSequence,
+          reply: replyObject,
         });
       });
 

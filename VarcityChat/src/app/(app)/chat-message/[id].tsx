@@ -25,7 +25,10 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { useQuery } from "@realm/react";
 import { useSocket } from "@/context/useSocketContext";
 import { useChats } from "@/core/hooks/use-chats";
-import { convertToGiftedChatMessage } from "@/core/utils";
+import {
+  convertToGiftedChatMessage,
+  formatChatReplyMessage,
+} from "@/core/utils";
 import { uploadToCloudinaryWithProgress } from "@/core/upload-utils";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
@@ -48,7 +51,7 @@ import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { MessageInputContainer } from "@/components/chats/message-input-container";
 import { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 
-const MESSAGES_PER_PAGE = 80;
+const MESSAGES_PER_PAGE = 100;
 
 export default function ChatMessage() {
   const dispatch = useAppDispatch();
@@ -84,6 +87,7 @@ export default function ChatMessage() {
 
   const messageContainerRef = useRef<FlatList>(null);
   const swipeableRef = useRef<SwipeableMethods | null>(null);
+  const currentReplyMessageRef = useRef<IMessage | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [page, setPage] = useState(1);
@@ -147,7 +151,6 @@ export default function ChatMessage() {
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
-      console.log("\n\nSWIPEABLE REF:", swipeableRef.current);
       setTimeout(() => {
         swipeableRef.current?.close();
         swipeableRef.current = null;
@@ -171,27 +174,43 @@ export default function ChatMessage() {
     setPage((prev) => prev + 1);
   }, [page, messagesFromRealm.length]);
 
-  // const updateRowRef = useCallback(
-  //   (ref: any) => {
-  //     console.log("REF:", ref);
-  //     console.log("\n", ref?.props?.children);
-  //     if (
-  //       ref &&
-  //       replyMessage
-  //       // ref.props.children.props.currentMessage?._id === replyMessage._id
-  //     ) {
-  //       swipeableRef.current = ref;
-  //     }
-  //   },
-  //   [replyMessage]
-  // );
-
   const handleSetReplyMessage = useCallback(
     (message: IMessage, swipeable: SwipeableMethods | null) => {
       setReplyMessage(message);
-      if (swipeable) swipeableRef.current = swipeable;
+      currentReplyMessageRef.current = message;
+      if (swipeable) {
+        swipeableRef.current = swipeable;
+      }
     },
     []
+  );
+
+  const handleClearReplyMessage = useCallback(() => {
+    setReplyMessage(null);
+    currentReplyMessageRef.current = null;
+  }, []);
+
+  const scrollToMessage = useCallback(
+    (messageId: string) => {
+      try {
+        const messages = messagesFromRealm
+          .slice(0, page * MESSAGES_PER_PAGE)
+          .map((message) =>
+            convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+          );
+        const index = messages.findIndex((msg) => msg._id === messageId);
+        if (index !== -1 && messageContainerRef.current) {
+          setTimeout(() => {
+            messageContainerRef.current?.scrollToIndex({
+              index,
+              animated: true,
+              viewOffset: 50,
+            });
+          }, 100);
+        }
+      } catch (err) {}
+    },
+    [messagesFromRealm, page]
   );
 
   const handleSend = useCallback(
@@ -209,6 +228,22 @@ export default function ChatMessage() {
           .filter((img) => img.cloudinaryUrl)
           .map((img) => img.cloudinaryUrl) as string[];
 
+        const currentReplyMessage = currentReplyMessageRef.current;
+        const replyData = currentReplyMessage
+          ? {
+              reply: {
+                messageId: currentReplyMessage._id,
+                content: formatChatReplyMessage(currentReplyMessage as any),
+                sender: currentReplyMessage.user._id,
+                receiver:
+                  currentReplyMessage.user._id === user!._id
+                    ? activeChat!.receiver!._id
+                    : user!._id,
+              },
+            }
+          : {};
+        handleClearReplyMessage();
+
         const message = messages[0];
         sendMessage(
           {
@@ -217,6 +252,7 @@ export default function ChatMessage() {
             sender: user!._id,
             receiver: activeChat!.receiver!._id,
             mediaUrls,
+            ...replyData,
           } as unknown as ExtendedMessage,
           `${conversationId}`
         );
@@ -342,15 +378,10 @@ export default function ChatMessage() {
   );
 
   const renderBubble = useCallback(
-    (
-      props: BubbleProps<
-        IMessage & {
-          mediaUrls: string[];
-          deliveryStatus: DELIVERY_STATUSES;
-        }
-      >
-    ) => <CustomMessageBubble {...props} />,
-    []
+    (props: BubbleProps<ExtendedMessage>) => (
+      <CustomMessageBubble {...props} onReplyPress={scrollToMessage} />
+    ),
+    [scrollToMessage]
   );
 
   const renderMessage = useCallback(
@@ -369,7 +400,7 @@ export default function ChatMessage() {
     () =>
       replyMessage ? (
         <ReplyMessageBar
-          clearReply={() => setReplyMessage(null)}
+          clearReply={handleClearReplyMessage}
           message={replyMessage}
         />
       ) : (
@@ -378,7 +409,7 @@ export default function ChatMessage() {
           onRemoveImage={handleRemoveImage}
         />
       ),
-    [replyMessage, uploadingImages, handleRemoveImage]
+    [replyMessage, uploadingImages, handleRemoveImage, handleClearReplyMessage]
   );
 
   const renderInputToolbar = useCallback(
@@ -415,6 +446,7 @@ export default function ChatMessage() {
           maxToRenderPerBatch: 50,
           updateCellsBatchingPeriod: 50,
           removeCliippedSubviews: Platform.OS === "android",
+          onScrollToIndexFailed: (_info: any) => {},
           // maintainVisibleContentPosition: {
           //   minIndexForVisible: 1,
           //   autoScrollToTopThreshold: 0,
@@ -445,9 +477,6 @@ export default function ChatMessage() {
         renderInputToolbar,
         renderMessage,
         keyboardShouldPersistTaps: "never",
-        onLongPress(context, message) {
-          handleSetReplyMessage(message, null);
-        },
       } as GiftedChatProps),
     [
       messagesFromRealm,

@@ -1,23 +1,30 @@
-import { useState } from "react";
-import { colors } from "@/ui";
+import { useCallback, useState } from "react";
 import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { memo } from "react";
-import { View, Image } from "@/ui";
-import { StyleSheet, Dimensions, Pressable } from "react-native";
+import { View, Image, Text, colors } from "@/ui";
+import {
+  StyleSheet,
+  Dimensions,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 import { Bubble, IMessage, BubbleProps } from "react-native-gifted-chat";
 import { ImageViewer } from "./image-viewer";
 import { AudioMessageBubble } from "./audio-message-bubble";
+import { formatChatReplyMessage, trimText } from "@/core/utils";
+import { useAppSelector } from "@/core/store/store";
 
 const { width } = Dimensions.get("window");
 const MAX_IMAGE_WIDTH = width * 0.6;
 
+type CustomMessageBubbleProps = BubbleProps<ExtendedMessage> & {
+  onReplyPress?: (messageId: string) => void;
+};
+
 const CustomMessageBubble = memo(
-  (
-    props: BubbleProps<
-      IMessage & { mediaUrls: string[]; deliveryStatus: DELIVERY_STATUSES }
-    >
-  ) => {
+  (props: CustomMessageBubbleProps) => {
+    const activeChat = useAppSelector((state) => state.chats.activeChat);
     const [isViewerVisible, setIsViewerVisible] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -53,43 +60,81 @@ const CustomMessageBubble = memo(
       );
     };
 
-    const renderMessageImages = (props: BubbleProps<IMessage>) => {
-      const message = props?.currentMessage as ExtendedMessage;
-      if (!message?.mediaUrls?.length) return null;
+    const renderMessageImages = useCallback(
+      (props: BubbleProps<ExtendedMessage>) => {
+        const message = props?.currentMessage;
+        if (!message?.mediaUrls?.length) return null;
 
-      const mediaLength = message.mediaUrls.length;
-      const textIsEmpty = !message.text || message.text.trim().length === 0;
+        const mediaLength = message.mediaUrls.length;
+        const textIsEmpty = !message.text || message.text.trim().length === 0;
+
+        return (
+          <View
+            style={[
+              mediaLength < 4
+                ? styles.imageContainer
+                : styles.fourImagesContainer,
+              textIsEmpty && styles.noTextContainer,
+            ]}
+          >
+            {message.mediaUrls?.map((url, index) => (
+              <Pressable
+                key={url}
+                onPress={() =>
+                  handleImagePress(message.mediaUrls as string[], index)
+                }
+                style={[
+                  mediaLength < 4
+                    ? styles.imageWrapper
+                    : styles.fourImagesWrapper,
+                  mediaLength === 1 && styles.singleImage,
+                  mediaLength === 2 && styles.doubleImage,
+                  mediaLength === 3 && styles.multiImage,
+                ]}
+              >
+                <Image source={{ uri: url }} style={styles.image} />
+              </Pressable>
+            ))}
+          </View>
+        );
+      },
+      []
+    );
+
+    const renderReplyBubble = useCallback((props: CustomMessageBubbleProps) => {
+      const message = props?.currentMessage;
+      if (!message?.reply) return null;
+
+      const isOwnMessage = message.reply.sender === props.user?._id;
+      const senderName = isOwnMessage
+        ? "You"
+        : trimText(`${activeChat?.receiver?.firstname}`, 20);
+
+      const handlePress = () => {
+        if (message?.reply?.messageId) {
+          props?.onReplyPress?.(message?.reply?.messageId);
+        }
+      };
 
       return (
-        <View
-          style={[
-            mediaLength < 4
-              ? styles.imageContainer
-              : styles.fourImagesContainer,
-            textIsEmpty && styles.noTextContainer,
-          ]}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className="flex-row overflow-hidden rounded-md mt-1.5 mx-1.5"
+          style={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+          onPress={handlePress}
         >
-          {message.mediaUrls?.map((url, index) => (
-            <Pressable
-              key={url}
-              onPress={() =>
-                handleImagePress(message.mediaUrls as string[], index)
-              }
-              style={[
-                mediaLength < 4
-                  ? styles.imageWrapper
-                  : styles.fourImagesWrapper,
-                mediaLength === 1 && styles.singleImage,
-                mediaLength === 2 && styles.doubleImage,
-                mediaLength === 3 && styles.multiImage,
-              ]}
-            >
-              <Image source={{ uri: url }} style={styles.image} />
-            </Pressable>
-          ))}
-        </View>
+          <View className="w-1 bg-primary-400" />
+          <View className="flex-1 p-1 pl-2">
+            <Text className="mb-0.5 text-primary-500 text-sm font-sans-semibold">
+              {senderName}
+            </Text>
+            <Text className="text-sm text-grey-700" numberOfLines={2}>
+              {formatChatReplyMessage(message?.reply as any)}
+            </Text>
+          </View>
+        </TouchableOpacity>
       );
-    };
+    }, []);
 
     return (
       <>
@@ -123,7 +168,12 @@ const CustomMessageBubble = memo(
             }}
             renderTicks={renderTicks}
             renderCustomView={(props) => {
-              return renderMessageImages(props);
+              return (
+                <>
+                  {renderReplyBubble(props)}
+                  {renderMessageImages(props)}
+                </>
+              );
             }}
             renderMessageAudio={(props) => {
               return (
