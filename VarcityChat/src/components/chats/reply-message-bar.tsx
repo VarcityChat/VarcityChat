@@ -1,3 +1,6 @@
+import { ExtendedMessage } from "@/api/chats/types";
+import { useAppSelector } from "@/core/store/store";
+import { formatChatReplyMessage, trimText } from "@/core/utils";
 import { View, Text, TouchableOpacity, colors } from "@/ui";
 import { Ionicons } from "@expo/vector-icons";
 import { IMessage } from "react-native-gifted-chat";
@@ -9,6 +12,9 @@ type ReplyMessageBarProps = {
 };
 
 const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
+  const user = useAppSelector((state) => state.auth.user);
+  const activeChat = useAppSelector((state) => state.chats.activeChat);
+
   return (
     <>
       {message !== null && (
@@ -16,41 +22,52 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
           style={{
             height: 50,
             flexDirection: "row",
-            backgroundColor: "#E4E9EB",
+            backgroundColor: "#edf2f3",
           }}
           entering={FadeInDown}
           exiting={FadeOutDown}
         >
           <View
-            style={{ height: 50, width: 6, backgroundColor: "#89BC0C" }}
-          ></View>
-          <View style={{ flexDirection: "column" }}>
-            <Text
-              style={{
-                color: "#89BC0C",
-                paddingLeft: 10,
-                paddingTop: 5,
-                fontWeight: "600",
-                fontSize: 15,
-              }}
-            >
-              {message?.user.name}
-            </Text>
-            <Text
-              style={{
-                color: colors.grey[300],
-                paddingLeft: 10,
-                paddingTop: 5,
-              }}
-            >
-              {message!.text.length > 40
-                ? message?.text.substring(0, 40) + "..."
-                : message?.text}
-            </Text>
-          </View>
+            style={{
+              height: 50,
+              width: 6,
+              backgroundColor: colors.primary[300],
+            }}
+          />
           <View
             style={{
-              flex: 1,
+              flexDirection: "column",
+              paddingBottom: 5,
+              width: "90%",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.primary[500],
+                paddingLeft: 10,
+                paddingTop: 2,
+                fontWeight: "800",
+                fontSize: 13,
+              }}
+            >
+              {message?.user?._id === user?._id
+                ? "You"
+                : trimText(`${activeChat?.receiver?.firstname}`, 20)}
+            </Text>
+            <Text
+              style={{
+                color: colors.grey[500],
+                paddingLeft: 10,
+                paddingRight: 2,
+              }}
+              numberOfLines={1}
+            >
+              {formatChatReplyMessage(message as IMessage & ExtendedMessage)}
+            </Text>
+          </View>
+
+          <View
+            style={{
               justifyContent: "center",
               alignItems: "flex-end",
               paddingRight: 10,

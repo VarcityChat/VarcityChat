@@ -29,6 +29,16 @@ export const formatChatLastMessage = (
   return trimText(limitNewLines(`${message.content}`, 2) || "", 70);
 };
 
+export const formatChatReplyMessage = (message: IMessage & ExtendedMessage) => {
+  if (!message) return "";
+  if (message?.audio) return `🎙️ voice message`;
+  if (message?.mediaUrls?.length && !message.content?.trim().length)
+    return `🗾 ${message.mediaUrls.length} image${
+      message.mediaUrls.length > 1 ? "s" : ""
+    }`;
+  return trimText(limitNewLines(`${message?.text}`, 1) || "", 50);
+};
+
 export const limitNewLines = (text: string, maxLines: number): string => {
   if (!text || typeof text !== "string") return "";
   const lines = text.split("\n");

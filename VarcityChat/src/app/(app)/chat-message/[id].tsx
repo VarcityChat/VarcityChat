@@ -11,11 +11,12 @@ import {
   GiftedChatProps,
   IMessage,
   InputToolbarProps,
+  MessageProps,
 } from "react-native-gifted-chat";
 import { colors, View } from "@/ui";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FlatList, Swipeable } from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import { MessageRequest } from "@/components/chats/message-request";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
@@ -45,6 +46,7 @@ import { ChatInput } from "@/components/chats/chat-input";
 import { useAudioUpload } from "@/core/hooks/chatHooks/use-audio-upload";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { MessageInputContainer } from "@/components/chats/message-input-container";
+import { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 
 const MESSAGES_PER_PAGE = 80;
 
@@ -81,7 +83,7 @@ export default function ChatMessage() {
   const { stopAllPlayers } = useAudioPlayer();
 
   const messageContainerRef = useRef<FlatList>(null);
-  const swipeableRef = useRef<Swipeable | null>(null);
+  const swipeableRef = useRef<SwipeableMethods | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [page, setPage] = useState(1);
@@ -96,7 +98,6 @@ export default function ChatMessage() {
       ["serverSequence", true],
     ]);
 
-  // console.log("CURRENT PAGE:", page);
   // console.log("RENDERED COUNT:", renderedCount++);
 
   useEffect(() => {
@@ -146,8 +147,11 @@ export default function ChatMessage() {
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
-      swipeableRef.current.close();
-      swipeableRef.current = null;
+      console.log("\n\nSWIPEABLE REF:", swipeableRef.current);
+      setTimeout(() => {
+        swipeableRef.current?.close();
+        swipeableRef.current = null;
+      }, 150);
     }
   }, [replyMessage]);
 
@@ -166,6 +170,29 @@ export default function ChatMessage() {
     }
     setPage((prev) => prev + 1);
   }, [page, messagesFromRealm.length]);
+
+  // const updateRowRef = useCallback(
+  //   (ref: any) => {
+  //     console.log("REF:", ref);
+  //     console.log("\n", ref?.props?.children);
+  //     if (
+  //       ref &&
+  //       replyMessage
+  //       // ref.props.children.props.currentMessage?._id === replyMessage._id
+  //     ) {
+  //       swipeableRef.current = ref;
+  //     }
+  //   },
+  //   [replyMessage]
+  // );
+
+  const handleSetReplyMessage = useCallback(
+    (message: IMessage, swipeable: SwipeableMethods | null) => {
+      setReplyMessage(message);
+      if (swipeable) swipeableRef.current = swipeable;
+    },
+    []
+  );
 
   const handleSend = useCallback(
     (messages: IMessage[]) => {
@@ -314,19 +341,6 @@ export default function ChatMessage() {
     [uploadingImages, setUploadingImages]
   );
 
-  const updateRowRef = useCallback(
-    (ref: any) => {
-      if (
-        ref &&
-        replyMessage &&
-        ref.props.children.props.currentMessage === replyMessage._id
-      ) {
-        swipeableRef.current = ref;
-      }
-    },
-    [replyMessage]
-  );
-
   const renderBubble = useCallback(
     (
       props: BubbleProps<
@@ -339,19 +353,32 @@ export default function ChatMessage() {
     []
   );
 
+  const renderMessage = useCallback(
+    (props: MessageProps<any>) => (
+      <ChatMessageBox {...props} setReplyOnSwipe={handleSetReplyMessage} />
+    ),
+    []
+  );
+
   const renderChatEmpty = useCallback(
     () => (isSyncing ? null : <ChatEmptyComponent />),
     [isSyncing]
   );
 
   const renderChatFooter = useCallback(
-    () => (
-      <ChatFooter
-        uploadingImages={uploadingImages}
-        onRemoveImage={handleRemoveImage}
-      />
-    ),
-    [uploadingImages, handleRemoveImage]
+    () =>
+      replyMessage ? (
+        <ReplyMessageBar
+          clearReply={() => setReplyMessage(null)}
+          message={replyMessage}
+        />
+      ) : (
+        <ChatFooter
+          uploadingImages={uploadingImages}
+          onRemoveImage={handleRemoveImage}
+        />
+      ),
+    [replyMessage, uploadingImages, handleRemoveImage]
   );
 
   const renderInputToolbar = useCallback(
@@ -416,7 +443,11 @@ export default function ChatMessage() {
         renderChatEmpty,
         renderChatFooter,
         renderInputToolbar,
+        renderMessage,
         keyboardShouldPersistTaps: "never",
+        onLongPress(context, message) {
+          handleSetReplyMessage(message, null);
+        },
       } as GiftedChatProps),
     [
       messagesFromRealm,
@@ -482,10 +513,10 @@ export default function ChatMessage() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   composer: {
     paddingHorizontal: 5,
+    paddingBottom: 10,
     fontSize: 14,
     fontFamily: "PlusJakartaSans_400Regular",
   },
