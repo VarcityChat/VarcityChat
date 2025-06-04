@@ -102,8 +102,6 @@ export default function ChatMessage() {
       ["serverSequence", true],
     ]);
 
-  // console.log("RENDERED COUNT:", renderedCount++);
-
   useEffect(() => {
     if (isConnected) {
       socket?.emit("get-user-activity", activeChat?.receiver!._id);

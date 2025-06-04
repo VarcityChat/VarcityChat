@@ -125,10 +125,13 @@ const CustomMessageBubble = memo(
         >
           <View className="w-1 bg-primary-400" />
           <View className="flex-1 p-1 pl-2">
-            <Text className="mb-0.5 text-primary-500 text-sm font-sans-semibold">
+            <Text className="mb-0.5 text-primary-500 dark:text-primary-500 text-sm font-sans-semibold">
               {senderName}
             </Text>
-            <Text className="text-sm text-grey-700" numberOfLines={2}>
+            <Text
+              className="text-sm text-grey-700 dark:text-grey-700"
+              numberOfLines={2}
+            >
               {formatChatReplyMessage(message?.reply as any)}
             </Text>
           </View>

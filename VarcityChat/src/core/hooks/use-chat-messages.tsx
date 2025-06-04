@@ -37,16 +37,19 @@ export const useChatMessages = () => {
 
   const syncMessagesFromBackend = useCallback(
     async (conversationId: string) => {
-      const lastMessageServerSequence =
+      let lastMessageServerSequence =
         realm
           .objects<MessageSchema>("Message")
           .filtered("conversationId = $0", conversationId)
           .max("serverSequence") ?? 1;
+      lastMessageServerSequence = Number(lastMessageServerSequence);
 
       // Get messages from server since last sync
       try {
         setIsSyncing(true);
-        const apiUrl = `/chat/${conversationId}/messages/sequence?sequence=${lastMessageServerSequence}`;
+        const apiUrl = `/chat/${conversationId}/messages/sequence?sequence=${
+          lastMessageServerSequence === 1 ? 0 : lastMessageServerSequence
+        }`;
 
         const response = await axiosApiClient.get<{
           messages: ExtendedMessage[];
@@ -175,12 +178,13 @@ export const useChatMessages = () => {
           "sent",
           user?._id || ""
         );
-
-      unreadMessagesInConversation.forEach((message) => {
+      if (unreadMessagesInConversation.length) {
         realm.write(() => {
-          message.deliveryStatus = "delivered";
+          for (let message of unreadMessagesInConversation) {
+            message.deliveryStatus = "delivered";
+          }
         });
-      });
+      }
     },
     [realm]
   );
@@ -275,7 +279,6 @@ export const useChatMessages = () => {
   const addAudioMessageToRealm = useCallback(
     (message: ExtendedMessage, localId: BSON.ObjectID, chatId: string) => {
       const localSequence = getNewMessageSequence(chatId);
-
       // optimistic update
       realm.write(() => {
         realm.create("Message", {
