@@ -72,9 +72,7 @@ export default function RootLayout() {
         await Updates.fetchUpdateAsync();
         await Updates.reloadAsync();
       }
-    } catch (e) {
-      // alert(`Update check failed: ${e}`);
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {
@@ -109,7 +107,6 @@ function RootLayoutNav() {
           dispatch(setAuth({ ...authData, isAuthenticated: true }));
         }
       } catch (e) {
-        // alert("ERROR FETCHING AUTH FROM STORAGE" + `${e}`);
       } finally {
         dispatch(setIsLoading(false));
       }

@@ -396,7 +396,7 @@ export default function ChatMessage() {
 
   const renderChatFooter = useCallback(
     () =>
-      replyMessage ? (
+      replyMessage && uploadingImages.length === 0 ? (
         <ReplyMessageBar
           clearReply={handleClearReplyMessage}
           message={replyMessage}
@@ -519,6 +519,7 @@ export default function ChatMessage() {
               onImageSelected={handleImageSelected}
               onAudioSend={handleAudioSend}
               isKeyboardInternallyHandled={false}
+              replyMessage={replyMessage}
             />
           </AvoidSoftInputView>
         ) : (
@@ -530,6 +531,7 @@ export default function ChatMessage() {
             uploadingImages={uploadingImages}
             onImageSelected={handleImageSelected}
             onAudioSend={handleAudioSend}
+            replyMessage={replyMessage}
           />
         )}
 

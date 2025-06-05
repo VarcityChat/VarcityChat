@@ -1,4 +1,11 @@
-import { useCallback, useState, memo } from "react";
+import {
+  useCallback,
+  useState,
+  memo,
+  useRef,
+  RefObject,
+  useEffect,
+} from "react";
 import {
   Composer,
   GiftedChat,
@@ -9,6 +16,7 @@ import { ChatInput } from "./chat-input";
 import { CustomSend } from "./custom-send";
 import { UploadingImage } from "@/types/chat";
 import { ImagePickerAsset } from "expo-image-picker";
+import { InteractionManager, TextInput } from "react-native";
 
 interface MessageInputContainerProps {
   onInputTextChanged?: (text: string) => void;
@@ -17,6 +25,7 @@ interface MessageInputContainerProps {
   uploadingImages: UploadingImage[];
   onImageSelected: (images: ImagePickerAsset[]) => void;
   onAudioSend: (audioUri: string) => void;
+  replyMessage: IMessage | null;
 }
 
 export const MessageInputContainer = memo(
@@ -28,9 +37,11 @@ export const MessageInputContainer = memo(
     uploadingImages,
     onImageSelected,
     onAudioSend,
+    replyMessage,
     ...restProps
   }: GiftedChatProps & MessageInputContainerProps) => {
     const [text, setText] = useState("");
+    const textInputRef = useRef<TextInput>(null);
 
     const handleTextChange = useCallback(
       (newText: string) => {
@@ -48,10 +59,19 @@ export const MessageInputContainer = memo(
       [onSend]
     );
 
+    useEffect(() => {
+      if (replyMessage) {
+        InteractionManager.runAfterInteractions(() => {
+          textInputRef?.current?.focus();
+        });
+      }
+    }, [replyMessage]);
+
     return (
       <GiftedChat
         {...restProps}
         text={text}
+        textInputRef={textInputRef as RefObject<TextInput>}
         onSend={handleSend}
         onInputTextChanged={handleTextChange}
         maxComposerHeight={100}

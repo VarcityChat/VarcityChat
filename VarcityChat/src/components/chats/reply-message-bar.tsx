@@ -3,6 +3,8 @@ import { useAppSelector } from "@/core/store/store";
 import { formatChatReplyMessage, trimText } from "@/core/utils";
 import { View, Text, TouchableOpacity, colors } from "@/ui";
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect } from "react";
+import { Keyboard } from "react-native";
 import { IMessage } from "react-native-gifted-chat";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 

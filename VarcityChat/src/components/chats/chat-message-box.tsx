@@ -11,7 +11,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Swipeable, {
   SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -25,6 +25,14 @@ type ChatMessageBoxProps = {
 
 function ChatMessageBox({ setReplyOnSwipe, ...props }: ChatMessageBoxProps) {
   const swipeableRef = useRef<SwipeableMethods | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (swipeableRef.current) {
+        swipeableRef.current.close();
+      }
+    };
+  }, []);
 
   const isNextMyMessage =
     props.currentMessage &&
@@ -79,7 +87,15 @@ function ChatMessageBox({ setReplyOnSwipe, ...props }: ChatMessageBoxProps) {
 
   const onSwipeOpenAction = () => {
     if (props.currentMessage && swipeableRef.current) {
-      setReplyOnSwipe({ ...props.currentMessage }, swipeableRef.current);
+      try {
+        const messageCopy = { ...props.currentMessage };
+        if (swipeableRef?.current) {
+          setReplyOnSwipe(messageCopy, swipeableRef.current);
+        }
+      } catch (error) {
+        console.error("Error in onSwipeOpenAction:", error);
+        swipeableRef.current?.close();
+      }
     }
   };
 
@@ -92,6 +108,9 @@ function ChatMessageBox({ setReplyOnSwipe, ...props }: ChatMessageBoxProps) {
       onSwipeableWillOpen={onSwipeOpenAction}
       dragOffsetFromLeftEdge={1}
       hitSlop={{ right: 20 }}
+      containerStyle={{
+        marginLeft: 4,
+      }}
     >
       <Message {...props} />
     </Swipeable>

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DELIVERY_STATUSES, ExtendedMessage } from "@/api/chats/types";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { memo } from "react";
@@ -17,6 +17,7 @@ import { useAppSelector } from "@/core/store/store";
 
 const { width } = Dimensions.get("window");
 const MAX_IMAGE_WIDTH = width * 0.6;
+const MIN_WIDTH_FOR_REPLY = width * 0.4;
 
 type CustomMessageBubbleProps = BubbleProps<ExtendedMessage> & {
   onReplyPress?: (messageId: string) => void;
@@ -139,6 +140,23 @@ const CustomMessageBubble = memo(
       );
     }, []);
 
+    const maxBubbleWidth = useMemo(
+      () =>
+        props?.currentMessage?.mediaUrls?.length
+          ? MAX_IMAGE_WIDTH + 8
+          : undefined,
+      []
+    );
+    const minBubbleWidth = useMemo(
+      () =>
+        props?.currentMessage?.reply
+          ? props?.currentMessage?.reply?.content?.length > 10
+            ? MIN_WIDTH_FOR_REPLY
+            : undefined
+          : undefined,
+      []
+    );
+
     return (
       <>
         <View shouldRasterizeIOS renderToHardwareTextureAndroid>
@@ -158,15 +176,13 @@ const CustomMessageBubble = memo(
             wrapperStyle={{
               left: {
                 backgroundColor: colors.grey[50],
-                maxWidth: props?.currentMessage?.mediaUrls?.length
-                  ? MAX_IMAGE_WIDTH + 8
-                  : undefined,
+                maxWidth: maxBubbleWidth,
+                minWidth: minBubbleWidth,
               },
               right: {
                 backgroundColor: "#FCEBEB",
-                maxWidth: props?.currentMessage?.mediaUrls?.length
-                  ? MAX_IMAGE_WIDTH + 8
-                  : undefined,
+                maxWidth: maxBubbleWidth,
+                minWidth: minBubbleWidth,
               },
             }}
             renderTicks={renderTicks}
