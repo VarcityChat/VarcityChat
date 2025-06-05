@@ -5,7 +5,12 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { forwardRef, useEffect, useMemo, useState } from "react";
-import { SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import {
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import LogoutIcon from "@/ui/icons/settings/logout-icon";
 import { useAuth } from "@/core/hooks/use-auth";
 import { defaultAvatarUrl } from "../../../../../constants/chats";
@@ -113,6 +118,35 @@ export default function ProfileScreen() {
     });
   };
 
+  const handleSupportPress = async () => {
+    const supportEmail = "varcitychat@gmail.com";
+    const subject = "VarcityChat Support Request";
+    const body = `User: ${user?.firstname} ${user?.lastname}\nEmail: ${user?.email}\n\nI need help with: `;
+    const url = `mailto:${supportEmail}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        showToast({
+          type: "error",
+          text1: "Cannot open email client",
+          text2: "Please email varcitychat@gmail.com directly",
+        });
+      }
+    } catch (error) {
+      console.log("EMAIL ERROR:", error);
+      showToast({
+        type: "error",
+        text1: "Error opening email",
+        text2: "Please email varcitychat@gmail.com directly",
+      });
+    }
+  };
+
   return (
     <SafeAreaView className="flex flex-1">
       <ScrollView className="flex">
@@ -177,7 +211,11 @@ export default function ProfileScreen() {
 
           <SettingsItem name="tndc" label="Terms and conditions" />
 
-          <SettingsItem name="support" label="Support" />
+          <SettingsItem
+            name="support"
+            label="Support"
+            onPress={handleSupportPress}
+          />
         </View>
 
         <View className="flex flex-1 flex-row items-center justify-center my-12">
