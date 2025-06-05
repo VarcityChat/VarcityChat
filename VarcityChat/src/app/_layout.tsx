@@ -32,7 +32,7 @@ import { loadSelectedTheme } from "@/core/hooks/use-selected-theme";
 import { useAuth } from "@/core/hooks/use-auth";
 import { authStorage, setItem } from "@/core/storage";
 import { setAuth, setIsLoading } from "@/core/auth/auth-slice";
-import { MessageSchema } from "@/core/models/message-model";
+import { MessageSchema, ReplySchema } from "@/core/models/message-model";
 import { IsFirstLaunchKey } from "@/types/user";
 import Toast from "react-native-toast-message";
 import * as Updates from "expo-updates";
@@ -73,7 +73,7 @@ export default function RootLayout() {
         await Updates.reloadAsync();
       }
     } catch (e) {
-      alert(`Update check failed: ${e}`);
+      // alert(`Update check failed: ${e}`);
     }
   };
 
@@ -109,7 +109,7 @@ function RootLayoutNav() {
           dispatch(setAuth({ ...authData, isAuthenticated: true }));
         }
       } catch (e) {
-        alert("ERROR FETCHING AUTH FROM STORAGE" + `${e}`);
+        // alert("ERROR FETCHING AUTH FROM STORAGE" + `${e}`);
       } finally {
         dispatch(setIsLoading(false));
       }
@@ -136,7 +136,7 @@ function Providers({ children }: { children: ReactNode }) {
   const theme = useThemeConfig();
 
   return (
-    <RealmProvider schema={[MessageSchema]} schemaVersion={13}>
+    <RealmProvider schema={[MessageSchema, ReplySchema]} schemaVersion={14}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <GestureHandlerRootView

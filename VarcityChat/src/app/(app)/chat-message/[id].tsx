@@ -11,11 +11,12 @@ import {
   GiftedChatProps,
   IMessage,
   InputToolbarProps,
+  MessageProps,
 } from "react-native-gifted-chat";
 import { colors, View } from "@/ui";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FlatList, Swipeable } from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 import { useLocalSearchParams } from "expo-router";
 import { MessageRequest } from "@/components/chats/message-request";
 import { useChatMessages } from "@/core/hooks/use-chat-messages";
@@ -24,7 +25,10 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { useQuery } from "@realm/react";
 import { useSocket } from "@/context/useSocketContext";
 import { useChats } from "@/core/hooks/use-chats";
-import { convertToGiftedChatMessage } from "@/core/utils";
+import {
+  convertToGiftedChatMessage,
+  formatChatReplyMessage,
+} from "@/core/utils";
 import { uploadToCloudinaryWithProgress } from "@/core/upload-utils";
 import { MessageSchema } from "@/core/models/message-model";
 import { AvoidSoftInputView } from "react-native-avoid-softinput";
@@ -45,8 +49,9 @@ import { ChatInput } from "@/components/chats/chat-input";
 import { useAudioUpload } from "@/core/hooks/chatHooks/use-audio-upload";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { MessageInputContainer } from "@/components/chats/message-input-container";
+import { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 
-const MESSAGES_PER_PAGE = 80;
+const MESSAGES_PER_PAGE = 100;
 
 export default function ChatMessage() {
   const dispatch = useAppDispatch();
@@ -81,7 +86,8 @@ export default function ChatMessage() {
   const { stopAllPlayers } = useAudioPlayer();
 
   const messageContainerRef = useRef<FlatList>(null);
-  const swipeableRef = useRef<Swipeable | null>(null);
+  const swipeableRef = useRef<SwipeableMethods | null>(null);
+  const currentReplyMessageRef = useRef<IMessage | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [page, setPage] = useState(1);
@@ -95,9 +101,6 @@ export default function ChatMessage() {
       ["localSequence", true],
       ["serverSequence", true],
     ]);
-
-  // console.log("CURRENT PAGE:", page);
-  // console.log("RENDERED COUNT:", renderedCount++);
 
   useEffect(() => {
     if (isConnected) {
@@ -146,8 +149,10 @@ export default function ChatMessage() {
 
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
-      swipeableRef.current.close();
-      swipeableRef.current = null;
+      setTimeout(() => {
+        swipeableRef.current?.close();
+        swipeableRef.current = null;
+      }, 150);
     }
   }, [replyMessage]);
 
@@ -167,6 +172,45 @@ export default function ChatMessage() {
     setPage((prev) => prev + 1);
   }, [page, messagesFromRealm.length]);
 
+  const handleSetReplyMessage = useCallback(
+    (message: IMessage, swipeable: SwipeableMethods | null) => {
+      setReplyMessage(message);
+      currentReplyMessageRef.current = message;
+      if (swipeable) {
+        swipeableRef.current = swipeable;
+      }
+    },
+    []
+  );
+
+  const handleClearReplyMessage = useCallback(() => {
+    setReplyMessage(null);
+    currentReplyMessageRef.current = null;
+  }, []);
+
+  const scrollToMessage = useCallback(
+    (messageId: string) => {
+      try {
+        const messages = messagesFromRealm
+          .slice(0, page * MESSAGES_PER_PAGE)
+          .map((message) =>
+            convertToGiftedChatMessage(message as unknown as ExtendedMessage)
+          );
+        const index = messages.findIndex((msg) => msg._id === messageId);
+        if (index !== -1 && messageContainerRef.current) {
+          setTimeout(() => {
+            messageContainerRef.current?.scrollToIndex({
+              index,
+              animated: true,
+              viewOffset: 50,
+            });
+          }, 100);
+        }
+      } catch (err) {}
+    },
+    [messagesFromRealm, page]
+  );
+
   const handleSend = useCallback(
     (messages: IMessage[]) => {
       messageContainerRef?.current?.scrollToOffset({
@@ -182,6 +226,22 @@ export default function ChatMessage() {
           .filter((img) => img.cloudinaryUrl)
           .map((img) => img.cloudinaryUrl) as string[];
 
+        const currentReplyMessage = currentReplyMessageRef.current;
+        const replyData = currentReplyMessage
+          ? {
+              reply: {
+                messageId: currentReplyMessage._id,
+                content: formatChatReplyMessage(currentReplyMessage as any),
+                sender: currentReplyMessage.user._id,
+                receiver:
+                  currentReplyMessage.user._id === user!._id
+                    ? activeChat!.receiver!._id
+                    : user!._id,
+              },
+            }
+          : {};
+        handleClearReplyMessage();
+
         const message = messages[0];
         sendMessage(
           {
@@ -190,6 +250,7 @@ export default function ChatMessage() {
             sender: user!._id,
             receiver: activeChat!.receiver!._id,
             mediaUrls,
+            ...replyData,
           } as unknown as ExtendedMessage,
           `${conversationId}`
         );
@@ -314,28 +375,17 @@ export default function ChatMessage() {
     [uploadingImages, setUploadingImages]
   );
 
-  const updateRowRef = useCallback(
-    (ref: any) => {
-      if (
-        ref &&
-        replyMessage &&
-        ref.props.children.props.currentMessage === replyMessage._id
-      ) {
-        swipeableRef.current = ref;
-      }
-    },
-    [replyMessage]
+  const renderBubble = useCallback(
+    (props: BubbleProps<ExtendedMessage>) => (
+      <CustomMessageBubble {...props} onReplyPress={scrollToMessage} />
+    ),
+    [scrollToMessage]
   );
 
-  const renderBubble = useCallback(
-    (
-      props: BubbleProps<
-        IMessage & {
-          mediaUrls: string[];
-          deliveryStatus: DELIVERY_STATUSES;
-        }
-      >
-    ) => <CustomMessageBubble {...props} />,
+  const renderMessage = useCallback(
+    (props: MessageProps<any>) => (
+      <ChatMessageBox {...props} setReplyOnSwipe={handleSetReplyMessage} />
+    ),
     []
   );
 
@@ -345,13 +395,19 @@ export default function ChatMessage() {
   );
 
   const renderChatFooter = useCallback(
-    () => (
-      <ChatFooter
-        uploadingImages={uploadingImages}
-        onRemoveImage={handleRemoveImage}
-      />
-    ),
-    [uploadingImages, handleRemoveImage]
+    () =>
+      replyMessage ? (
+        <ReplyMessageBar
+          clearReply={handleClearReplyMessage}
+          message={replyMessage}
+        />
+      ) : (
+        <ChatFooter
+          uploadingImages={uploadingImages}
+          onRemoveImage={handleRemoveImage}
+        />
+      ),
+    [replyMessage, uploadingImages, handleRemoveImage, handleClearReplyMessage]
   );
 
   const renderInputToolbar = useCallback(
@@ -388,6 +444,7 @@ export default function ChatMessage() {
           maxToRenderPerBatch: 50,
           updateCellsBatchingPeriod: 50,
           removeCliippedSubviews: Platform.OS === "android",
+          onScrollToIndexFailed: (_info: any) => {},
           // maintainVisibleContentPosition: {
           //   minIndexForVisible: 1,
           //   autoScrollToTopThreshold: 0,
@@ -416,6 +473,7 @@ export default function ChatMessage() {
         renderChatEmpty,
         renderChatFooter,
         renderInputToolbar,
+        renderMessage,
         keyboardShouldPersistTaps: "never",
       } as GiftedChatProps),
     [
@@ -482,10 +540,10 @@ export default function ChatMessage() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   composer: {
     paddingHorizontal: 5,
+    paddingBottom: 10,
     fontSize: 14,
     fontFamily: "PlusJakartaSans_400Regular",
   },

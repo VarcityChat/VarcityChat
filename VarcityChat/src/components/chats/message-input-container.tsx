@@ -80,6 +80,9 @@ export const MessageInputContainer = memo(
             onImageSelected={onImageSelected}
           />
         )}
+        messagesContainerStyle={{
+          paddingLeft: 4,
+        }}
       />
     );
   }

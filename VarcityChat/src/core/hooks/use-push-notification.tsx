@@ -46,6 +46,7 @@ export const usePushNotifications = () => {
           type: "error",
           text1: "Permission not granted to get push token for notifications",
         });
+        return;
       }
 
       const projectId =

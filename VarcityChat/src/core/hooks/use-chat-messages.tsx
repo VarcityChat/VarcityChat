@@ -37,16 +37,19 @@ export const useChatMessages = () => {
 
   const syncMessagesFromBackend = useCallback(
     async (conversationId: string) => {
-      const lastMessageServerSequence =
+      let lastMessageServerSequence =
         realm
           .objects<MessageSchema>("Message")
           .filtered("conversationId = $0", conversationId)
           .max("serverSequence") ?? 1;
+      lastMessageServerSequence = Number(lastMessageServerSequence);
 
       // Get messages from server since last sync
       try {
         setIsSyncing(true);
-        const apiUrl = `/chat/${conversationId}/messages/sequence?sequence=${lastMessageServerSequence}`;
+        const apiUrl = `/chat/${conversationId}/messages/sequence?sequence=${
+          lastMessageServerSequence === 1 ? 0 : lastMessageServerSequence
+        }`;
 
         const response = await axiosApiClient.get<{
           messages: ExtendedMessage[];
@@ -70,6 +73,15 @@ export const useChatMessages = () => {
               new BSON.ObjectId(message.localId)
             );
 
+            const replyObject = message?.reply
+              ? {
+                  messageId: message.reply.messageId,
+                  content: message.reply.content,
+                  sender: message.reply.sender,
+                  receiver: message.reply.receiver,
+                }
+              : undefined;
+
             if (localMessage) {
               realm.write(() => {
                 localMessage.serverSequence = Number(message.sequence);
@@ -78,6 +90,9 @@ export const useChatMessages = () => {
                 localMessage.deliveryStatus = message?.readAt
                   ? "delivered"
                   : "sent";
+                if (replyObject) {
+                  localMessage.reply = replyObject as any;
+                }
               });
             } else {
               messagesToCreate.push({
@@ -94,6 +109,7 @@ export const useChatMessages = () => {
                 audio: message?.audio,
                 createdAt: message.createdAt,
                 lastSyncTimestamp: new Date(message.createdAt),
+                reply: replyObject as any,
               });
             }
           }
@@ -122,6 +138,15 @@ export const useChatMessages = () => {
         .objects("Message")
         .filtered(`serverId == $0`, message._id);
 
+      const replyObject = message?.reply
+        ? {
+            messageId: message.reply.messageId,
+            content: message.reply.content,
+            sender: message.reply.sender,
+            receiver: message.reply.receiver,
+          }
+        : undefined;
+
       if (!messageExists.length) {
         realm.write(() => {
           realm.create("Message", {
@@ -136,6 +161,7 @@ export const useChatMessages = () => {
             audio: message?.audio,
             serverId: message._id,
             localSequence: Number(message.sequence),
+            reply: replyObject,
           });
         });
       }
@@ -152,12 +178,13 @@ export const useChatMessages = () => {
           "sent",
           user?._id || ""
         );
-
-      unreadMessagesInConversation.forEach((message) => {
+      if (unreadMessagesInConversation.length) {
         realm.write(() => {
-          message.deliveryStatus = "delivered";
+          for (let message of unreadMessagesInConversation) {
+            message.deliveryStatus = "delivered";
+          }
         });
-      });
+      }
     },
     [realm]
   );
@@ -167,6 +194,16 @@ export const useChatMessages = () => {
       // Generate a new local id for realm
       const localId = generateLocalId();
       const localSequence = getNewMessageSequence(chatId);
+
+      // create reply object if message has a reply
+      const replyObject = message?.reply
+        ? {
+            messageId: message.reply.messageId,
+            content: message.reply.content,
+            sender: message.reply.sender,
+            receiver: message.reply.receiver,
+          }
+        : undefined;
 
       // optimistic update
       realm.write(() => {
@@ -178,6 +215,7 @@ export const useChatMessages = () => {
           createdAt: new Date(),
           isQueued: !isConnected || socket === null,
           localSequence,
+          reply: replyObject,
         });
       });
 
@@ -241,7 +279,6 @@ export const useChatMessages = () => {
   const addAudioMessageToRealm = useCallback(
     (message: ExtendedMessage, localId: BSON.ObjectID, chatId: string) => {
       const localSequence = getNewMessageSequence(chatId);
-
       // optimistic update
       realm.write(() => {
         realm.create("Message", {

@@ -30,7 +30,6 @@ export interface ExtendedMessage extends IMessage {
     content: string;
     sender: string;
     receiver: string;
-    mediaUrl: string;
   };
 }
 
