@@ -54,6 +54,11 @@ class Update {
       conversationId
     });
 
+    await notificationService.sendNotificationToUser(conversation.user1.toString(), {
+      title: 'Message Request Accepted',
+      body: `${currentUser?.firstname}: accepted your message request`
+    });
+
     res.status(HTTP_STATUS.OK).json({ message: 'Message request accepted', conversation });
   }
 
@@ -94,6 +99,11 @@ class Update {
 
     ioInstance.to(conversation.user1.toString()).emit('rejected-conversation-request', {
       conversationId
+    });
+
+    await notificationService.sendNotificationToUser(conversation.user1.toString(), {
+      title: 'Message Request Rejected',
+      body: `${currentUser?.firstname}: rejected your message request`
     });
 
     res.status(HTTP_STATUS.OK).json({ message: 'Message request rejected', conversation });

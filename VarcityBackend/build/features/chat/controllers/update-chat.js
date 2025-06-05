@@ -53,6 +53,10 @@ class Update {
         user_1.ioInstance.to(conversation.user1.toString()).emit('accepted-conversation-request', {
             conversationId
         });
+        await notification_service_1.notificationService.sendNotificationToUser(conversation.user1.toString(), {
+            title: 'Message Request Accepted',
+            body: `${currentUser?.firstname}: accepted your message request`
+        });
         res.status(http_status_codes_1.default.OK).json({ message: 'Message request accepted', conversation });
     }
     async rejectConversationRequest(req, res) {
@@ -81,6 +85,10 @@ class Update {
         });
         user_1.ioInstance.to(conversation.user1.toString()).emit('rejected-conversation-request', {
             conversationId
+        });
+        await notification_service_1.notificationService.sendNotificationToUser(conversation.user1.toString(), {
+            title: 'Message Request Rejected',
+            body: `${currentUser?.firstname}: rejected your message request`
         });
         res.status(http_status_codes_1.default.OK).json({ message: 'Message request rejected', conversation });
     }

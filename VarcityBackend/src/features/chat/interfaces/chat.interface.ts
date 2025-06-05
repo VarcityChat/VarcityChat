@@ -60,6 +60,7 @@ export interface IMessageData {
   conversationId: string | ObjectId;
   sender: string | ObjectId;
   receiver: string | ObjectId;
+  senderName?: string;
   content?: string;
   mediaUrls?: string[];
   audio?: string;

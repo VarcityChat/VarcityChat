@@ -98,13 +98,20 @@ class NotificationService {
 
   public async sendChatMessageNotification(message: IMessageData): Promise<void> {
     try {
-      const user: IUserDocument | null = await userService.getUserById(`${message.receiver}`);
-      if (!user) return;
+      const receiver: IUserDocument | null = await userService.getUserById(`${message.receiver}`);
+      if (!receiver) return;
+      if (!receiver.settings.notificationsEnabled) return;
 
-      const pushToken = user?.deviceToken;
+      let senderName = message?.senderName;
+      if (!senderName) {
+        const user: IUserDocument | null = await userService.getUserById(`${message.sender}`);
+        senderName = user?.firstname;
+      }
+
+      const pushToken = receiver?.deviceToken;
       if (pushToken)
         await this.sendNotification([pushToken], {
-          title: user.firstname,
+          title: senderName || 'New Message',
           body: message.content
             ? message.content
             : message?.audio

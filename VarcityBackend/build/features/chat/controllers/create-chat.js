@@ -56,7 +56,11 @@ class Add {
             user2: targetUserId,
             status: conversation.status
         });
-        // TODO: send push notification to 'targetUserId' informing on new message request
+        // Send push notification to user
+        await notification_service_1.notificationService.sendNotificationToUser(targetUserId, {
+            title: 'New Message Request',
+            body: `${currentAuthUser?.firstname}: sent you a new message request`
+        });
         res.status(http_status_codes_1.default.CREATED).json({ message: 'Conversation created', conversation });
     }
 }

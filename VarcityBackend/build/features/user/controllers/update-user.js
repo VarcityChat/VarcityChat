@@ -76,7 +76,6 @@ class Update {
     // @validator(savePushTokenSchema)
     async savePushNotificationToken(req, res) {
         const { deviceToken } = req.body;
-        console.log('\nDEVICE TOKEN:', deviceToken);
         if (expo_server_sdk_1.default.isExpoPushToken(deviceToken)) {
             await user_service_1.userService.updateUser(req.currentUser.userId, { deviceToken });
             res.status(http_status_codes_1.default.OK).json({ message: 'PushToken saved successfully' });

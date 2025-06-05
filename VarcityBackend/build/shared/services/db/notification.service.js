@@ -71,13 +71,20 @@ class NotificationService {
     }
     async sendChatMessageNotification(message) {
         try {
-            const user = await user_service_1.userService.getUserById(`${message.receiver}`);
-            if (!user)
+            const receiver = await user_service_1.userService.getUserById(`${message.receiver}`);
+            if (!receiver)
                 return;
-            const pushToken = user?.deviceToken;
+            if (!receiver.settings.notificationsEnabled)
+                return;
+            let senderName = message?.senderName;
+            if (!senderName) {
+                const user = await user_service_1.userService.getUserById(`${message.sender}`);
+                senderName = user?.firstname;
+            }
+            const pushToken = receiver?.deviceToken;
             if (pushToken)
                 await this.sendNotification([pushToken], {
-                    title: user.firstname,
+                    title: senderName || 'New Message',
                     body: message.content
                         ? message.content
                         : message?.audio
