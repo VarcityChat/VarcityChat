@@ -60,11 +60,8 @@ export const usePushNotifications = () => {
         pushTokenString = (
           await Notifications.getExpoPushTokenAsync({ projectId })
         ).data;
-        alert(`PUSH TOKEN STRING: ${pushTokenString}`);
-        return pushTokenString;
       } catch (e) {
         pushTokenString = "";
-        alert(`NOTIFICATIONS ERROR: ${e}`);
       }
 
       if (Platform.OS === "android") {
@@ -74,8 +71,9 @@ export const usePushNotifications = () => {
           vibrationPattern: [0, 250, 250, 250],
           lightColor: "#FF231F7C",
         });
-        return pushTokenString;
       }
+
+      return pushTokenString;
     } else {
       alert("Must use a physical device for push notifications");
     }
@@ -86,13 +84,18 @@ export const usePushNotifications = () => {
   };
 
   useEffect(() => {
-    registerPushNotificationsAsync()
-      .then((token) => {
-        setExpoPushToken(token!);
-      })
-      .catch((error) => {
-        throw Error(error);
-      });
+    const getToken = async () => {
+      try {
+        const token = await registerPushNotificationsAsync();
+        if (token) {
+          setExpoPushToken(token);
+        }
+      } catch (error) {
+        console.error("Failed to reigster for push notifications:", error);
+      }
+    };
+
+    getToken();
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {

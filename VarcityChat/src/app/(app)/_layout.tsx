@@ -12,19 +12,21 @@ export default function HomeLayout() {
 
   useEffect(() => {
     if (!isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (expoPushToken && !isLoading) {
       const handleNotifications = () => {
         try {
           resetBadgeCount();
           updateDeviceToken({ deviceToken: expoPushToken });
-        } catch (e) {
-          console.log("ERROR IN DEVICE OTKEN:", e);
-        }
+        } catch (e) {}
       };
       handleNotifications();
-
-      SplashScreen.hideAsync();
     }
-  }, [isLoading]);
+  }, [expoPushToken, isLoading]);
 
   if (isLoading) return null;
 
