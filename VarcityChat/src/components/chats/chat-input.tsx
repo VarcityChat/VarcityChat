@@ -22,10 +22,10 @@ export const ChatInput = (
   if (!props.isRecording)
     return (
       <InputToolbar
-        {...props}
         containerStyle={{
           backgroundColor: isDark ? colors.black : colors.white,
         }}
+        {...props}
       />
     );
 

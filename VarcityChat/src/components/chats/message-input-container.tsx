@@ -1,9 +1,9 @@
 import { useCallback, useState, memo } from "react";
 import {
+  Composer,
   GiftedChat,
   GiftedChatProps,
   IMessage,
-  Message,
 } from "react-native-gifted-chat";
 import { ChatInput } from "./chat-input";
 import { CustomSend } from "./custom-send";
@@ -49,32 +49,41 @@ export const MessageInputContainer = memo(
     );
 
     return (
-      <>
-        <GiftedChat
-          {...restProps}
-          text={text}
-          onSend={handleSend}
-          onInputTextChanged={handleTextChange}
-          renderInputToolbar={(props) => (
-            <ChatInput
-              {...props}
-              isRecording={isRecording}
-              setIsRecording={setIsRecording}
-              onAudioSend={onAudioSend}
-            />
-          )}
-          renderSend={(props) => (
-            <CustomSend
-              text={text}
-              sendProps={props}
-              isRecording={isRecording}
-              setIsRecording={setIsRecording}
-              uploadingImages={uploadingImages}
-              onImageSelected={onImageSelected}
-            />
-          )}
-        />
-      </>
+      <GiftedChat
+        {...restProps}
+        text={text}
+        onSend={handleSend}
+        onInputTextChanged={handleTextChange}
+        maxComposerHeight={100}
+        renderComposer={(props) => (
+          <Composer
+            {...props}
+            composerHeight={"auto"}
+            textInputStyle={{ maxHeight: 100 }}
+          />
+        )}
+        renderInputToolbar={(props) => (
+          <ChatInput
+            {...props}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            onAudioSend={onAudioSend}
+          />
+        )}
+        renderSend={(props) => (
+          <CustomSend
+            text={text}
+            sendProps={props}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            uploadingImages={uploadingImages}
+            onImageSelected={onImageSelected}
+          />
+        )}
+        messagesContainerStyle={{
+          paddingLeft: 4,
+        }}
+      />
     );
   }
 );

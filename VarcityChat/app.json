@@ -1,17 +1,12 @@
 {
   "expo": {
-    "name": "Varcity",
-    "slug": "Varcity",
-    "version": "1.0.0",
+    "name": "VarcityChat",
+    "slug": "VarcityChat",
+    "version": "2.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sheggsmann.VarcityChat",
@@ -28,7 +23,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sheggsmann.VarcityChat"
+      "package": "com.sheggsmann.VarcityChat",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -39,7 +38,19 @@
       "expo-router",
       "expo-font",
       "expo-secure-store",
+      "expo-notifications",
       "react-native-compressor",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fff",
+          "image": "./assets/images/splash-icon.png",
+          "dark": {
+            "backgroundColor": "#151718"
+          },
+          "imageWidth": 150
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -60,6 +71,12 @@
       "eas": {
         "projectId": "cbc0cdda-cb4c-4de3-9baa-ccf4b51b0ee8"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/cbc0cdda-cb4c-4de3-9baa-ccf4b51b0ee8"
     }
   }
 }

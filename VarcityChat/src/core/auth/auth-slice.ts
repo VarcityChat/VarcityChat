@@ -7,6 +7,7 @@ interface SliceState {
   token: string | null;
   user: IUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   signupData: ISignupBody | null;
   showSuccessModal: boolean;
 }
@@ -15,6 +16,7 @@ const initialState: SliceState = {
   token: null,
   user: null,
   isAuthenticated: false,
+  isLoading: true,
   signupData: null,
   showSuccessModal: false,
 };
@@ -54,6 +56,9 @@ const authSlice = createSlice({
         );
       }
     },
+    setIsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
     setSignupData: (state, action: PayloadAction<ISignupBody>) => {
       state.signupData = { ...state.signupData, ...action.payload };
     },
@@ -71,6 +76,7 @@ const authSlice = createSlice({
 
 export const {
   setAuth,
+  setIsLoading,
   updateUser,
   setSignupData,
   setShowSuccessModal,

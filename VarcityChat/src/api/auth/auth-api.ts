@@ -118,6 +118,14 @@ export const authApi = api.injectEndpoints({
         } catch (error) {}
       },
     }),
+
+    updateDeviceToken: builder.mutation<any, { deviceToken: string }>({
+      query: (body) => ({
+        url: "/user/deviceToken",
+        method: "PUT",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -129,4 +137,5 @@ export const {
   useLazyUserExistsQuery,
   useUpdateUserMutation,
   useUpdateUserStatusMutation,
+  useUpdateDeviceTokenMutation,
 } = authApi;

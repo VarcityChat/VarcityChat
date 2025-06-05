@@ -14,16 +14,16 @@ export const useChats = () => {
   const { data: chats, isLoading, refetch, error } = useGetChatsQuery();
   const dispatch = useAppDispatch();
 
-  const totalUnreadCount = useMemo(() => {
-    return (
+  const totalUnreadCount = useMemo(
+    () =>
       chats?.reduce((acc, chat) => {
         if (chat.user1._id === user?._id) {
           return acc + chat.unreadCountUser1;
         }
         return acc + chat.unreadCountUser2;
-      }, 0) || 0
-    );
-  }, [chats, user]);
+      }, 0) || 0,
+    [chats, user]
+  );
 
   const updateChatOrder = (newMessage: Partial<ExtendedMessage>) => {
     // configure animation

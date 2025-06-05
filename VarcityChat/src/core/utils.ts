@@ -26,7 +26,35 @@ export const formatChatLastMessage = (
       message.mediaUrls.length > 1 ? "s" : ""
     }`;
 
-  return trimText(message.content || "", 70);
+  return trimText(limitNewLines(`${message.content}`, 2) || "", 70);
+};
+
+export const formatChatReplyMessage = (
+  message: IMessage & ExtendedMessage,
+  linesLimit: number = 1
+) => {
+  if (!message) return "";
+  if (message?.audio) return `🎙️ voice message`;
+  if (message?.mediaUrls?.length && !message.content?.trim().length)
+    return `🗾 ${message.mediaUrls.length} image${
+      message.mediaUrls.length > 1 ? "s" : ""
+    }`;
+  return trimText(
+    limitNewLines(`${message?.text || message?.content}`, linesLimit) || "",
+    50
+  );
+};
+
+export const limitNewLines = (text: string, maxLines: number): string => {
+  if (!text || typeof text !== "string") return "";
+  const lines = text.split("\n");
+  if (lines.length <= maxLines) return text;
+  return lines.slice(0, maxLines).join("\n") + "...";
+};
+
+export const removeNewLinesAndTabs = (text: string): string => {
+  if (!text || typeof text !== "string") return "";
+  return text.replace(/[\n\r\t]/g, " ");
 };
 
 export const capitalize = (text: string): string => {
@@ -90,10 +118,7 @@ export const formatDuration = (seconds: number) => {
 
 export const convertToGiftedChatMessage = (
   message: ExtendedMessage
-): IMessage & {
-  mediaUrls: string[];
-  deliveryStatus: DELIVERY_STATUSES;
-} => {
+): Partial<ExtendedMessage> => {
   return {
     _id: message._id.toString(),
     text: message.content || "",
@@ -107,11 +132,12 @@ export const convertToGiftedChatMessage = (
     received: message.deliveryStatus === "delivered",
     pending: message.deliveryStatus === "pending",
     deliveryStatus: message.deliveryStatus,
+    reply: message?.reply,
   };
 };
 
 export const convertGiftedMessages = (
   messages: ExtendedMessage[]
-): IMessage[] => {
+): Partial<ExtendedMessage>[] => {
   return messages.map(convertToGiftedChatMessage);
 };

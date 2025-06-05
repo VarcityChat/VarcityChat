@@ -47,7 +47,13 @@ const LogoutModal = forwardRef<BottomSheetModal, { dismissModal: () => void }>(
 
           <View className="flex flex-1 mt-8">
             <Button label="Log out" onPress={handleLogout} />
-            <Button label="Go back" variant="tertiary" />
+            <Button
+              label="Go back"
+              variant="tertiary"
+              onPress={() => {
+                dismissModal?.();
+              }}
+            />
           </View>
         </View>
       </Modal>
@@ -117,6 +123,7 @@ export default function ProfileScreen() {
             <Image
               source={{ uri: user?.images[0] || defaultAvatarUrl }}
               className="w-full h-full object-cover rounded-full"
+              contentFit="cover"
             />
           </View>
           <Text className="font-semibold text-lg">

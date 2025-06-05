@@ -141,6 +141,7 @@ export default function Personality() {
         relationshipStatus,
         lookingFor,
         images: successfulUploads,
+        about: description,
       }).unwrap()
     );
 
@@ -342,7 +343,7 @@ const ImageSelectCard = ({ onSelectImage, imageUri }: ImageSelectProps) => {
       {imageUri ? (
         <Image
           source={{ uri: imageUri }}
-          contentFit="fill"
+          contentFit="cover"
           className="w-full h-full"
         />
       ) : (

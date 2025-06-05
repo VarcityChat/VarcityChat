@@ -1,4 +1,4 @@
-import { Animated, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { View, colors } from "@/ui";
 import {
   IMessage,
@@ -8,46 +8,62 @@ import {
   isSameUser,
 } from "react-native-gifted-chat";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Swipeable } from "react-native-gesture-handler";
-import { memo } from "react";
+import Swipeable, {
+  SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
+import { memo, useRef } from "react";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  SharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 type ChatMessageBoxProps = {
-  setReplyOnSwipe: (message: IMessage) => void;
-  updateRowRef: (ref: any) => void;
+  setReplyOnSwipe: (message: IMessage, swipeable: SwipeableMethods) => void;
 } & MessageProps<IMessage>;
 
-function ChatMessageBox({
-  setReplyOnSwipe,
-  updateRowRef,
-  ...props
-}: ChatMessageBoxProps) {
+function ChatMessageBox({ setReplyOnSwipe, ...props }: ChatMessageBoxProps) {
+  const swipeableRef = useRef<SwipeableMethods | null>(null);
+
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
     isSameUser(props.currentMessage, props.nextMessage) &&
     isSameDay(props.currentMessage, props.nextMessage);
 
-  const renderRightAction = (
-    progressAnimatedValue: Animated.AnimatedInterpolation<any>
-  ) => {
-    const size = progressAnimatedValue.interpolate({
-      inputRange: [0, 1, 100],
-      outputRange: [0, 1, 1],
-    });
-    const trans = progressAnimatedValue.interpolate({
-      inputRange: [0, 1, 2],
-      outputRange: [0, -12, -30],
+  const renderLeftAction = (progress: SharedValue<number>) => {
+    const animatedStyle = useAnimatedStyle(() => {
+      const scale = interpolate(progress.value, [0, 0.1, 1], [0.1, 0.4, 1], {
+        extrapolateRight: Extrapolation.CLAMP,
+      });
+      const translateX = interpolate(
+        progress.value,
+        [0, 0.2, 1],
+        [-20, 0, 10],
+        {
+          extrapolateRight: Extrapolation.CLAMP,
+        }
+      );
+      const opacity = interpolate(progress.value, [0, 0.1, 1], [0.3, 0.7, 1], {
+        extrapolateRight: Extrapolation.CLAMP,
+      });
+
+      return {
+        transform: [{ scale }, { translateX }],
+        opacity,
+      };
     });
 
     return (
       <Animated.View
         style={[
           styles.container,
-          { transform: [{ scale: size }, { translateX: trans }] },
+          animatedStyle,
           isNextMyMessage
             ? styles.defaultBottomOffset
             : styles.bottomOffsetNext,
-          props.position === "right" && styles.leftOffsetValue,
+          props.position === "left" && styles.leftOffsetValue,
         ]}
       >
         <View style={styles.replyImageWrapper}>
@@ -62,24 +78,25 @@ function ChatMessageBox({
   };
 
   const onSwipeOpenAction = () => {
-    if (props.currentMessage) {
-      setReplyOnSwipe({ ...props.currentMessage });
+    if (props.currentMessage && swipeableRef.current) {
+      setReplyOnSwipe({ ...props.currentMessage }, swipeableRef.current);
     }
   };
 
   return (
     <Swipeable
-      ref={updateRowRef}
+      ref={swipeableRef}
       friction={2}
-      rightThreshold={40}
-      renderLeftActions={renderRightAction}
+      overshootLeft={false}
+      renderLeftActions={renderLeftAction}
       onSwipeableWillOpen={onSwipeOpenAction}
+      dragOffsetFromLeftEdge={1}
+      hitSlop={{ right: 20 }}
     >
       <Message {...props} />
     </Swipeable>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     width: 40,
@@ -100,7 +117,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   leftOffsetValue: {
-    marginLeft: 16,
+    marginRight: 10,
   },
 });
 

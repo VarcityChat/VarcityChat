@@ -170,7 +170,6 @@ export const VoiceRecorder = ({
 
       // Start timer
       timerRef.current = setInterval(() => {
-        console.log("UPDATE DURATION");
         setDuration((prev) => prev + 1);
         // Simulate audio levels - in a real app you would use actual audio levels
         audioLevels.value = Math.random();

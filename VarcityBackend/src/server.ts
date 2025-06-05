@@ -110,9 +110,16 @@ export class VarcityServer {
 
   private startHttpServer(httpServer: http.Server): void {
     log.info(`Server has started with process id ${process.pid}`);
-    httpServer.listen(SERVER_PORT, () => {
-      log.info(`Server running on port ${SERVER_PORT}`);
-    });
+
+    if (config.NODE_ENV === 'development') {
+      httpServer.listen(SERVER_PORT, () => {
+        log.info(`Server running on port ${SERVER_PORT}`);
+      });
+    } else {
+      httpServer.listen(config.SERVER_PORT, '0.0.0.0', () => {
+        log.info(`Server running on port ${SERVER_PORT}`);
+      });
+    }
   }
 
   private socketIOConnections(io: Server): void {

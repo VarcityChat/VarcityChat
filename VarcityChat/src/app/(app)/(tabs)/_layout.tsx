@@ -15,10 +15,6 @@ import { useAuth } from "@/core/hooks/use-auth";
 import { Gender } from "@/types/user";
 import { useChats } from "@/core/hooks/use-chats";
 
-export const unstable_settings = {
-  initialRouteName: "discover",
-};
-
 const TabNavigation = () => {
   const { colorScheme } = useColorScheme();
   const { user } = useAuth();
@@ -27,6 +23,7 @@ const TabNavigation = () => {
 
   return (
     <Tabs
+      backBehavior="order"
       screenOptions={{
         headerShown: false,
         tabBarLabelStyle: {
@@ -43,7 +40,7 @@ const TabNavigation = () => {
       }}
     >
       <Tabs.Screen
-        name="discover"
+        name="index"
         options={{
           title: "Discover",
           tabBarIcon: ({ focused }) =>

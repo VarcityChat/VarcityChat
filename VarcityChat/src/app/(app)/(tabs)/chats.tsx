@@ -31,6 +31,7 @@ export default function Chats() {
   const { chats, isLoading, error, loadChats } = useChats();
   const { showToast } = useToast();
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "unread">("all");
   const activeChat = useAppSelector((state) => state.chats.activeChat);
 
   useFocusEffect(
@@ -78,6 +79,20 @@ export default function Chats() {
     router.push(`/chat-message/${conversationId}`);
   };
 
+  const filteredChats = chats?.filter((item) => {
+    const matchesSearch =
+      search === "" ||
+      item.user1.firstname.toLowerCase().includes(search.toLowerCase()) ||
+      item.user2.firstname.toLowerCase().includes(search.toLowerCase());
+    if (filter === "unread") {
+      const isUnread =
+        (item.user1._id === user?._id && item.unreadCountUser1 > 0) ||
+        (item.user2._id === user?._id && item.unreadCountUser2 > 0);
+      return matchesSearch && isUnread;
+    }
+    return matchesSearch;
+  });
+
   return (
     <SafeAreaView className="flex flex-1">
       <Animated.View
@@ -112,22 +127,14 @@ export default function Chats() {
                 placeholder="Search"
                 onChangeText={(text) => setSearch(text)}
               />
-              <ChatFilter />
+              <ChatFilter filter={filter} setFilter={setFilter} />
             </>
           }
           contentContainerClassName="px-6"
           style={{ flex: 1 }}
           keyExtractor={(item) => `${item._id}`}
           contentContainerStyle={{ paddingHorizontal: 6 }}
-          data={chats?.filter((item) => {
-            if (search === "") return true;
-            return (
-              item.user1.firstname
-                .toLowerCase()
-                .includes(search.toLowerCase()) ||
-              item.user2.firstname.toLowerCase().includes(search.toLowerCase())
-            );
-          })}
+          data={filteredChats}
           ItemSeparatorComponent={() => (
             <View className="h-[1px] bg-grey-50 mt-3 mb-5 dark:bg-grey-800" />
           )}
@@ -221,9 +228,12 @@ export default function Chats() {
   );
 }
 
-function ChatFilter() {
-  const [filter, setFilter] = useState<"all" | "unread">("all");
+interface ChatFilterProps {
+  filter: "all" | "unread";
+  setFilter: (filter: "all" | "unread") => void;
+}
 
+function ChatFilter({ filter, setFilter }: ChatFilterProps) {
   return (
     <View className="flex flex-row mb-6 gap-4">
       <TouchableOpacity
