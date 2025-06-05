@@ -248,6 +248,7 @@ export default function ChatMessage() {
             conversationId: conversationId as string,
             content: message.text,
             sender: user!._id,
+            senderName: user?.firstname,
             receiver: activeChat!.receiver!._id,
             mediaUrls,
             ...replyData,

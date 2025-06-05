@@ -19,6 +19,7 @@ export interface ExtendedMessage extends IMessage {
   createdAt: Date;
   sender: string;
   receiver: string;
+  senderName?: string;
   content?: string;
   mediaUrls?: string[];
   audio?: string;
