@@ -17,7 +17,7 @@ export default function HomeLayout() {
   }, [isLoading]);
 
   useEffect(() => {
-    if (expoPushToken && !isLoading) {
+    if (expoPushToken && isAuthenticated && !isLoading) {
       const handleNotifications = () => {
         try {
           resetBadgeCount();
@@ -26,7 +26,7 @@ export default function HomeLayout() {
       };
       handleNotifications();
     }
-  }, [expoPushToken, isLoading]);
+  }, [expoPushToken, isLoading, isAuthenticated]);
 
   if (isLoading) return null;
 

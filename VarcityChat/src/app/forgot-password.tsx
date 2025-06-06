@@ -49,8 +49,8 @@ export default function ForgotPassword() {
         <View className="w-full items-center justify-center mt-20">
           <Text className="font-sans-bold text-2xl">Forgot password</Text>
           <Text className="text-grey-500 text-sm mt-2 text-center font-sans">
-            We would help you get your account back! An otp would be sent to the
-            phone number
+            We would help you get your account back! An otp would be sent to
+            your email
           </Text>
 
           <View className="flex w-full mt-10">
