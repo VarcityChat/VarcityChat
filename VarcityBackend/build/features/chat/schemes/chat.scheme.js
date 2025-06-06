@@ -8,6 +8,7 @@ const joi_1 = __importDefault(require("joi"));
 const addChatSchema = joi_1.default.object().keys({
     conversationId: joi_1.default.string().required(),
     sender: joi_1.default.string().required(),
+    senderName: joi_1.default.string().optional(),
     receiver: joi_1.default.string().required(),
     content: joi_1.default.string().optional().allow(null, ''),
     mediaUrls: joi_1.default.array().max(5).optional(),

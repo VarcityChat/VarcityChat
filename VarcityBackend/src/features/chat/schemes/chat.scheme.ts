@@ -3,6 +3,7 @@ import Joi, { ObjectSchema } from 'joi';
 const addChatSchema: ObjectSchema = Joi.object().keys({
   conversationId: Joi.string().required(),
   sender: Joi.string().required(),
+  senderName: Joi.string().optional(),
   receiver: Joi.string().required(),
   content: Joi.string().optional().allow(null, ''),
   mediaUrls: Joi.array().max(5).optional(),
