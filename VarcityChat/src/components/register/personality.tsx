@@ -138,6 +138,7 @@ export default function Personality() {
         university: signupData?.university,
         firstname: signupData?.firstname,
         lastname: signupData?.lastname,
+        course: signupData?.course,
         relationshipStatus,
         lookingFor,
         images: successfulUploads,

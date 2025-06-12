@@ -33,6 +33,7 @@ export interface ISignupBody {
   lookingFor?: string;
   images?: string[];
   about?: string;
+  course?: string;
 }
 
 export interface IGetSignedUrlResponse {
