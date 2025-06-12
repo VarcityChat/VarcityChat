@@ -13,11 +13,6 @@ import { colors } from "@/ui";
 import { useColorScheme } from "nativewind";
 import { StyleSheet } from "react-native";
 import { formatDuration } from "@/core/utils";
-import {
-  AndroidAudioEncoder,
-  AndroidOutputFormat,
-  IOSOutputFormat,
-} from "expo-av/build/Audio";
 import SendSvg from "@/ui/icons/chat/send-svg";
 import { useToast } from "@/core/hooks/use-toast";
 
@@ -40,15 +35,15 @@ export const VoiceRecorder = ({
   onCancel,
 }: VoiceRecorderProps) => {
   const { showToast } = useToast();
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [duration, setDuration] = useState(0);
   const [audioUri, setAudioUri] = useState<string | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState(false);
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 
+  const recording = useRef<Audio.Recording | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const wasUnloadedRef = useRef(false);
   const audioLevels = useSharedValue(0);
   const containerHeight = useSharedValue(0);
   const buttonHeight = useSharedValue(0);
@@ -108,18 +103,18 @@ export const VoiceRecorder = ({
 
   // Pause/resume recording
   const togglePause = async () => {
-    if (!recording) return;
+    if (!recording.current) return;
     try {
       if (isPaused) {
         // Resume recording
-        await recording.startAsync();
+        await recording.current.startAsync();
         timerRef.current = setInterval(() => {
           setDuration((prev) => prev + 1);
           audioLevels.value = Math.random();
         }, 1000) as unknown as NodeJS.Timeout;
       } else {
         // Pause recording
-        await recording.pauseAsync();
+        await recording.current.pauseAsync();
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
@@ -131,19 +126,35 @@ export const VoiceRecorder = ({
     }
   };
 
+  // Check and request permissions
+  const checkPermissions = async () => {
+    try {
+      const permissionResponse = await Audio.requestPermissionsAsync();
+      if (permissionResponse.granted) {
+        setPermissionGranted(true);
+        return true;
+      } else {
+        showToast({
+          type: "error",
+          text1: "Permission Denied",
+          text2:
+            "Open the settings app to grant recording permissions to VarcityChat",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking permissions:", error);
+      return false;
+    }
+  };
+
   // Start recording function
   const startRecording = async () => {
     try {
-      wasUnloadedRef.current = false;
-      const permissionResponse = await Audio.requestPermissionsAsync();
-
-      if (!permissionResponse.granted) {
-        showToast({
-          type: "error",
-          text1: "Permissions Denied",
-          text2:
-            "Open the settings app to grant recording permissions to Varcity",
-        });
+      // Check permissions first
+      const hasPermission = await checkPermissions();
+      if (!hasPermission) {
+        resetRecorder();
         return;
       }
 
@@ -155,18 +166,16 @@ export const VoiceRecorder = ({
         staysActiveInBackground: false,
         playThroughEarpieceAndroid: false,
       });
-
       const { recording: newRecording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
 
       setDuration(0);
+      setIsPaused(false);
       setIsRecording(true);
       containerHeight.value = VOICE_RECORDER_HEIGHT;
       waveOpacity.value = withTiming(1, { duration: 300 });
-
-      setRecording(newRecording);
-      setIsPaused(false);
+      recording.current = newRecording;
 
       // Start timer
       timerRef.current = setInterval(() => {
@@ -181,22 +190,22 @@ export const VoiceRecorder = ({
 
   // Stop recording and get the file
   const stopRecording = async () => {
-    if (!recording) return;
+    if (!recording.current) return;
     try {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
 
-      await recording.stopAndUnloadAsync();
+      await recording.current.stopAndUnloadAsync();
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
       });
-      wasUnloadedRef.current = true;
 
-      const uri = recording.getURI();
+      const uri = recording.current.getURI();
       waveOpacity.value = withTiming(0, { duration: 300 });
-      setRecording(null);
+      recording.current = null;
+      setIsRecording(false);
 
       if (uri) {
         setAudioUri(uri);
@@ -210,38 +219,35 @@ export const VoiceRecorder = ({
   };
 
   const handleCancel = async () => {
-    if (recording) {
-      try {
-        await recording.stopAndUnloadAsync();
-        wasUnloadedRef.current = true;
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          staysActiveInBackground: false,
-          playsInSilentModeIOS: false,
-          playThroughEarpieceAndroid: false,
-        });
-      } catch (error) {
-        console.error("Error stopping recording during cancel:", error);
-      }
-    }
     resetRecorder();
     onCancel?.();
   };
 
   // Reset the recorder state
   const resetRecorder = async () => {
-    setRecording(null);
-    setAudioUri(null);
-    setIsRecording(false);
-    setIsPaused(false);
-    setDuration(0);
-    containerHeight.value = 0;
-    audioLevels.value = 0;
-    wasUnloadedRef.current = false;
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+    try {
+      if (recording.current) {
+        await recording.current.stopAndUnloadAsync();
+      }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      recording.current = null;
+      setAudioUri(null);
+      setIsRecording(false);
+      setIsPaused(false);
+      setDuration(0);
+      containerHeight.value = 0;
+      audioLevels.value = 0;
+      // Reset audio mode
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        playsInSilentModeIOS: false,
+        playThroughEarpieceAndroid: false,
+      });
+    } catch (error) {}
   };
 
   const handleSend = async () => {
@@ -254,34 +260,8 @@ export const VoiceRecorder = ({
 
   useEffect(() => {
     startRecording();
-  }, []);
-
-  // Clean up on unmonut
-  useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-
-      if (recording && !wasUnloadedRef.current) {
-        (async () => {
-          try {
-            await recording.stopAndUnloadAsync();
-            wasUnloadedRef.current = true;
-
-            // Reset audio mode
-            await Audio.setAudioModeAsync({
-              allowsRecordingIOS: false,
-              staysActiveInBackground: false,
-              playsInSilentModeIOS: false,
-              playThroughEarpieceAndroid: false,
-            });
-          } catch (error) {
-            console.error("Error cleaning up audio:", error);
-          }
-        })();
-      }
+      resetRecorder();
     };
   }, []);
 

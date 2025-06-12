@@ -112,17 +112,6 @@ export default function ChatMessage() {
   // Chats screen cleanup
   useEffect(() => {
     return () => {
-      Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        playThroughEarpieceAndroid: false,
-        shouldDuckAndroid: false,
-      });
-
-      if (isRecording) {
-        setIsRecording(false);
-      }
-
       // Cancel all ongoing uploads
       uploadingImages.forEach((img) => {
         if (img.abortController) {
@@ -134,6 +123,14 @@ export default function ChatMessage() {
       handleCancelAudioUpload();
       stopAllPlayers();
       dispatch(resetActiveChat());
+
+      // Clear swipeable references
+      if (swipeableRef.current) {
+        swipeableRef.current.close();
+        swipeableRef.current = null;
+      }
+      currentReplyMessageRef.current = null;
+      setReplyMessage(null);
     };
   }, []);
 
@@ -150,8 +147,10 @@ export default function ChatMessage() {
   useEffect(() => {
     if (replyMessage && swipeableRef.current) {
       setTimeout(() => {
-        swipeableRef.current?.close();
-        swipeableRef.current = null;
+        if (swipeableRef.current) {
+          swipeableRef.current?.close();
+          swipeableRef.current = null;
+        }
       }, 150);
     }
   }, [replyMessage]);
