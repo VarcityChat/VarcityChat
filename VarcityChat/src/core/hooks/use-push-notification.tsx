@@ -5,16 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { useToast } from "./use-toast";
 import { Platform } from "react-native";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 export const usePushNotifications = () => {
   const { showToast } = useToast();
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldPlaySound: false,
-      shouldSetBadge: true,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
 
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState<

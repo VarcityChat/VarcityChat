@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "474717665177",
+    "project_id": "varcitychat-2fb2b",
+    "storage_bucket": "varcitychat-2fb2b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474717665177:android:5f5955880c9a29a3978508",
+        "android_client_info": {
+          "package_name": "com.sheggsmann.VarcityChat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo1oBZaBXTYp90nvFY1HyqtVPYwHlh9Jw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
