@@ -52,7 +52,7 @@ import { MessageInputContainer } from "@/components/chats/message-input-containe
 import { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 
 const MESSAGES_PER_PAGE = 100;
-let renderCount = 0;
+
 export default function ChatMessage() {
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
@@ -103,7 +103,6 @@ export default function ChatMessage() {
     ]);
 
   const messages = useMemo(() => {
-    console.log("RE-RENDERED:", renderCount++);
     return messagesFromRealm
       .slice(0, page * MESSAGES_PER_PAGE)
       .map((message) => {
