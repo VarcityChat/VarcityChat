@@ -141,3 +141,11 @@ export const convertGiftedMessages = (
 ): Partial<ExtendedMessage>[] => {
   return messages.map(convertToGiftedChatMessage);
 };
+
+export const isRealmObjectValid = (obj: any): boolean => {
+  try {
+    return obj && typeof obj?.isValid === "function" && obj.isValid();
+  } catch (error) {
+    return false;
+  }
+};

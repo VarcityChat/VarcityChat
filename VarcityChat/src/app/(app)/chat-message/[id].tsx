@@ -52,7 +52,7 @@ import { MessageInputContainer } from "@/components/chats/message-input-containe
 import { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 
 const MESSAGES_PER_PAGE = 100;
-
+let renderCount = 0;
 export default function ChatMessage() {
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
@@ -101,6 +101,31 @@ export default function ChatMessage() {
       ["localSequence", true],
       ["serverSequence", true],
     ]);
+
+  const messages = useMemo(() => {
+    console.log("RE-RENDERED:", renderCount++);
+    return messagesFromRealm
+      .slice(0, page * MESSAGES_PER_PAGE)
+      .map((message) => {
+        const detachedMessage = {
+          _id: message?._id.toString(),
+          conversationId: message?.conversationId,
+          content: message?.content,
+          createdAt: message?.createdAt
+            ? new Date(message?.createdAt)
+            : new Date(),
+          deliveryStatus: message?.deliveryStatus,
+          sender: message?.sender,
+          receiver: message?.receiver,
+          mediaUrls: message?.mediaUrls ? [...message.mediaUrls] : undefined,
+          audio: message?.audio,
+          reply: message?.reply ? { ...message.reply } : undefined,
+        };
+        return convertToGiftedChatMessage(
+          detachedMessage as unknown as ExtendedMessage
+        );
+      });
+  }, [messagesFromRealm, page]);
 
   useEffect(() => {
     if (isConnected) {
@@ -433,11 +458,7 @@ export default function ChatMessage() {
     () =>
       ({
         messageContainerRef,
-        messages: messagesFromRealm
-          .slice(0, page * MESSAGES_PER_PAGE)
-          .map((message) =>
-            convertToGiftedChatMessage(message as unknown as ExtendedMessage)
-          ),
+        messages,
         listViewProps: {
           windowSize: 20,
           initialNumToRender: 25,
@@ -477,7 +498,7 @@ export default function ChatMessage() {
         keyboardShouldPersistTaps: "never",
       } as GiftedChatProps),
     [
-      messagesFromRealm,
+      messages,
       page,
       hasMoreMessages,
       isOtherUserTyping,
