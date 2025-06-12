@@ -19,7 +19,8 @@ class NotificationService {
                 to: pushToken,
                 sound: 'default',
                 body: notificationMessage.body,
-                title: notificationMessage.title
+                title: notificationMessage.title,
+                badge: 1
             });
         }
         const chunks = this.expo.chunkPushNotifications(messages);
