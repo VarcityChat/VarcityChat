@@ -1,6 +1,7 @@
 import {
   useCallback,
   useState,
+  useMemo,
   memo,
   useRef,
   RefObject,
@@ -16,7 +17,8 @@ import { ChatInput } from "./chat-input";
 import { CustomSend } from "./custom-send";
 import { UploadingImage } from "@/types/chat";
 import { ImagePickerAsset } from "expo-image-picker";
-import { InteractionManager, TextInput } from "react-native";
+import { InteractionManager, Linking, TextInput } from "react-native";
+import { useColorScheme } from "nativewind";
 
 interface MessageInputContainerProps {
   onInputTextChanged?: (text: string) => void;
@@ -40,6 +42,8 @@ export const MessageInputContainer = memo(
     replyMessage,
     ...restProps
   }: GiftedChatProps & MessageInputContainerProps) => {
+    const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === "dark";
     const [text, setText] = useState("");
     const textInputRef = useRef<TextInput>(null);
 

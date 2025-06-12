@@ -112,7 +112,17 @@ function ChatMessageBox({ setReplyOnSwipe, ...props }: ChatMessageBoxProps) {
         marginLeft: 4,
       }}
     >
-      <Message {...props} />
+      <Message
+        {...props}
+        linkStyle={{
+          right: {
+            color: colors.success[600],
+          },
+          left: {
+            color: colors.success[600],
+          },
+        }}
+      />
     </Swipeable>
   );
 }
