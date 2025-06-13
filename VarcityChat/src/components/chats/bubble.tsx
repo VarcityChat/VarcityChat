@@ -17,7 +17,8 @@ import { useAppSelector } from "@/core/store/store";
 
 const { width } = Dimensions.get("window");
 const MAX_IMAGE_WIDTH = width * 0.6;
-const MIN_WIDTH_FOR_REPLY = width * 0.4;
+const MIN_WIDTH_FOR_REPLY = width * 0.2;
+const LONG_REPLY_WIDTH = width * 0.4;
 
 type CustomMessageBubbleProps = BubbleProps<ExtendedMessage> & {
   onReplyPress?: (messageId: string) => void;
@@ -28,8 +29,6 @@ const CustomMessageBubble = memo(
     const activeChat = useAppSelector((state) => state.chats.activeChat);
     const [isViewerVisible, setIsViewerVisible] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-    // console.log("RENDERED BUBBLE: ", props.currentMessage?.text);
 
     const handleImagePress = (urls: string[], index: number) => {
       setSelectedImageIndex(index);
@@ -151,8 +150,8 @@ const CustomMessageBubble = memo(
       () =>
         props?.currentMessage?.reply
           ? props?.currentMessage?.reply?.content?.length > 10
-            ? MIN_WIDTH_FOR_REPLY
-            : undefined
+            ? LONG_REPLY_WIDTH
+            : MIN_WIDTH_FOR_REPLY
           : undefined,
       []
     );

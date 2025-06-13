@@ -268,7 +268,7 @@ export default function ChatMessage() {
         const message = messages[0];
         sendMessage(
           {
-            conversationId: conversationId as string,
+            conversationId: `${conversationId}`,
             content: message.text,
             sender: user!._id,
             senderName: user?.firstname,
@@ -292,6 +292,22 @@ export default function ChatMessage() {
       });
 
       InteractionManager.runAfterInteractions(async () => {
+        const currentReplyMessage = currentReplyMessageRef.current;
+        const replyData = currentReplyMessage
+          ? {
+              reply: {
+                messageId: currentReplyMessage._id,
+                content: formatChatReplyMessage(currentReplyMessage as any),
+                sender: currentReplyMessage.user._id,
+                receiver:
+                  currentReplyMessage.user._id === user!._id
+                    ? activeChat!.receiver!._id
+                    : user!._id,
+              },
+            }
+          : {};
+        handleClearReplyMessage();
+
         const localId = generateLocalId();
         try {
           // optimistic update
@@ -299,9 +315,11 @@ export default function ChatMessage() {
             {
               conversationId: `${conversationId}`,
               sender: user!._id,
+              senderName: user?.firstname,
               receiver: activeChat!.receiver!._id,
               audio: audioUri,
               content: "",
+              ...replyData,
             } as unknown as ExtendedMessage,
             localId,
             `${conversationId}`
@@ -476,6 +494,9 @@ export default function ChatMessage() {
         onSend: (messages: IMessage[]) => handleSend(messages),
         user: { _id: user!._id },
         renderBubble,
+        scrollToBottomStyle: {
+          elevation: 10,
+        },
         placeholder:
           uploadingImages.length > 0 ? "Add a caption..." : "Type a message...",
         isTyping: isOtherUserTyping,

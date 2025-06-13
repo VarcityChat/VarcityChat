@@ -296,6 +296,16 @@ export const useChatMessages = () => {
   const addAudioMessageToRealm = useCallback(
     (message: ExtendedMessage, localId: BSON.ObjectID, chatId: string) => {
       try {
+        // create reply object if message has a reply
+        const replyObject = message?.reply
+          ? {
+              messageId: message.reply.messageId,
+              content: message.reply.content,
+              sender: message.reply.sender,
+              receiver: message.reply.receiver,
+            }
+          : undefined;
+
         const localSequence = getNewMessageSequence(chatId);
         // optimistic update
         realm.write(() => {
@@ -307,6 +317,7 @@ export const useChatMessages = () => {
             createdAt: new Date(),
             isQueued: !isConnected || socket === null,
             localSequence,
+            reply: replyObject,
           });
         });
       } catch (error) {}
